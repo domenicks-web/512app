@@ -1,0 +1,15 @@
+services:
+  postgres:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: riftdex
+      POSTGRES_USER: riftdex
+      POSTGRES_PASSWORD: riftdex
+    ports:
+      - "5432:5432"
+    volumes:
+      - riftdex-postgres:/var/lib/postgresql/data
+
+volumes:
+  riftdex-postgres:
