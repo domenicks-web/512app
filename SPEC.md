@@ -3,7 +3,7 @@
 Jogo de abrir pack de Pokémon geração 1, com espécimes únicos e colecionáveis.
 PWA privado, uso entre amigos, sem monetização.
 
-Nome do projeto ainda não definido. Usar `pokedex-game` como slug provisório.
+Nome do jogo: **512**. Vem da chance de shiny, 1 em 512.
 
 ---
 
@@ -34,20 +34,30 @@ Sem os itens 2 a 4 o jogo cansa em uma semana. Eles não são "extras".
 
 ## 2. Stack
 
-| Camada | Escolha |
-|---|---|
-| Backend | Laravel 12 (PHP 8.3+) |
-| Frontend | Inertia + Vue 3 |
-| CSS | Tailwind |
-| Build | Vite + `vite-plugin-pwa` |
-| Banco | PostgreSQL |
-| Auth | Laravel Socialite, provider Google |
-| Animação | GSAP |
+| Camada   | Escolha                                |
+| -------- | -------------------------------------- |
+| Backend  | Laravel 12 (PHP 8.3+)                  |
+| Frontend | Inertia + Vue 3                        |
+| CSS      | Tailwind                               |
+| Build    | Vite + `vite-plugin-pwa`               |
+| Banco    | MySQL                                  |
+| Auth     | Email + senha, nativo do Laravel       |
+| Animação | GSAP                                   |
 | Realtime | Laravel Reverb (só a partir da fase 4) |
 
-**Não usar Firebase.** Firestore é documento e o domínio aqui é relacional. Cloud
-Functions exige plano Blaze com cartão. Socialite resolve o login sem trazer mais
-um fornecedor.
+**Não usar Firebase.** Firestore é documento e o domínio aqui é relacional — o
+motor do jogo depende de transação com lock (`lockForUpdate` no `mint_number`) e
+de FKs cruzadas entre `specimens`/`openings`/`trades`, que é doloroso em Firestore.
+Cloud Functions (obrigatório pra regra #1, sorteio sempre no servidor) só roda no
+plano Blaze, que pede cartão — não é de fato grátis pro que a gente precisa.
+
+**Login abandonado o Google/Socialite.** Ia exigir credenciais OAuth no Google
+Cloud Console antes de qualquer teste real, e o jogo é privado entre amigos — não
+precisa de um provider terceiro pra isso. Cadastro é email + senha direto.
+
+**MySQL em vez de Postgres.** Nada no projeto usa recurso específico do Postgres;
+MySQL/InnoDB cobre FK, unique e lock transacional igual. Critério aqui foi
+familiaridade de quem mantém o projeto.
 
 ### Deploy
 
@@ -59,12 +69,12 @@ lentidão mata o projeto.
 
 ## 3. Conceitos do domínio
 
-| Termo | Significado |
-|---|---|
-| **Species** | Uma das 151. Dado estático, vem da PokéAPI. |
+| Termo        | Significado                                                        |
+| ------------ | ------------------------------------------------------------------ |
+| **Species**  | Uma das 151. Dado estático, vem da PokéAPI.                        |
 | **Specimen** | Uma instância única em posse de um jogador. É o item colecionável. |
-| **Opening** | Um evento de abertura de pack. Guarda as seeds da auditoria. |
-| **Roll** | Uma rolagem derivada da seed. Determinística. |
+| **Opening**  | Um evento de abertura de pack. Guarda as seeds da auditoria.       |
+| **Roll**     | Uma rolagem derivada da seed. Determinística.                      |
 
 Regra de ouro do vocabulário: nunca chamar Specimen de "card" nem de "pokemon" no
 código. Species e Specimen são coisas diferentes e confundir as duas vai gerar bug.
@@ -76,14 +86,38 @@ código. Species e Specimen são coisas diferentes e confundir as duas vai gerar
 ```sql
 users
   id
-  name
+  nickname                 string, "Lin", NÃO único sozinho
+  tag                      string(4), "1234", gerado na criação
   email                    unique
-  google_id                unique, nullable
-  avatar_url               nullable
+  password                 hash
+  email_verified_at        timestamp, nullable
+  birthdate                date
+  avatar_seed              string, gera avatar a partir da species/bola
+  is_admin                 boolean, default false
+  invited_by               fk invites, nullable
   client_seed              string, o jogador pode trocar
   nonce                    integer, default 0
   next_pack_at             timestamp, nullable
   created_at, updated_at
+
+  unique (nickname, tag)
+
+invites
+  id
+  code                     string, único, ex: "RAMON-7X2K"
+  created_by               fk users
+  max_uses                 integer, nullable   -- null = infinito
+  uses_count               integer, default 0
+  expires_at               timestamp, nullable
+  created_at
+
+invite_redemptions
+  id
+  invite_id                fk invites
+  user_id                  fk users, quem usou
+  created_at
+
+  unique (invite_id, user_id)
 
 species                    -- 151 registros, populados por seeder
   id                       = dex_number, 1 a 151
@@ -158,6 +192,41 @@ outro. Isso cria valor sem precisar de nenhuma economia.
 
 Gerar dentro de transação com lock, senão dois packs simultâneos colidem.
 
+### Sobre o cadastro
+
+Login por email e senha. Sem OAuth de terceiro.
+
+**Nickname + tag, não único sozinho.** Sistema igual ao da Riot: o jogador
+escolhe um `nickname` (ex: "Lin"), e o sistema gera uma `tag` de 4 dígitos
+(ex: "1234"). O nome exibido pro grupo é só "Lin". O `nickname#tag` completo
+("Lin#1234") só aparece na hora de adicionar amizade, pra resolver o caso de
+duas pessoas quererem o mesmo nome. Único é o par `(nickname, tag)`, nunca o
+nickname isolado. A `tag` é gerada com retry loop: sorteia 4 dígitos, checa
+colisão só contra aquele `nickname` específico (não é único global), tenta de
+novo se colidir.
+
+**Sem nome completo.** Não serve pra nada dentro do jogo, é só fricção e dado
+sensível a mais pra guardar. O nickname já resolve identidade.
+
+**Idade: pede a data de nascimento de verdade**, não um checkbox de "sou maior
+de 18". O jogo não usa loot box remunerada hoje (a Lei 15.211/2025, que proíbe
+loot box paga pra menor de 18 a partir de março de 2026, só se aplica quando
+há pagamento envolvido), mas ter a data real já cadastrada evita retrabalho se
+algum dia entrar qualquer coisa perto de monetização.
+
+**Cadastro fechado por convite.** Cada convite (tabela `invites`) tem um
+`max_uses` definido por quem criou — 1, um número fixo, ou `null` pra infinito
+— e cada uso fica registrado em `invite_redemptions` (não só o último, todo
+mundo que usou). Quem pode criar convite: um admin (`users.is_admin`) via
+painel próprio, e possivelmente cada jogador comum gerar um número limitado —
+essa segunda parte ainda não está fechada, decidir quando chegar a vez de
+implementar gestão de convites.
+
+**Confirmação de email é leve, não bloqueia o uso.** O jogador já pode abrir
+pack e jogar sem confirmar. O link de confirmação chega em paralelo, e só
+funções sensíveis (troca de senha, recuperação de conta) exigem email
+confirmado.
+
 ---
 
 ## 5. Tabela de raridade
@@ -178,12 +247,12 @@ Chansey, Kangaskhan, Tauros, Porygon, Farfetch'd. Deixar uma constante
 
 ### Pesos por pull
 
-| Tier | Peso |
-|---|---|
-| comum | 60.0% |
-| incomum | 28.0% |
-| raro | 10.5% |
-| lendario | 1.5% |
+| Tier     | Peso  |
+| -------- | ----- |
+| comum    | 60.0% |
+| incomum  | 28.0% |
+| raro     | 10.5% |
+| lendario | 1.5%  |
 
 Pack tem 5 slots. Slots 1 a 4 usam a tabela livre. **Slot 5 garante incomum ou
 acima**, redistribuindo os pesos entre os três tiers superiores. Isso evita o pack
@@ -191,13 +260,13 @@ totalmente lixo, que é o que faz jogador largar.
 
 ### Camadas de sorte
 
-| Camada | Distribuição | Papel |
-|---|---|---|
-| Shiny | 1 em 512 | o momento, sprite alternativo |
-| Tamanho | normal, μ=0.5 σ=0.17 | extremos raros, xxs e xxl ~2% cada |
-| IV | uniforme 0 a 31 por stat | "potencial", 186 é perfeito |
-| Natureza | uniforme 1 em 25 | sabor, define cor de destaque na UI |
-| Mint | sequencial | prestígio de ter chegado primeiro |
+| Camada   | Distribuição             | Papel                               |
+| -------- | ------------------------ | ----------------------------------- |
+| Shiny    | 1 em 512                 | o momento, sprite alternativo       |
+| Tamanho  | normal, μ=0.5 σ=0.17     | extremos raros, xxs e xxl ~2% cada  |
+| IV       | uniforme 0 a 31 por stat | "potencial", 186 é perfeito         |
+| Natureza | uniforme 1 em 25         | sabor, define cor de destaque na UI |
+| Mint     | sequencial               | prestígio de ter chegado primeiro   |
 
 A taxa de shiny é intencionalmente generosa. Com 5 pulls por dia, um jogador tem
 cerca de 25% de chance de shiny por mês. Num grupo de 6 pessoas isso dá mais ou
@@ -208,13 +277,13 @@ Deixar as taxas em `config/game.php`, nunca hardcoded.
 
 ### Classes de tamanho
 
-| size_roll | size_class |
-|---|---|
-| < 0.02 | xxs |
-| 0.02 a 0.20 | xs |
-| 0.20 a 0.80 | m |
-| 0.80 a 0.98 | xl |
-| >= 0.98 | xxl |
+| size_roll   | size_class |
+| ----------- | ---------- |
+| < 0.02      | xxs        |
+| 0.02 a 0.20 | xs         |
+| 0.20 a 0.80 | m          |
+| 0.80 a 0.98 | xl         |
+| >= 0.98     | xxl        |
 
 Altura exibida = `base_height_m * (0.7 + size_roll * 0.6)`.
 
@@ -286,8 +355,9 @@ visual e prova de autenticidade. Não é blockchain e não precisa ser.
 ## 8. Fases
 
 ### Fase 1, o núcleo
+
 - [ ] Projeto Laravel + Inertia + Tailwind + PWA
-- [ ] Login Google via Socialite
+- [ ] Cadastro e login com email + senha
 - [ ] Command `php artisan pokedex:sync` que importa as 151 e baixa sprites
 - [ ] `ResolveSpecimen` pura, com teste de determinismo
 - [ ] `OpenPack` com cooldown de 24h
@@ -299,21 +369,25 @@ encher. Se isso não der vontade de abrir de novo amanhã, parar e repensar ante
 construir o resto.
 
 ### Fase 2, a prova
+
 - [ ] Commit e reveal de seeds
 - [ ] Página `/verificar`
 - [ ] Ficha detalhada do espécime com todos os atributos e o hash
 
 ### Fase 3, o social
+
 - [ ] Perfil público de cada jogador
 - [ ] Comparar dois espécimes da mesma espécie lado a lado
 - [ ] Ranking: mais espécies, mais shinies, maior IV, menor mint
 
 ### Fase 4, as trocas
+
 - [ ] Propor, aceitar, recusar
 - [ ] Notificação via Reverb
 - [ ] Histórico de donos anteriores de cada espécime
 
 ### Fase 5, o polimento
+
 - [ ] Tilt com giroscópio no celular
 - [ ] Som de abertura
 - [ ] Apelido no espécime

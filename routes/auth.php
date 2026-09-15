@@ -2,12 +2,20 @@
 
 declare(strict_types=1);
 
-use App\Http\Controllers\Auth\GoogleAuthController;
+use App\Http\Controllers\Auth\LoginUserController;
+use App\Http\Controllers\Auth\RegisterUserController;
+use App\Http\Controllers\Auth\VerifyEmailController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware('guest')->group(function () {
     Route::inertia('login', 'auth/Login')->name('login');
+    Route::post('login', [LoginUserController::class, 'store'])->name('login.store');
+    Route::inertia('cadastro', 'auth/Register')->name('register');
+    Route::post('cadastro', [RegisterUserController::class, 'store'])->name('register.store');
+});
 
-    Route::get('auth/google/redirect', [GoogleAuthController::class, 'redirect'])->name('auth.google.redirect');
-    Route::get('auth/google/callback', [GoogleAuthController::class, 'callback'])->name('auth.google.callback');
+Route::middleware('auth')->group(function () {
+    Route::get('verificar-email/{id}/{hash}', VerifyEmailController::class)
+        ->middleware(['signed', 'throttle:6,1'])
+        ->name('verification.verify');
 });

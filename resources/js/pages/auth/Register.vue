@@ -1,6 +1,8 @@
 <script setup lang="ts">
-import { Head, Form } from '@inertiajs/vue3';
-import { store } from '@/actions/App/Http/Controllers/Auth/LoginUserController';
+import { Head, Link } from '@inertiajs/vue3';
+import { Form } from '@inertiajs/vue3';
+import { store } from '@/actions/App/Http/Controllers/Auth/RegisterUserController';
+import { login } from '@/routes';
 import AppButton from '@/components/AppButton.vue';
 import AppInput from '@/components/AppInput.vue';
 import BrandMark from '@/components/BrandMark.vue';
@@ -8,7 +10,7 @@ import ThemeToggle from '@/components/ThemeToggle.vue';
 </script>
 
 <template>
-    <Head title="Entrar" />
+    <Head title="Cadastro" />
 
     <div
         class="bg-base relative flex min-h-screen items-center justify-center overflow-hidden p-6"
@@ -28,10 +30,10 @@ import ThemeToggle from '@/components/ThemeToggle.vue';
             <div class="flex flex-col items-center text-center">
                 <BrandMark />
                 <h1 class="font-display text-ink mt-6 text-2xl font-extrabold">
-                    Bem-vindo de volta
+                    Cria sua conta
                 </h1>
                 <p class="text-ink/60 mt-2 text-sm">
-                    Entre com sua conta pra continuar
+                    Precisa de um código de convite de quem já joga
                 </p>
             </div>
 
@@ -41,6 +43,14 @@ import ThemeToggle from '@/components/ThemeToggle.vue';
                 class="mt-8 flex flex-col gap-4"
                 #default="{ errors, processing }"
             >
+                <AppInput
+                    label="Apelido"
+                    name="nickname"
+                    autocomplete="nickname"
+                    required
+                    :error="errors.nickname"
+                />
+
                 <AppInput
                     label="Email"
                     name="email"
@@ -54,9 +64,34 @@ import ThemeToggle from '@/components/ThemeToggle.vue';
                     label="Senha"
                     name="password"
                     type="password"
-                    autocomplete="current-password"
+                    autocomplete="new-password"
                     required
                     :error="errors.password"
+                />
+
+                <AppInput
+                    label="Confirme a senha"
+                    name="password_confirmation"
+                    type="password"
+                    autocomplete="new-password"
+                    required
+                />
+
+                <AppInput
+                    label="Data de nascimento"
+                    name="birthdate"
+                    type="date"
+                    autocomplete="bday"
+                    required
+                    :error="errors.birthdate"
+                />
+
+                <AppInput
+                    label="Código de convite"
+                    name="invite_code"
+                    autocomplete="off"
+                    required
+                    :error="errors.invite_code"
                 />
 
                 <AppButton
@@ -64,9 +99,18 @@ import ThemeToggle from '@/components/ThemeToggle.vue';
                     :disabled="processing"
                     class="mt-2 w-full"
                 >
-                    {{ processing ? 'Entrando...' : 'Entrar' }}
+                    {{ processing ? 'Criando conta...' : 'Criar conta' }}
                 </AppButton>
             </Form>
+
+            <p class="text-ink/40 mt-6 text-center text-xs">
+                Já tem conta?
+                <Link
+                    :href="login()"
+                    class="text-brand cursor-pointer font-bold hover:underline"
+                    >Entrar</Link
+                >
+            </p>
         </div>
     </div>
 </template>

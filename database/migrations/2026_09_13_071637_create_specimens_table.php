@@ -14,7 +14,8 @@ return new class extends Migration
             $table->id();
             $table->foreignId('opening_id')->constrained()->cascadeOnDelete();
             $table->foreignId('user_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('species_id')->constrained('species')->restrictOnDelete();
+            $table->unsignedSmallInteger('species_id');
+            $table->foreign('species_id')->references('id')->on('species')->restrictOnDelete();
             $table->string('seed', 64);
             $table->boolean('is_shiny')->default(false);
             $table->decimal('size_roll', 6, 5);

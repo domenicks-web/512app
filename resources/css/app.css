@@ -1,11 +1,55 @@
 @import 'tailwindcss';
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
 @source '../../storage/framework/views/*.php';
 
 @theme inline {
     --font-sans:
-        Instrument Sans, ui-sans-serif, system-ui, sans-serif,
-        'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol',
-        'Noto Color Emoji';
+        Inter, ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji',
+        'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+    --font-display: 'Baloo 2', Inter, ui-sans-serif, system-ui, sans-serif;
+}
+
+/*
+ * Cores num `@theme` sem `inline`: precisam virar `var(--color-x)` de
+ * verdade nas classes utilitárias (não o valor literal gravado direto),
+ * senão o `.dark` abaixo não consegue sobrescrever nada em runtime.
+ */
+@theme {
+    --color-brand: #f24d4d;
+    --color-brand-blush: #ffd9d9;
+    --color-ink: #2b2f36;
+    --color-base: #eff0f2;
+    --color-screen-dark: #1c1f26;
+    --color-surface: #ffffff;
+}
+
+/*
+ * Modo escuro: troca os tokens de base/ink/superfície pro par escuro.
+ * `--color-screen-dark` fica de fora de propósito — é o fundo fixo da tela
+ * de abertura de pack (sempre escura, ver SPEC.md seção 9), independente
+ * do tema claro/escuro que o jogador escolhe no resto do app.
+ */
+.dark {
+    color-scheme: dark;
+
+    --color-base: #15171c;
+    --color-ink: #f5f5f6;
+    --color-brand-blush: rgb(255 255 255 / 8%);
+    --color-surface: rgb(255 255 255 / 6%);
+}
+
+/*
+ * Troca de tema suave em vez de piscar: qualquer elemento que use os
+ * tokens de cor acima transiciona junto quando o `.dark` entra ou sai.
+ * Respeita prefers-reduced-motion.
+ */
+@media (prefers-reduced-motion: no-preference) {
+    * {
+        transition-property: background-color, border-color, color, fill;
+        transition-duration: 200ms;
+        transition-timing-function: ease-out;
+    }
 }

@@ -91,6 +91,48 @@ real, pare e avise: está fora de escopo pelo `SPEC.md`. Não implemente.
 Se a tarefa parecer exigir que o cliente calcule um resultado, pare e avise.
 Sempre tem outro jeito.
 
+## Checkpoint (15/09, sessão em pausa)
+
+Onde paramos, pra retomar sem perder contexto:
+
+- **Login com Google abandonado.** `laravel/socialite` desinstalado, controller
+  `GoogleAuthController`, action `LoginWithGoogle`, rotas, colunas
+  `google_id`/`avatar_url`, bloco `services.php` e vars `GOOGLE_*` do `.env` — tudo
+  removido. `Login.vue` ficou só com o placeholder "cadastro com email e senha em
+  construção" até o subprojeto de cadastro entrar. `SPEC.md` atualizado (Auth =
+  email + senha nativo do Laravel).
+
+- **Fonte trocada**: Nunito → Inter (`vite.config.ts` e tokens do `app.css`).
+  Baloo 2 continua como fonte de display.
+
+- **Design system, subprojeto A (fundação) — feito**: tokens no `app.css`
+  (`--color-brand #F24D4D`, `brand-blush`, `ink`, `base`, `screen-dark`; fontes
+  Inter + Baloo 2 via bunny no `vite.config.ts`), componentes em
+  `resources/js/components/` (`BrandMark`, `AppButton`, `AppChip`, `ProgressBar`,
+  `SpecimenCard`, `StatusBar`, `AppToggle`), `Login.vue` redesenhado em modo claro,
+  favicon trocado da pokébola pro disco "512". Página `/design-system` (bloqueada
+  fora de local, sem link em lugar nenhum) mostra tudo junto pra conferência
+  visual.
+
+- **Pendente antes de continuar**: rodar `php artisan migrate:fresh` — as
+  migrations de `users` foram editadas na mão pra tirar `google_id`/`avatar_url`
+  e voltar `password` pra obrigatória (banco local não tinha dado nenhum, então
+  editar em vez de empilhar migration nova). E reiniciar `composer run dev` — o
+  `vite.config.ts` mudou (fonte nova) e o processo em execução ainda está com a
+  config antiga.
+
+- **Em brainstorm agora**: campos do cadastro (email, senha, nome, apelido,
+  idade?). Decisão ainda não fechada — ver conversa da sessão antes de
+  implementar.
+
+- **Próximos subprojetos combinados** (cada um com brainstorm próprio antes de
+  codar, não pular direto pra implementação):
+    - **B — Tela de Início** (fundo claro): pack de hoje, coleção, amigos online.
+      Precisa de dados reais ou mock, já que `OpenPack` ainda não existe.
+    - **C — Tela de abertura de pack** (fundo escuro): a maior. Envolve criar a
+      action `OpenPack` (transação + lock em `mint_number`, chamando
+      `ResolveSpecimen`), rota, e a animação de revelação em GSAP.
+
 ===
 
 <laravel-boost-guidelines>
@@ -105,6 +147,7 @@ The Laravel Boost guidelines are specifically curated by Laravel maintainers for
 This application is a Laravel application running on PHP 8.4. You are an expert with the Laravel ecosystem. Always use the APIs that match the installed major version of each package — do not assume a version.
 
 Before relying on a package's API, confirm its installed version:
+
 - PHP packages: run `composer show --direct` to list direct dependencies with versions, or `composer show <vendor/package>` for a single package.
 - JS packages: check `package.json` for the installed versions.
 
@@ -180,7 +223,7 @@ This project has domain-specific skills available in `**/skills/**`. You MUST ac
 
 - Execute PHP in app context for debugging and testing code. Do not create models without user approval, prefer tests with factories instead. Prefer existing Artisan commands over custom tinker code.
 - Always use single quotes to prevent shell expansion: `php artisan tinker --execute 'Your::code();'`
-  - Double quotes for PHP strings inside: `php artisan tinker --execute 'User::where("active", true)->count();'`
+    - Double quotes for PHP strings inside: `php artisan tinker --execute 'User::where("active", true)->count();'`
 
 === php rules ===
 
@@ -285,6 +328,7 @@ Use Wayfinder to generate TypeScript functions for Laravel routes. Import from `
 # Inertia + Vue
 
 Vue components must have a single root element.
+
 - IMPORTANT: Activate `inertia-vue-development` when working with Inertia Vue client-side patterns.
 
 </laravel-boost-guidelines>

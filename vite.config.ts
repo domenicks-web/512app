@@ -12,8 +12,11 @@ export default defineConfig({
             input: ['resources/css/app.css', 'resources/js/app.ts'],
             refresh: true,
             fonts: [
-                bunny('Instrument Sans', {
-                    weights: [400, 500, 600],
+                bunny('Inter', {
+                    weights: [600, 700, 800, 900],
+                }),
+                bunny('Baloo 2', {
+                    weights: [700, 800],
                 }),
             ],
         }),

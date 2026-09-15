@@ -2,11 +2,12 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Database\Factories\UserFactory;
+use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -14,25 +15,44 @@ use Illuminate\Support\Carbon;
 
 /**
  * @property int $id
- * @property string $name
+ * @property string $nickname
+ * @property string $tag
  * @property string $email
  * @property Carbon|null $email_verified_at
+ * @property Carbon $birthdate
+ * @property string $avatar_seed
+ * @property bool $is_admin
+ * @property int|null $invited_by
  * @property string $password
  * @property string|null $remember_token
- * @property string|null $google_id
- * @property string|null $avatar_url
  * @property string $client_seed
  * @property int $nonce
  * @property Carbon|null $next_pack_at
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  */
-#[Fillable(['name', 'email', 'password', 'google_id', 'avatar_url', 'client_seed'])]
+#[Fillable(['nickname', 'tag', 'email', 'password', 'birthdate', 'avatar_seed', 'invited_by', 'client_seed'])]
 #[Hidden(['password', 'remember_token'])]
-class User extends Authenticatable
+class User extends Authenticatable implements MustVerifyEmail
 {
     /** @use HasFactory<UserFactory> */
     use HasFactory, Notifiable;
+
+    /**
+     * @return BelongsTo<Invite, $this>
+     */
+    public function invitedBy(): BelongsTo
+    {
+        return $this->belongsTo(Invite::class, 'invited_by');
+    }
+
+    /**
+     * @return HasMany<Invite, $this>
+     */
+    public function createdInvites(): HasMany
+    {
+        return $this->hasMany(Invite::class, 'created_by');
+    }
 
     /**
      * @return HasMany<Opening, $this>
@@ -59,6 +79,8 @@ class User extends Authenticatable
     {
         return [
             'email_verified_at' => 'datetime',
+            'birthdate' => 'date',
+            'is_admin' => 'boolean',
             'password' => 'hashed',
             'nonce' => 'integer',
             'next_pack_at' => 'datetime',
