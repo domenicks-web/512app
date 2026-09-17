@@ -1,4 +1,6 @@
 <script setup lang="ts">
+const model = defineModel<string>({ default: '' });
+
 withDefaults(
     defineProps<{
         label: string;
@@ -21,6 +23,7 @@ withDefaults(
     <label class="flex flex-col gap-1.5 text-left">
         <span class="text-ink/70 text-sm font-bold">{{ label }}</span>
         <input
+            v-model="model"
             :type="type"
             :name="name"
             :autocomplete="autocomplete"
