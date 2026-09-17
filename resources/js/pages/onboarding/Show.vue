@@ -1,14 +1,17 @@
 <script setup lang="ts">
 import { defineProps } from 'vue'
-import type { Species } from '@/types'
 
 defineProps<{
-  avatarOptions: Species[]
+  avatarOptions: Array<{
+    id: number
+    name: string
+    artwork_path: string
+  }>
 }>()
 </script>
 
 <template>
   <div>
-    <!-- Placeholder for onboarding wizard - implemented in Task 6 -->
+    <!-- Placeholder - Implementação completa na Task 6 -->
   </div>
 </template>
