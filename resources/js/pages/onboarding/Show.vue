@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Head, useForm } from '@inertiajs/vue3';
-import { computed, ref } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 import { store } from '@/actions/App/Http/Controllers/Onboarding/CompleteOnboardingController';
 import AppButton from '@/components/AppButton.vue';
 import AppInput from '@/components/AppInput.vue';
@@ -76,7 +76,10 @@ const tagPreview = computed(() => {
     return String(hash % 10000).padStart(4, '0');
 });
 
+const transitionName = ref<'slide-fwd' | 'slide-back'>('slide-fwd');
+
 function goToStep(target: 1 | 2 | 3) {
+    transitionName.value = target > step.value ? 'slide-fwd' : 'slide-back';
     step.value = target;
 }
 
@@ -84,17 +87,59 @@ function submit() {
     form.post(store().url, {
         onError: (errors) => {
             if (errors.nickname) {
-                step.value = 1;
+                goToStep(1);
             } else if (errors.birthdate) {
-                step.value = 2;
+                goToStep(2);
             }
         },
     });
 }
+
+// Cortina de entrada ("entrando no mundo...") e de saída (durante o
+// submit final) — mesmo ritual de tela preta que o SPEC.md reserva pra
+// abertura de pack, só que resolvido em CSS puro (opacity), sem nenhuma
+// biblioteca de animação: pesa o mesmo que qualquer transição comum.
+const isEntering = ref(true);
+
+onMounted(() => {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        isEntering.value = false;
+
+        return;
+    }
+
+    window.setTimeout(() => {
+        isEntering.value = false;
+    }, 650);
+});
+
+const overlayMessage = computed(() => {
+    if (isEntering.value) {
+        return 'Entrando no mundo...';
+    }
+
+    if (form.processing) {
+        return 'Bem-vindo, treinador!';
+    }
+
+    return null;
+});
 </script>
 
 <template>
     <Head title="Complete seu perfil" />
+
+    <Transition name="fade">
+        <div
+            v-if="overlayMessage"
+            class="fixed inset-0 z-20 flex items-center justify-center bg-black"
+            aria-hidden="true"
+        >
+            <p class="font-display text-sm tracking-wide text-white/70">
+                {{ overlayMessage }}
+            </p>
+        </div>
+    </Transition>
 
     <div
         class="bg-base relative flex min-h-screen items-center justify-center overflow-hidden p-6"
@@ -188,116 +233,127 @@ function submit() {
                     {{ subtitle }}
                 </p>
 
-                <form
-                    v-if="step === 1"
-                    class="mt-6 flex flex-col gap-4"
-                    @submit.prevent="goToStep(2)"
-                >
-                    <AppInput
-                        v-model="form.nickname"
-                        label="Nickname"
-                        name="nickname"
-                        autocomplete="nickname"
-                        required
-                        :error="form.errors.nickname"
-                    />
-
-                    <AppButton
-                        type="submit"
-                        :disabled="!canAdvanceFromStep1"
-                        class="mt-2 w-full"
+                <Transition :name="transitionName" mode="out-in">
+                    <form
+                        v-if="step === 1"
+                        key="1"
+                        class="mt-6 flex flex-col gap-4"
+                        @submit.prevent="goToStep(2)"
                     >
-                        Continuar
-                    </AppButton>
-                </form>
+                        <AppInput
+                            v-model="form.nickname"
+                            label="Nickname"
+                            name="nickname"
+                            autocomplete="nickname"
+                            required
+                            :error="form.errors.nickname"
+                        />
 
-                <form
-                    v-else-if="step === 2"
-                    class="mt-6 flex flex-col gap-4"
-                    @submit.prevent="goToStep(3)"
-                >
-                    <AppInput
-                        v-model="form.birthdate"
-                        label="Data de nascimento"
-                        name="birthdate"
-                        type="date"
-                        autocomplete="bday"
-                        required
-                        :error="form.errors.birthdate"
-                    />
-
-                    <div class="mt-2 flex gap-3">
-                        <AppButton
-                            type="button"
-                            variant="secondary"
-                            class="w-full"
-                            @click="goToStep(1)"
-                        >
-                            Voltar
-                        </AppButton>
                         <AppButton
                             type="submit"
-                            :disabled="!canAdvanceFromStep2"
-                            class="w-full"
+                            :disabled="!canAdvanceFromStep1"
+                            class="mt-2 w-full"
                         >
                             Continuar
                         </AppButton>
-                    </div>
-                </form>
+                    </form>
 
-                <form
-                    v-else
-                    class="mt-6 flex flex-col gap-4"
-                    @submit.prevent="submit"
-                >
-                    <div class="grid grid-cols-3 gap-3">
-                        <button
-                            v-for="option in avatarOptions"
-                            :key="option.id"
-                            type="button"
-                            class="avatar-tile"
-                            :class="{
-                                'avatar-tile--selected':
-                                    form.avatar_species_id === option.id,
-                            }"
-                            :aria-label="option.name"
-                            :aria-pressed="form.avatar_species_id === option.id"
-                            @click="form.avatar_species_id = option.id"
-                        >
-                            <img
-                                :src="`/storage/${option.artwork_path}`"
-                                :alt="option.name"
-                            />
-                        </button>
-                    </div>
-
-                    <span
-                        v-if="form.errors.avatar_species_id"
-                        class="text-center text-xs font-semibold text-red-500"
-                        >{{ form.errors.avatar_species_id }}</span
+                    <form
+                        v-else-if="step === 2"
+                        key="2"
+                        class="mt-6 flex flex-col gap-4"
+                        @submit.prevent="goToStep(3)"
                     >
+                        <AppInput
+                            v-model="form.birthdate"
+                            label="Data de nascimento"
+                            name="birthdate"
+                            type="date"
+                            autocomplete="bday"
+                            required
+                            :error="form.errors.birthdate"
+                        />
 
-                    <div class="mt-2 flex gap-3">
-                        <AppButton
-                            type="button"
-                            variant="secondary"
-                            class="w-full"
-                            @click="goToStep(2)"
+                        <div class="mt-2 flex gap-3">
+                            <AppButton
+                                type="button"
+                                variant="secondary"
+                                class="w-full"
+                                @click="goToStep(1)"
+                            >
+                                Voltar
+                            </AppButton>
+                            <AppButton
+                                type="submit"
+                                :disabled="!canAdvanceFromStep2"
+                                class="w-full"
+                            >
+                                Continuar
+                            </AppButton>
+                        </div>
+                    </form>
+
+                    <form
+                        v-else
+                        key="3"
+                        class="mt-6 flex flex-col gap-4"
+                        @submit.prevent="submit"
+                    >
+                        <div class="grid grid-cols-3 gap-3">
+                            <button
+                                v-for="option in avatarOptions"
+                                :key="option.id"
+                                type="button"
+                                class="avatar-tile"
+                                :class="{
+                                    'avatar-tile--selected':
+                                        form.avatar_species_id === option.id,
+                                }"
+                                :aria-label="option.name"
+                                :aria-pressed="
+                                    form.avatar_species_id === option.id
+                                "
+                                @click="form.avatar_species_id = option.id"
+                            >
+                                <img
+                                    :src="`/storage/${option.artwork_path}`"
+                                    :alt="option.name"
+                                />
+                            </button>
+                        </div>
+
+                        <span
+                            v-if="form.errors.avatar_species_id"
+                            class="text-center text-xs font-semibold text-red-500"
+                            >{{ form.errors.avatar_species_id }}</span
                         >
-                            Voltar
-                        </AppButton>
-                        <AppButton
-                            type="submit"
-                            :disabled="
-                                form.avatar_species_id === null ||
-                                form.processing
-                            "
-                            class="w-full"
-                        >
-                            {{ form.processing ? 'Salvando...' : 'Entrar no jogo' }}
-                        </AppButton>
-                    </div>
-                </form>
+
+                        <div class="mt-2 flex gap-3">
+                            <AppButton
+                                type="button"
+                                variant="secondary"
+                                class="w-full"
+                                @click="goToStep(2)"
+                            >
+                                Voltar
+                            </AppButton>
+                            <AppButton
+                                type="submit"
+                                :disabled="
+                                    form.avatar_species_id === null ||
+                                    form.processing
+                                "
+                                class="w-full"
+                            >
+                                {{
+                                    form.processing
+                                        ? 'Entrando...'
+                                        : 'Entrar no jogo'
+                                }}
+                            </AppButton>
+                        </div>
+                    </form>
+                </Transition>
             </div>
         </div>
     </div>
@@ -350,12 +406,57 @@ function submit() {
     }
 }
 
+.fade-enter-active,
+.fade-leave-active {
+    transition: opacity 350ms ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+    opacity: 0;
+}
+
+.slide-fwd-enter-active,
+.slide-fwd-leave-active,
+.slide-back-enter-active,
+.slide-back-leave-active {
+    transition:
+        opacity 200ms ease,
+        transform 200ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.slide-fwd-enter-from {
+    opacity: 0;
+    transform: translateX(20px);
+}
+
+.slide-fwd-leave-to {
+    opacity: 0;
+    transform: translateX(-20px);
+}
+
+.slide-back-enter-from {
+    opacity: 0;
+    transform: translateX(-20px);
+}
+
+.slide-back-leave-to {
+    opacity: 0;
+    transform: translateX(20px);
+}
+
 @media (prefers-reduced-motion: reduce) {
     .avatar-tile--selected::before {
         animation: none;
     }
 
-    .avatar-tile {
+    .avatar-tile,
+    .fade-enter-active,
+    .fade-leave-active,
+    .slide-fwd-enter-active,
+    .slide-fwd-leave-active,
+    .slide-back-enter-active,
+    .slide-back-leave-active {
         transition: none;
     }
 }
