@@ -91,44 +91,84 @@ real, pare e avise: está fora de escopo pelo `SPEC.md`. Não implemente.
 Se a tarefa parecer exigir que o cliente calcule um resultado, pare e avise.
 Sempre tem outro jeito.
 
-## Checkpoint (15/09, sessão em pausa)
+## Checkpoint (17/09, sessão em pausa)
 
-Onde paramos, pra retomar sem perder contexto:
+Onde paramos, pra retomar sem perder contexto. Tudo abaixo já está commitado e
+pushado pro `main`.
 
-- **Login com Google abandonado.** `laravel/socialite` desinstalado, controller
-  `GoogleAuthController`, action `LoginWithGoogle`, rotas, colunas
-  `google_id`/`avatar_url`, bloco `services.php` e vars `GOOGLE_*` do `.env` — tudo
-  removido. `Login.vue` ficou só com o placeholder "cadastro com email e senha em
-  construção" até o subprojeto de cadastro entrar. `SPEC.md` atualizado (Auth =
-  email + senha nativo do Laravel).
+- **Onboarding pós-login, de verdade.** Cadastro (`/cadastro`) ficou só
+  convite + email + senha — `nickname`, `tag`, `birthdate` e
+  `avatar_species_id` viraram nullable em `users` e são preenchidos depois,
+  no primeiro login, por um wizard de 3 passos (`onboarding/Show.vue`:
+  nickname → data de nascimento → avatar) atrás de `GET`/`POST
+  completar-perfil`. `User::hasCompletedProfile()` (`nickname !== null`)
+  decide quem já passou por ali. Action `CompleteOnboarding` reaproveita o
+  `GenerateUserTag` que o cadastro usava antes.
 
-- **Fonte trocada**: Nunito → Inter (`vite.config.ts` e tokens do `app.css`).
-  Baloo 2 continua como fonte de display.
+- **`avatar_seed` (string aleatória) morreu, virou `avatar_species_id`**
+  (FK pra `species.id`, ambos `unsignedSmallInteger` — mesmo cuidado de tipo
+  que já tinha corrigido `specimens.species_id` antes). O avatar é escolhido
+  entre 15 espécies fixas em `config('game.onboarding.avatar_species_ids')`,
+  devolvidas na ordem curada do config (não na ordem crua do banco).
 
-- **Design system, subprojeto A (fundação) — feito**: tokens no `app.css`
-  (`--color-brand #F24D4D`, `brand-blush`, `ink`, `base`, `screen-dark`; fontes
-  Inter + Baloo 2 via bunny no `vite.config.ts`), componentes em
-  `resources/js/components/` (`BrandMark`, `AppButton`, `AppChip`, `ProgressBar`,
-  `SpecimenCard`, `StatusBar`, `AppToggle`), `Login.vue` redesenhado em modo claro,
-  favicon trocado da pokébola pro disco "512". Página `/design-system` (bloqueada
-  fora de local, sem link em lugar nenhum) mostra tudo junto pra conferência
-  visual.
+- **Comando `pokedex:sync` construído e já rodado contra a API real**: puxa
+  as 151 espécies da PokeAPI, baixa sprite/shiny/artwork pro storage local
+  (nunca hotlink), classifica raridade via `RarityTable` já existente. Achei
+  e corrigi um bug de dado real: a PokeAPI devolve o tipo *atual* de algumas
+  espécies (ex. Jigglypuff é `fairy` desde a geração 6), mas o enum
+  `PokemonType` só tem os 15 tipos originais da gen 1 — o comando agora usa
+  `past_types` da API pra recuperar o tipo de gen 1 quando existe divergência.
 
-- **Pendente antes de continuar**: rodar `php artisan migrate:fresh` — as
-  migrations de `users` foram editadas na mão pra tirar `google_id`/`avatar_url`
-  e voltar `password` pra obrigatória (banco local não tinha dado nenhum, então
-  editar em vez de empilhar migration nova). E reiniciar `composer run dev` — o
-  `vite.config.ts` mudou (fonte nova) e o processo em execução ainda está com a
-  config antiga.
+- **Guards de rota**: middleware `EnsureProfileIsComplete` (alias
+  `onboarded`) — deslogado cai no `/login` (`auth` padrão do Laravel), logado
+  sem perfil cai no onboarding, logado com perfil vê a home. Rota de logout
+  (`POST /logout`) existe mas só tem um link provisório na `Welcome.vue`
+  (que ainda é o placeholder padrão do Laravel — a Tela de Início de
+  verdade é o subprojeto B).
 
-- **Em brainstorm agora**: campos do cadastro (email, senha, nome, apelido,
-  idade?). Decisão ainda não fechada — ver conversa da sessão antes de
-  implementar.
+- **Bug real achado no meio do caminho**: `<Form v-bind="store()">` no
+  Login/Cadastro só "funcionava" por coincidência (a URL da página é igual
+  à URL do POST nos dois casos). O componente `Form` do Inertia espera o
+  par `{url, method}` inteiro na prop `action` (`action: string |
+  {url, method}`), não espalhado via `v-bind`. Corrigido nos três lugares
+  pra `:action="store()"` — vale lembrar disso em qualquer form novo.
+
+- **Visual do onboarding, tratamento "Nintendo Switch 2"**: retrato borrado
+  de fundo com os sprites reais (reflete o avatar escolhido), anel
+  holográfico (vermelho→dourado→violeta, tokens `--color-gold`/
+  `--color-violet`/`--holo-gradient` em `app.css`) no avatar selecionado e
+  na trilha de passos — mesma linguagem que o `SPEC.md` reserva pro shiny
+  na abertura de pack. Cartão de treinador que preenche em tempo real
+  (nickname + tag-prévia + avatar). Tema claro vira acrílico vermelho-claro
+  (não cinza neutro) em vez de simplesmente inverter as cores. Cortina de
+  entrada/saída ("Entrando no mundo...") e slide/fade real entre os 3
+  passos — tudo em CSS puro (`transform`/`opacity`), sem lib de animação,
+  respeitando `prefers-reduced-motion`.
+
+- **Usuário admin criado**: `ramondfernandes@gmail.com`, `is_admin = true`
+  (setado via `forceFill` — não é mass-assignable de propósito). Perfil foi
+  resetado pra `null` mais de uma vez durante os testes desta sessão; se
+  estiver com perfil completo ao retomar e precisar ver o onboarding de
+  novo, resetar via tinker (`forceFill(['nickname'=>null, 'tag'=>null,
+  'birthdate'=>null, 'avatar_species_id'=>null])->save()`).
+
+- **Pendente antes de cadastrar alguém de verdade**: gestão de convites
+  ainda não existe (nem comando artisan, nem UI de admin) — só o schema.
+  Fica pro próximo subprojeto de admin, com brainstorm próprio.
+
+- **Ambiente local**: MySQL sobe com `docker compose up -d`. Dev server
+  (`composer run dev`) pode ter ficado rodando em background desta sessão —
+  se a porta 8000/5173 já estiver ocupada ao retomar, é provavelmente ele.
+  `storage:link` já foi rodado no ambiente local.
 
 - **Próximos subprojetos combinados** (cada um com brainstorm próprio antes de
   codar, não pular direto pra implementação):
-    - **B — Tela de Início** (fundo claro): pack de hoje, coleção, amigos online.
-      Precisa de dados reais ou mock, já que `OpenPack` ainda não existe.
+    - **Admin — gestão de convites**: quem pode criar convite, `max_uses`,
+      UI ou comando artisan — não decidido ainda.
+    - **B — Tela de Início** (fundo claro): pack de hoje, coleção, amigos
+      online, e o logout de verdade (hoje só o link provisório na
+      `Welcome`). Precisa de dados reais ou mock, já que `OpenPack` ainda
+      não existe.
     - **C — Tela de abertura de pack** (fundo escuro): a maior. Envolve criar a
       action `OpenPack` (transação + lock em `mint_number`, chamando
       `ResolveSpecimen`), rota, e a animação de revelação em GSAP.
