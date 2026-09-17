@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Models\Species;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Facades\Hash;
@@ -30,7 +31,7 @@ class UserFactory extends Factory
             'email' => fake()->unique()->safeEmail(),
             'email_verified_at' => now(),
             'birthdate' => fake()->date(),
-            'avatar_seed' => Str::random(16),
+            'avatar_species_id' => Species::factory(),
             'password' => static::$password ??= Hash::make('password'),
             'remember_token' => Str::random(10),
             'client_seed' => Str::random(32),
@@ -44,6 +45,19 @@ class UserFactory extends Factory
     {
         return $this->state(fn (array $attributes) => [
             'email_verified_at' => null,
+        ]);
+    }
+
+    /**
+     * Indicate that the user ainda não passou pelo onboarding pós-login.
+     */
+    public function withoutProfile(): static
+    {
+        return $this->state(fn (): array => [
+            'nickname' => null,
+            'tag' => null,
+            'birthdate' => null,
+            'avatar_species_id' => null,
         ]);
     }
 }
