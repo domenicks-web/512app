@@ -91,8 +91,8 @@ users
   email                    unique
   password                 hash
   email_verified_at        timestamp, nullable
-  birthdate                date
-  avatar_seed              string, gera avatar a partir da species/bola
+  birthdate                date, nullable, preenchido no onboarding pós-login
+  avatar_species_id        fk species, nullable, preenchido no onboarding pós-login
   is_admin                 boolean, default false
   invited_by               fk invites, nullable
   client_seed              string, o jogador pode trocar
@@ -119,7 +119,7 @@ invite_redemptions
 
   unique (invite_id, user_id)
 
-species                    -- 151 registros, populados por seeder
+species                    -- 151 registros, populados pelo comando pokedex:sync
   id                       = dex_number, 1 a 151
   name                     "Bulbasaur"
   slug                     "bulbasaur"
