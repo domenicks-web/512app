@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Http\Controllers\Auth\LoginUserController;
+use App\Http\Controllers\Auth\LogoutUserController;
 use App\Http\Controllers\Auth\RegisterUserController;
 use App\Http\Controllers\Auth\VerifyEmailController;
 use App\Http\Controllers\Onboarding\CompleteOnboardingController;
@@ -23,4 +24,5 @@ Route::middleware('auth')->group(function () {
 
     Route::get('completar-perfil', ShowOnboardingController::class)->name('onboarding.show');
     Route::post('completar-perfil', [CompleteOnboardingController::class, 'store'])->name('onboarding.store');
+    Route::post('logout', LogoutUserController::class)->name('logout');
 });
