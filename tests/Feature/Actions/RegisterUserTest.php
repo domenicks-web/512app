@@ -17,27 +17,24 @@ uses(RefreshDatabase::class);
 function registerUserData(array $overrides = []): RegisterUserData
 {
     $defaults = [
-        'nickname' => 'Lin',
         'email' => 'lin@example.com',
         'password' => 'segredo123',
-        'birthdate' => now()->subYears(20),
         'inviteCode' => 'RAMON-7X2K',
     ];
 
-    $data = array_merge($defaults, $overrides);
-
-    return new RegisterUserData(...$data);
+    return new RegisterUserData(...array_merge($defaults, $overrides));
 }
 
-it('cria o usuário, resgata o convite e envia a verificação de email', function () {
+it('cria o usuário com perfil pendente, resgata o convite e envia a verificação de email', function () {
     Notification::fake();
 
     $invite = Invite::factory()->create(['code' => 'RAMON-7X2K', 'max_uses' => 1]);
 
     $user = (new RegisterUser)->handle(registerUserData());
 
-    expect($user->nickname)->toBe('Lin')
-        ->and($user->tag)->toMatch('/^\d{4}$/')
+    expect($user->nickname)->toBeNull()
+        ->and($user->tag)->toBeNull()
+        ->and($user->hasCompletedProfile())->toBeFalse()
         ->and($user->email)->toBe('lin@example.com')
         ->and(Hash::check('segredo123', $user->password))->toBeTrue()
         ->and($user->invited_by)->toBe($invite->id);

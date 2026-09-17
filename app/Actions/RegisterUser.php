@@ -14,8 +14,6 @@ use Illuminate\Support\Str;
 
 class RegisterUser
 {
-    public function __construct(private readonly GenerateUserTag $generateUserTag = new GenerateUserTag) {}
-
     public function handle(RegisterUserData $data): User
     {
         $user = DB::transaction(function () use ($data): User {
@@ -26,12 +24,8 @@ class RegisterUser
             }
 
             $user = User::create([
-                'nickname' => $data->nickname,
-                'tag' => $this->generateUserTag->handle($data->nickname),
                 'email' => $data->email,
                 'password' => $data->password,
-                'birthdate' => $data->birthdate,
-                'avatar_seed' => Str::random(16),
                 'invited_by' => $invite->id,
                 'client_seed' => Str::random(32),
             ]);
