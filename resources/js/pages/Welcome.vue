@@ -16,7 +16,7 @@ import LogoutUserController from '@/actions/App/Http/Controllers/Auth/LogoutUser
             e vai ser substituída pela Tela de Início (subprojeto B). Só um
             jeito de deslogar pra testar com outra conta enquanto isso.
         -->
-        <Form v-bind="LogoutUserController()" class="absolute top-4 right-4">
+        <Form :action="LogoutUserController()" class="absolute top-4 right-4">
             <button
                 type="submit"
                 class="cursor-pointer rounded-md border border-[#e3e3e0] bg-white px-3 py-1 text-xs font-medium text-[#1b1b18] hover:bg-[#f5f5f4] dark:border-[#3E3E3A] dark:bg-[#161615] dark:text-[#EDEDEC] dark:hover:bg-[#1c1c1a]"

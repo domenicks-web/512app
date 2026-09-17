@@ -38,7 +38,7 @@ import ThemeToggle from '@/components/ThemeToggle.vue';
             </div>
 
             <Form
-                v-bind="store()"
+                :action="store()"
                 reset-on-error
                 class="mt-8 flex flex-col gap-4"
                 #default="{ errors, processing }"
