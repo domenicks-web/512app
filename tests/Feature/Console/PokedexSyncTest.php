@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Enums\PokemonType;
 use App\Enums\RarityTier;
 use App\Models\Species;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -82,7 +83,18 @@ function pokemonFixture(int $dexId): array
         'name' => $names[$dexId] ?? "species-{$dexId}",
         'height' => 7,
         'weight' => 69,
-        'types' => [['slot' => 1, 'type' => ['name' => 'grass']]],
+        // Jigglypuff (39) simula um caso real: a PokeAPI devolve o tipo
+        // ATUAL (fairy, introduzido na geração 6), mas o jogo é gen-1, então
+        // o sync precisa recuperar o tipo original via `past_types`.
+        'types' => $dexId === 39
+            ? [['slot' => 1, 'type' => ['name' => 'fairy']]]
+            : [['slot' => 1, 'type' => ['name' => 'grass']]],
+        'past_types' => $dexId === 39
+            ? [[
+                'generation' => ['url' => 'https://pokeapi.co/api/v2/generation/6/'],
+                'types' => [['slot' => 1, 'type' => ['name' => 'normal']]],
+            ]]
+            : [],
         'stats' => [
             ['base_stat' => 45, 'stat' => ['name' => 'hp']],
             ['base_stat' => 49, 'stat' => ['name' => 'attack']],
@@ -146,6 +158,11 @@ it('sincroniza as 151 espécies com raridade, estágio evolutivo e sprites', fun
     expect(Species::find(26)->evolution_stage)->toBe(2);
 
     expect(Species::find(150)->rarity_tier)->toBe(RarityTier::Legendary);
+
+    // Jigglypuff (39): a API devolve "fairy" (tipo atual, gen 6+), mas o
+    // tipo original de gen 1 (via past_types) é "normal" — o enum do jogo
+    // só tem os 15 tipos originais, então usar o tipo atual quebraria.
+    expect(Species::find(39)->type_1)->toBe(PokemonType::Normal);
 
     Storage::disk('public')->assertExists($bulbasaur->sprite_path);
     Storage::disk('public')->assertExists($bulbasaur->sprite_shiny_path);

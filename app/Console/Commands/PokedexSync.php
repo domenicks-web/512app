@@ -40,13 +40,13 @@ class PokedexSync extends Command
                 $missingFlavorText[] = $dexNumber;
             }
 
+            $typeNames = $this->resolveOriginalTypeNames($pokemon);
+
             $attributes = [
                 'name' => Str::title(str_replace('-', ' ', $pokemon['name'])),
                 'slug' => Str::slug($pokemon['name']),
-                'type_1' => PokemonType::from($pokemon['types'][0]['type']['name']),
-                'type_2' => isset($pokemon['types'][1])
-                    ? PokemonType::from($pokemon['types'][1]['type']['name'])
-                    : null,
+                'type_1' => PokemonType::from($typeNames[0]),
+                'type_2' => isset($typeNames[1]) ? PokemonType::from($typeNames[1]) : null,
                 'base_stat_total' => collect($pokemon['stats'])->sum('base_stat'),
                 'evolution_stage' => $this->resolveEvolutionStage($chain['chain'], $dexNumber) ?? 1,
                 'base_height_m' => $pokemon['height'] / 10,
@@ -88,6 +88,32 @@ class PokedexSync extends Command
         }
 
         return null;
+    }
+
+    /**
+     * A PokeAPI devolve o tipo ATUAL do pokémon (jogos mais recentes), mas o
+     * jogo é gen-1 e o enum `PokemonType` só tem os 15 tipos originais —
+     * sem fairy, steel ou dark, introduzidos em gerações seguintes. Quando
+     * `past_types` tem entrada (ex.: Jigglypuff virou fairy na geração 6,
+     * era normal antes), usamos o tipo mais antigo registrado ali; senão,
+     * o tipo nunca mudou e o atual já é o original.
+     *
+     * @param  array<string, mixed>  $pokemon
+     * @return array<int, string>
+     */
+    private function resolveOriginalTypeNames(array $pokemon): array
+    {
+        $pastTypes = $pokemon['past_types'] ?? [];
+
+        if ($pastTypes === []) {
+            return collect($pokemon['types'])->pluck('type.name')->all();
+        }
+
+        $oldest = collect($pastTypes)->sortBy(
+            fn (array $entry): int => (int) Str::afterLast(rtrim($entry['generation']['url'], '/'), '/')
+        )->first();
+
+        return collect($oldest['types'])->pluck('type.name')->all();
     }
 
     /**
