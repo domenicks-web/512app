@@ -28,12 +28,19 @@ const canAdvanceFromStep1 = computed(() => form.nickname.trim().length >= 2);
 const canAdvanceFromStep2 = computed(() => form.birthdate.length > 0);
 
 const headlines: Record<1 | 2 | 3, string> = {
-    1: 'Como te chamam?',
-    2: 'Quando você nasceu?',
-    3: 'Escolha seu Pokémon',
+    1: 'Ei, treinador! Como posso te chamar?',
+    2: 'Qual é a sua data de nascimento, treinador?',
+    3: 'Escolha seu parceiro!',
+};
+
+const subtitles: Record<1 | 2 | 3, string | null> = {
+    1: null,
+    2: 'Só pra garantir que você já pode aparecer no Pokédex.',
+    3: 'Ele vai te representar pra galera, então escolhe com o coração.',
 };
 
 const headline = computed(() => headlines[step.value]);
+const subtitle = computed(() => subtitles[step.value]);
 
 const selectedAvatar = computed(
     () =>
@@ -177,6 +184,9 @@ function submit() {
                 >
                     {{ headline }}
                 </h1>
+                <p v-if="subtitle" class="text-ink/60 mt-1 text-center text-sm">
+                    {{ subtitle }}
+                </p>
 
                 <form
                     v-if="step === 1"
@@ -240,10 +250,6 @@ function submit() {
                     class="mt-6 flex flex-col gap-4"
                     @submit.prevent="submit"
                 >
-                    <p class="text-ink/60 -mt-2 text-center text-sm">
-                        Vai te representar pra galera do grupo.
-                    </p>
-
                     <div class="grid grid-cols-3 gap-3">
                         <button
                             v-for="option in avatarOptions"
