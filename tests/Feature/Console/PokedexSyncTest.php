@@ -134,7 +134,8 @@ it('sincroniza as 151 espécies com raridade, estágio evolutivo e sprites', fun
     expect(Species::count())->toBe(151);
 
     $bulbasaur = Species::find(1);
-    expect($bulbasaur->name)->toBe('bulbasaur')
+    expect($bulbasaur->name)->toBe('Bulbasaur')
+        ->and($bulbasaur->slug)->toBe('bulbasaur')
         ->and($bulbasaur->evolution_stage)->toBe(1)
         ->and($bulbasaur->flavor_pt)->toBe('Semente estranha nas costas desde o nascimento.');
 

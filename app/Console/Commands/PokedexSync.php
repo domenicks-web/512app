@@ -41,7 +41,7 @@ class PokedexSync extends Command
             }
 
             $attributes = [
-                'name' => $pokemon['name'],
+                'name' => Str::title(str_replace('-', ' ', $pokemon['name'])),
                 'slug' => Str::slug($pokemon['name']),
                 'type_1' => PokemonType::from($pokemon['types'][0]['type']['name']),
                 'type_2' => isset($pokemon['types'][1])
