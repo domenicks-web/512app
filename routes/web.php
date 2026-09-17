@@ -2,7 +2,9 @@
 
 use Illuminate\Support\Facades\Route;
 
-Route::inertia('/', 'Welcome')->name('home');
+Route::middleware(['auth', 'onboarded'])->group(function () {
+    Route::inertia('/', 'Welcome')->name('home');
+});
 
 if (! app()->isProduction()) {
     Route::inertia('/design-system', 'DesignSystem')->name('design-system');
