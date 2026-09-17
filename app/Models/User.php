@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
 use Database\Factories\UserFactory;
@@ -15,12 +17,12 @@ use Illuminate\Support\Carbon;
 
 /**
  * @property int $id
- * @property string $nickname
- * @property string $tag
+ * @property string|null $nickname
+ * @property string|null $tag
  * @property string $email
  * @property Carbon|null $email_verified_at
- * @property Carbon $birthdate
- * @property string $avatar_seed
+ * @property Carbon|null $birthdate
+ * @property int|null $avatar_species_id
  * @property bool $is_admin
  * @property int|null $invited_by
  * @property string $password
@@ -31,7 +33,7 @@ use Illuminate\Support\Carbon;
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  */
-#[Fillable(['nickname', 'tag', 'email', 'password', 'birthdate', 'avatar_seed', 'invited_by', 'client_seed'])]
+#[Fillable(['nickname', 'tag', 'email', 'password', 'birthdate', 'avatar_species_id', 'invited_by', 'client_seed'])]
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable implements MustVerifyEmail
 {
@@ -68,6 +70,19 @@ class User extends Authenticatable implements MustVerifyEmail
     public function specimens(): HasMany
     {
         return $this->hasMany(Specimen::class);
+    }
+
+    /**
+     * @return BelongsTo<Species, $this>
+     */
+    public function avatarSpecies(): BelongsTo
+    {
+        return $this->belongsTo(Species::class, 'avatar_species_id');
+    }
+
+    public function hasCompletedProfile(): bool
+    {
+        return $this->nickname !== null;
     }
 
     /**

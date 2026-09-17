@@ -96,6 +96,36 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Onboarding
+    |--------------------------------------------------------------------------
+    |
+    | Espécies disponíveis como avatar no wizard pós-cadastro. Ids batem com
+    | `species.id` (dex number, 1 a 151).
+    |
+    */
+
+    'onboarding' => [
+        'avatar_species_ids' => [
+            25,  // Pikachu
+            1,   // Bulbasaur
+            4,   // Charmander
+            7,   // Squirtle
+            6,   // Charizard
+            133, // Eevee
+            143, // Snorlax
+            94,  // Gengar
+            150, // Mewtwo
+            151, // Mew
+            39,  // Jigglypuff
+            54,  // Psyduck
+            130, // Gyarados
+            149, // Dragonite
+            52,  // Meowth
+        ],
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
     | Verificação do espécime
     |--------------------------------------------------------------------------
     */

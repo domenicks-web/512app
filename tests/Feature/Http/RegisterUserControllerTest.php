@@ -12,11 +12,9 @@ uses(RefreshDatabase::class);
 function validRegistrationPayload(array $overrides = []): array
 {
     return array_merge([
-        'nickname' => 'Lin',
         'email' => 'lin@example.com',
         'password' => 'segredo123',
         'password_confirmation' => 'segredo123',
-        'birthdate' => '2000-01-01',
         'invite_code' => 'RAMON-7X2K',
     ], $overrides);
 }

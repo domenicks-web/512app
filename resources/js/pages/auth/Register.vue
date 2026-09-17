@@ -44,14 +44,6 @@ import ThemeToggle from '@/components/ThemeToggle.vue';
                 #default="{ errors, processing }"
             >
                 <AppInput
-                    label="Apelido"
-                    name="nickname"
-                    autocomplete="nickname"
-                    required
-                    :error="errors.nickname"
-                />
-
-                <AppInput
                     label="Email"
                     name="email"
                     type="email"
@@ -75,15 +67,6 @@ import ThemeToggle from '@/components/ThemeToggle.vue';
                     type="password"
                     autocomplete="new-password"
                     required
-                />
-
-                <AppInput
-                    label="Data de nascimento"
-                    name="birthdate"
-                    type="date"
-                    autocomplete="bday"
-                    required
-                    :error="errors.birthdate"
                 />
 
                 <AppInput
