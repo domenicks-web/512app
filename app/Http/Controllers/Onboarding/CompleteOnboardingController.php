@@ -18,6 +18,10 @@ class CompleteOnboardingController extends Controller
         /** @var User $user */
         $user = Auth::user();
 
+        if ($user->hasCompletedProfile()) {
+            return redirect()->route('home');
+        }
+
         $action->handle($user, $request->toCompleteOnboardingData());
 
         return redirect()->route('home');
