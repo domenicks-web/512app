@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Models\Species;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Inertia\Testing\AssertableInertia as Assert;
 
 uses(RefreshDatabase::class);
 
@@ -14,6 +15,23 @@ it('mostra o onboarding pra quem ainda não tem perfil', function () {
     $response = $this->actingAs($user)->get('/completar-perfil');
 
     $response->assertOk();
+});
+
+it('devolve os avatares na ordem curada do config, não na ordem do banco', function () {
+    $user = User::factory()->withoutProfile()->create();
+
+    // Criados de propósito na ordem inversa da lista do config, pra provar
+    // que a ordem devolvida vem do config e não do id/insert no banco.
+    $second = Species::factory()->create();
+    $first = Species::factory()->create();
+    config(['game.onboarding.avatar_species_ids' => [$first->id, $second->id]]);
+
+    $response = $this->actingAs($user)->get('/completar-perfil');
+
+    $response->assertInertia(fn (Assert $page) => $page
+        ->where('avatarOptions.0.id', $first->id)
+        ->where('avatarOptions.1.id', $second->id)
+    );
 });
 
 it('manda pra home quem já completou o perfil e tenta abrir o onboarding', function () {

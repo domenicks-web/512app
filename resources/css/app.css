@@ -20,10 +20,33 @@
 @theme {
     --color-brand: #f24d4d;
     --color-brand-blush: #ffd9d9;
+    --color-gold: #ffc94a;
+    --color-violet: #8b6cf2;
     --color-ink: #2b2f36;
     --color-base: #eff0f2;
     --color-screen-dark: #1c1f26;
     --color-surface: #ffffff;
+}
+
+/*
+ * Selo "holográfico": mesma linguagem visual que o SPEC.md reserva pro
+ * shiny na abertura de pack (seed controla o brilho). Reaproveitado aqui,
+ * discreto, pra marcar "isso é especial" — passo atual, avatar escolhido.
+ * Fica como custom property (não só a classe) pra dar pra usar também em
+ * pseudo-elemento (::before), onde uma classe utilitária não chega.
+ */
+:root {
+    --holo-gradient: linear-gradient(
+        135deg,
+        var(--color-brand),
+        var(--color-gold) 45%,
+        var(--color-violet) 80%,
+        var(--color-brand)
+    );
+}
+
+.bg-holo {
+    background-image: var(--holo-gradient);
 }
 
 /*

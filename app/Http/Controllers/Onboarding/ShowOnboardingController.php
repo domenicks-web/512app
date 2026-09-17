@@ -23,8 +23,15 @@ class ShowOnboardingController extends Controller
             return redirect()->route('home');
         }
 
-        $avatarOptions = Species::whereIn('id', config('game.onboarding.avatar_species_ids'))
-            ->get(['id', 'name', 'artwork_path']);
+        $avatarSpeciesIds = config('game.onboarding.avatar_species_ids');
+
+        // Mantém a ordem curada do config (Pikachu primeiro, etc.) em vez da
+        // ordem crua do banco por id — é a espécie na primeira posição que
+        // aparece no fundo antes do jogador escolher um avatar.
+        $avatarOptions = Species::whereIn('id', $avatarSpeciesIds)
+            ->get(['id', 'name', 'artwork_path'])
+            ->sortBy(fn (Species $species): int => array_search($species->id, $avatarSpeciesIds, true))
+            ->values();
 
         return Inertia::render('onboarding/Show', [
             'avatarOptions' => $avatarOptions,
