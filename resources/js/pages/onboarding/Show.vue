@@ -33,7 +33,15 @@ function goToStep(target: 1 | 2 | 3) {
 }
 
 function submit() {
-    form.post(store().url);
+    form.post(store().url, {
+        onError: (errors) => {
+            if (errors.nickname) {
+                step.value = 1;
+            } else if (errors.birthdate) {
+                step.value = 2;
+            }
+        },
+    });
 }
 </script>
 
