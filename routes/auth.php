@@ -5,6 +5,8 @@ declare(strict_types=1);
 use App\Http\Controllers\Auth\LoginUserController;
 use App\Http\Controllers\Auth\RegisterUserController;
 use App\Http\Controllers\Auth\VerifyEmailController;
+use App\Http\Controllers\Onboarding\CompleteOnboardingController;
+use App\Http\Controllers\Onboarding\ShowOnboardingController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware('guest')->group(function () {
@@ -18,4 +20,7 @@ Route::middleware('auth')->group(function () {
     Route::get('verificar-email/{id}/{hash}', VerifyEmailController::class)
         ->middleware(['signed', 'throttle:6,1'])
         ->name('verification.verify');
+
+    Route::get('completar-perfil', ShowOnboardingController::class)->name('onboarding.show');
+    Route::post('completar-perfil', [CompleteOnboardingController::class, 'store'])->name('onboarding.store');
 });
