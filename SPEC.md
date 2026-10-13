@@ -109,6 +109,7 @@ invites
   max_uses                 integer, nullable   -- null = infinito
   uses_count               integer, default 0
   expires_at               timestamp, nullable
+  revoked_at               timestamp, nullable -- revogado pelo admin, não apaga
   created_at
 
 invite_redemptions
@@ -217,10 +218,11 @@ algum dia entrar qualquer coisa perto de monetização.
 **Cadastro fechado por convite.** Cada convite (tabela `invites`) tem um
 `max_uses` definido por quem criou — 1, um número fixo, ou `null` pra infinito
 — e cada uso fica registrado em `invite_redemptions` (não só o último, todo
-mundo que usou). Quem pode criar convite: um admin (`users.is_admin`) via
-painel próprio, e possivelmente cada jogador comum gerar um número limitado —
-essa segunda parte ainda não está fechada, decidir quando chegar a vez de
-implementar gestão de convites.
+mundo que usou). Quem pode criar convite: um admin (`users.is_admin`), pelo painel
+`/admin/convites` ou pelo comando `invites:create`. Admin também revoga
+convite (não apaga, só para de aceitar resgate) e promove/rebaixa outros
+admins em `/admin/usuarios` — ninguém rebaixa a si mesmo e o jogo nunca fica
+sem admin. Jogador comum gerar convite próprio ainda não está fechado.
 
 **Confirmação de email é leve, não bloqueia o uso.** O jogador já pode abrir
 pack e jogar sem confirmar. O link de confirmação chega em paralelo, e só

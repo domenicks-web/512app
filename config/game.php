@@ -126,6 +126,27 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Convites
+    |--------------------------------------------------------------------------
+    |
+    | Formato do código ("RAMON-7X2K"): prefixo com o nickname de quem criou
+    | (cortado em `code_prefix_max_length`) + sufixo aleatório. O alfabeto
+    | do sufixo não tem caracteres ambíguos (0/O, 1/I/L). Os limites
+    | seguram o formulário do admin contra valor absurdo.
+    |
+    */
+
+    'invites' => [
+        'code_alphabet' => 'ABCDEFGHJKMNPQRSTUVWXYZ23456789',
+        'code_suffix_length' => 4,
+        'code_prefix_max_length' => 10,
+        'code_fallback_prefix' => 'CONVITE',
+        'max_uses_limit' => 1000,
+        'expires_in_days_limit' => 365,
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
     | Verificação do espécime
     |--------------------------------------------------------------------------
     */

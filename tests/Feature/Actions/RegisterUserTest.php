@@ -63,6 +63,12 @@ it('rejeita convite expirado', function () {
     (new RegisterUser)->handle(registerUserData());
 })->throws(InviteNotRedeemableException::class);
 
+it('rejeita convite revogado', function () {
+    Invite::factory()->revoked()->create(['code' => 'RAMON-7X2K', 'max_uses' => 1]);
+
+    (new RegisterUser)->handle(registerUserData());
+})->throws(InviteNotRedeemableException::class);
+
 it('aceita convite sem limite de usos mesmo depois de vários resgates', function () {
     Notification::fake();
 

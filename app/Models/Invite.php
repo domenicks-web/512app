@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Enums\InviteStatus;
 use Database\Factories\InviteFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -19,6 +20,7 @@ use Illuminate\Support\Carbon;
  * @property int|null $max_uses
  * @property int $uses_count
  * @property Carbon|null $expires_at
+ * @property Carbon|null $revoked_at
  * @property Carbon $created_at
  */
 #[Fillable(['code', 'created_by', 'max_uses', 'expires_at'])]
@@ -55,6 +57,30 @@ class Invite extends Model
         return $this->expires_at !== null && $this->expires_at->isPast();
     }
 
+    public function isRevoked(): bool
+    {
+        return $this->revoked_at !== null;
+    }
+
+    public function isRedeemable(): bool
+    {
+        return $this->status() === InviteStatus::Active;
+    }
+
+    /**
+     * Revogado vence expirado, que vence esgotado: mostra o motivo mais
+     * "definitivo" quando mais de um se aplica.
+     */
+    public function status(): InviteStatus
+    {
+        return match (true) {
+            $this->isRevoked() => InviteStatus::Revoked,
+            $this->isExpired() => InviteStatus::Expired,
+            ! $this->hasUsesLeft() => InviteStatus::Exhausted,
+            default => InviteStatus::Active,
+        };
+    }
+
     /**
      * @return array<string, string>
      */
@@ -64,6 +90,7 @@ class Invite extends Model
             'max_uses' => 'integer',
             'uses_count' => 'integer',
             'expires_at' => 'datetime',
+            'revoked_at' => 'datetime',
         ];
     }
 }

@@ -19,7 +19,7 @@ class RegisterUser
         $user = DB::transaction(function () use ($data): User {
             $invite = Invite::where('code', $data->inviteCode)->lockForUpdate()->first();
 
-            if ($invite === null || $invite->isExpired() || ! $invite->hasUsesLeft()) {
+            if ($invite === null || ! $invite->isRedeemable()) {
                 throw InviteNotRedeemableException::code($data->inviteCode);
             }
 

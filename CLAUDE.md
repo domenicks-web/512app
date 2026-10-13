@@ -152,9 +152,13 @@ pushado pro `main`.
   novo, resetar via tinker (`forceFill(['nickname'=>null, 'tag'=>null,
   'birthdate'=>null, 'avatar_species_id'=>null])->save()`).
 
-- **Pendente antes de cadastrar alguém de verdade**: gestão de convites
-  ainda não existe (nem comando artisan, nem UI de admin) — só o schema.
-  Fica pro próximo subprojeto de admin, com brainstorm próprio.
+- **Admin pronto (13/10)**: `/admin/convites` (criar com `max_uses` e
+  validade opcionais, listar status/quem usou, revogar via `revoked_at`) e
+  `/admin/usuarios` (promover/rebaixar admin, travas de auto-rebaixamento e
+  último admin). Middleware `admin`, Actions em `app/Actions/Admin/`,
+  comando `php artisan invites:create [--by=email] [--max-uses=N]
+  [--unlimited] [--expires-in-days=N]`. Visual provisório (`AdminShell`),
+  sem tratamento de design ainda.
 
 - **Ambiente local**: MySQL sobe com `docker compose up -d`. Dev server
   (`composer run dev`) pode ter ficado rodando em background desta sessão —
@@ -163,8 +167,6 @@ pushado pro `main`.
 
 - **Próximos subprojetos combinados** (cada um com brainstorm próprio antes de
   codar, não pular direto pra implementação):
-    - **Admin — gestão de convites**: quem pode criar convite, `max_uses`,
-      UI ou comando artisan — não decidido ainda.
     - **B — Tela de Início** (fundo claro): pack de hoje, coleção, amigos
       online, e o logout de verdade (hoje só o link provisório na
       `Welcome`). Precisa de dados reais ou mock, já que `OpenPack` ainda

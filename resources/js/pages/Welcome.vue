@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import { Form, Head } from '@inertiajs/vue3';
+import { Form, Head, Link } from '@inertiajs/vue3';
 import LogoutUserController from '@/actions/App/Http/Controllers/Auth/LogoutUserController';
+import { index as adminIndex } from '@/routes/admin';
 </script>
 
 <template>
@@ -16,6 +17,13 @@ import LogoutUserController from '@/actions/App/Http/Controllers/Auth/LogoutUser
             e vai ser substituída pela Tela de Início (subprojeto B). Só um
             jeito de deslogar pra testar com outra conta enquanto isso.
         -->
+        <Link
+            v-if="$page.props.auth.user.is_admin"
+            :href="adminIndex.url()"
+            class="absolute top-4 right-20 rounded-md border border-[#e3e3e0] bg-white px-3 py-1 text-xs font-medium text-[#1b1b18] hover:bg-[#f5f5f4] dark:border-[#3E3E3A] dark:bg-[#161615] dark:text-[#EDEDEC] dark:hover:bg-[#1c1c1a]"
+        >
+            Admin
+        </Link>
         <Form :action="LogoutUserController()" class="absolute top-4 right-4">
             <button
                 type="submit"

@@ -41,6 +41,9 @@ class HandleInertiaRequests extends Middleware
             'auth' => [
                 'user' => $request->user(),
             ],
+            'flash' => [
+                'created_invite_code' => fn () => $request->session()->get('created_invite_code'),
+            ],
         ];
     }
 }

@@ -49,4 +49,11 @@ class InviteFactory extends Factory
             'max_uses' => null,
         ]);
     }
+
+    public function revoked(): static
+    {
+        return $this->state(fn (array $attributes): array => [
+            'revoked_at' => now()->subHour(),
+        ]);
+    }
 }

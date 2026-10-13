@@ -62,4 +62,11 @@ class UserFactory extends Factory
             'avatar_species_id' => null,
         ]);
     }
+
+    public function admin(): static
+    {
+        return $this->state(fn (): array => [
+            'is_admin' => true,
+        ]);
+    }
 }
