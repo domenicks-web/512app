@@ -160,6 +160,13 @@ pushado pro `main`.
   [--unlimited] [--expires-in-days=N]`. Visual provisório (`AdminShell`),
   sem tratamento de design ainda.
 
+- **Conta de teste local (13/10)**: `claudetest@512app.com` / `claude`,
+  `Claude#9805`, perfil completo, sem admin, sem espécimes. Criada a pedido
+  do usuário pro Claude testar no navegador. O MCP do Playwright não acha o
+  Chrome; funciona via script Node com o `playwright` do cache do npx
+  apontando `executablePath` pro `chromium_headless_shell-1243` em
+  `~/.cache/ms-playwright`.
+
 - **Ambiente local**: MySQL sobe com `docker compose up -d`. Dev server
   (`composer run dev`) pode ter ficado rodando em background desta sessão —
   se a porta 8000/5173 já estiver ocupada ao retomar, é provavelmente ele.
@@ -215,9 +222,8 @@ pushado pro `main`.
           `game.group.feed_highlight_tiers`** (raro, lendário). "Quem
           abriu" é o dono da `opening`, não o dono atual.
         - **Trocas é só leitura**: propor/aceitar/recusar é a fase 4.
-    - Não deu pra conferir as telas novas no navegador (sem senha da conta
-      local, e criar sessão na mão foi barrado). Validado só por teste,
-      `vue-tsc`, lint e build.
+    - Conferido no navegador (desktop e 390px) com a conta de teste, só nos
+      estados vazios — ainda não existe espécime no banco local.
 
 - **Pendências**:
     - Home: o tile "Pack de hoje" e o item Packs do dock não fazem nada —

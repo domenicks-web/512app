@@ -574,9 +574,13 @@ const tileBase =
             >
                 <div class="relative size-[9px]" aria-hidden="true">
                     <div
+                        v-if="friendsOnline > 0"
                         class="bg-online animate-online-pulse absolute inset-0 rounded-full"
                     />
-                    <div class="bg-online absolute inset-0 rounded-full" />
+                    <div
+                        class="absolute inset-0 rounded-full"
+                        :class="friendsOnline > 0 ? 'bg-online' : 'bg-faint-2'"
+                    />
                 </div>
                 <div class="text-muted text-[12.5px] font-extrabold">
                     {{ formatFriendsOnline(friendsOnline) }}

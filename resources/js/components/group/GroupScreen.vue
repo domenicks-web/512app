@@ -56,7 +56,7 @@ onMounted(async () => {
     <div ref="root" class="absolute inset-0 z-[3] flex flex-col">
         <header
             data-enter
-            class="flex items-center gap-4 px-[clamp(16px,5vw,56px)] pt-[22px] pb-4"
+            class="mx-auto flex w-full max-w-[calc(880px+2*clamp(16px,5vw,56px))] items-center gap-4 px-[clamp(16px,5vw,56px)] pt-[22px] pb-4"
         >
             <Link
                 :href="home()"

@@ -60,9 +60,11 @@ const sections = computed(() => [
     <GroupScreen
         title="Trocas"
         :subtitle="
-            incoming.length === 1
-                ? '1 proposta esperando você'
-                : `${incoming.length} propostas esperando você`
+            incoming.length === 0
+                ? 'Nenhuma proposta esperando você'
+                : incoming.length === 1
+                  ? '1 proposta esperando você'
+                  : `${incoming.length} propostas esperando você`
         "
         active="trades"
     >
