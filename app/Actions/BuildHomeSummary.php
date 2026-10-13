@@ -4,27 +4,41 @@ declare(strict_types=1);
 
 namespace App\Actions;
 
+use App\Enums\TradeStatus;
 use App\Models\Species;
+use App\Models\Trade;
 use App\Models\User;
+use App\Services\GroupPresence;
 use Carbon\CarbonInterface;
 
 /**
- * Monta os números da Home. Coleção e avatar são dado real; ranking,
- * trocas, feed e amigos online ainda não existem no jogo e vêm de
- * `game.home.placeholders` (provisório, ver CLAUDE.md).
+ * Monta os números da Home: treinador, coleção, posição no ranking de
+ * espécies, propostas de troca recebidas, destaque do feed e quantos
+ * outros jogadores estão online.
  */
 class BuildHomeSummary
 {
+    public function __construct(
+        private readonly BuildSpeciesRanking $ranking,
+        private readonly FindFeedHighlight $feed,
+        private readonly GroupPresence $presence,
+    ) {}
+
     /**
      * @return array{
      *     trainer: array{nickname: string, tag: string, avatarSpritePath: string|null, isAdmin: bool},
      *     collection: array{ownedSpecies: int, totalSpecies: int},
      *     packDate: string,
-     *     placeholders: array{ranking_position: int, trade_proposals: int, feed: array{is_shiny: bool, headline: string, meta: string}, friends_online: int},
+     *     rankingPosition: int|null,
+     *     pendingTrades: int,
+     *     feedHighlight: array{isShiny: bool, trainerNickname: string, speciesName: string, mintNumber: int, caughtAgo: string}|null,
+     *     friendsOnline: int,
      * }
      */
     public function handle(User $user, CarbonInterface $today): array
     {
+        $ownRow = collect($this->ranking->handle())->firstWhere('userId', $user->id);
+
         return [
             'trainer' => [
                 'nickname' => (string) $user->nickname,
@@ -37,7 +51,13 @@ class BuildHomeSummary
                 'totalSpecies' => Species::count(),
             ],
             'packDate' => $today->locale('pt_BR')->translatedFormat('j M'),
-            'placeholders' => config('game.home.placeholders'),
+            'rankingPosition' => $ownRow['position'] ?? null,
+            'pendingTrades' => Trade::query()
+                ->where('to_user_id', $user->id)
+                ->where('status', TradeStatus::Pending)
+                ->count(),
+            'feedHighlight' => $this->feed->handle(),
+            'friendsOnline' => count(array_diff($this->presence->onlineUserIds($today), [$user->id])),
         ];
     }
 }

@@ -1,28 +1,40 @@
 <script setup lang="ts">
 import { Link } from '@inertiajs/vue3';
 import { onBeforeUnmount, onMounted, ref } from 'vue';
+import type { DockKey } from '@/components/entry/dock';
 import { animate } from '@/lib/motion';
 import { logout } from '@/routes';
 import { index as adminIndex } from '@/routes/admin';
+import { show as collectionShow } from '@/routes/collection';
+import { index as friendsIndex } from '@/routes/friends';
+import { show as rankingShow } from '@/routes/ranking';
+import { index as tradesIndex } from '@/routes/trades';
+import type { RouteDefinition } from '@/wayfinder';
 
 /**
  * Dock de vidro da home. Cada ícone tem uma micro-animação no hover
  * (cartas em leque, cápsula abre, barras sobem, setas trocam, mão acena,
- * sliders correm). Só "Ajustes" faz algo hoje (menu com sair/admin); o
- * resto aguarda as telas de verdade — ver pendências no CLAUDE.md.
+ * sliders correm). Coleção, Ranking, Trocas e Amigos navegam; "Ajustes"
+ * abre o menu (sair/admin). Packs espera a tela de abertura (subprojeto C).
+ * `active` marca o item da tela atual.
  */
 defineProps<{
     isAdmin: boolean;
+    active?: DockKey;
 }>();
 
-type DockItem = { key: string; label: string };
+type DockItem = {
+    key: DockKey;
+    label: string;
+    href?: () => RouteDefinition<'get'>;
+};
 
 const items: DockItem[] = [
-    { key: 'collection', label: 'Coleção' },
+    { key: 'collection', label: 'Coleção', href: collectionShow },
     { key: 'packs', label: 'Packs' },
-    { key: 'ranking', label: 'Ranking' },
-    { key: 'trades', label: 'Trocas' },
-    { key: 'friends', label: 'Amigos' },
+    { key: 'ranking', label: 'Ranking', href: rankingShow },
+    { key: 'trades', label: 'Trocas', href: tradesIndex },
+    { key: 'friends', label: 'Amigos', href: friendsIndex },
     { key: 'settings', label: 'Ajustes' },
 ];
 
@@ -140,14 +152,22 @@ function onActivate(key: string) {
             </svg>
         </div>
 
-        <button
+        <component
+            :is="item.href ? Link : 'button'"
             v-for="item in items"
             :key="item.key"
-            type="button"
+            :href="item.href?.()"
+            :type="item.href ? undefined : 'button'"
             :aria-label="item.label"
+            :aria-current="active === item.key ? 'page' : undefined"
             :aria-haspopup="item.key === 'settings' ? 'menu' : undefined"
             :aria-expanded="item.key === 'settings' ? isMenuOpen : undefined"
-            class="relative flex size-11 shrink-0 cursor-pointer items-center justify-center rounded-full bg-white shadow-[0_1px_2px_rgba(28,32,38,0.06)] sm:size-14"
+            class="relative flex size-11 shrink-0 cursor-pointer items-center justify-center rounded-full bg-white sm:size-14"
+            :class="
+                active === item.key
+                    ? 'shadow-[0_0_0_2.5px_#f24d4d,0_6px_14px_rgba(242,77,77,0.22)]'
+                    : 'shadow-[0_1px_2px_rgba(28,32,38,0.06)]'
+            "
             @pointerenter="onEnter(item.key, $event)"
             @pointerleave="hovered = null"
             @focus="hovered = item.key"
@@ -295,7 +315,7 @@ function onActivate(key: string) {
             >
                 {{ item.label }}
             </span>
-        </button>
+        </component>
 
         <div
             v-if="isMenuOpen"

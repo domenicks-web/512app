@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Head } from '@inertiajs/vue3';
+import { Head, router } from '@inertiajs/vue3';
 import {
     computed,
     nextTick,
@@ -12,15 +12,19 @@ import HomeDock from '@/components/entry/HomeDock.vue';
 import { useDotField } from '@/composables/useDotField';
 import { waitForIntro } from '@/composables/useIntro';
 import EntryLayout from '@/layouts/EntryLayout.vue';
+import { formatFriendsOnline, formatMint } from '@/lib/format';
 import { animate, spring } from '@/lib/motion';
+import { show as collectionShow } from '@/routes/collection';
+import { show as rankingShow } from '@/routes/ranking';
+import { index as tradesIndex } from '@/routes/trades';
 
 defineOptions({ layout: EntryLayout });
 
 /**
  * Home: trilho de tiles com um anel colorido que desliza até o ativo
- * (setas, hover ou clique; Enter "aperta"). Coleção e treinador são dado
- * real; ranking, trocas, feed e amigos online vêm provisórios do servidor
- * (`config/game.php` → `home.placeholders`).
+ * (setas, hover ou clique; Enter "aperta"). Apertar Coleção, Ranking ou
+ * Trocas abre a tela; o Pack de hoje só levanta a tampa até existir a
+ * abertura (subprojeto C).
  */
 const props = defineProps<{
     trainer: {
@@ -31,13 +35,25 @@ const props = defineProps<{
     };
     collection: { ownedSpecies: number; totalSpecies: number };
     packDate: string;
-    placeholders: {
-        ranking_position: number;
-        trade_proposals: number;
-        feed: { is_shiny: boolean; headline: string; meta: string };
-        friends_online: number;
-    };
+    rankingPosition: number | null;
+    pendingTrades: number;
+    feedHighlight: {
+        isShiny: boolean;
+        trainerNickname: string;
+        speciesName: string;
+        mintNumber: number;
+        caughtAgo: string;
+    } | null;
+    friendsOnline: number;
 }>();
+
+/** Tile → tela que ele abre depois de apertado. */
+const TILE_DESTINATIONS: Partial<Record<number, () => { url: string }>> = {
+    1: collectionShow,
+    2: rankingShow,
+    3: tradesIndex,
+};
+const PRESS_BEFORE_VISIT = 300;
 
 const TILE_LABELS = [
     'Pack de hoje',
@@ -164,6 +180,15 @@ function pressTile(index: number) {
             ],
             900,
             { fill: 'none', easing: 'ease-in-out' },
+        );
+    }
+
+    const destination = TILE_DESTINATIONS[index];
+
+    if (destination) {
+        window.setTimeout(
+            () => router.visit(destination().url),
+            PRESS_BEFORE_VISIT,
         );
     }
 }
@@ -453,11 +478,17 @@ const tileBase =
                 >
                     <span
                         class="text-[72px] leading-[0.9] font-black tracking-[-0.03em] text-white"
-                        >{{ placeholders.ranking_position }}º</span
+                        >{{
+                            rankingPosition === null
+                                ? '—'
+                                : `${rankingPosition}º`
+                        }}</span
                     >
-                    <span class="text-sm font-extrabold text-[#c3cad4]"
-                        >em espécies no grupo</span
-                    >
+                    <span class="text-sm font-extrabold text-[#c3cad4]">{{
+                        rankingPosition === null
+                            ? 'abra um pack pra entrar'
+                            : 'em espécies no grupo'
+                    }}</span>
                 </button>
 
                 <button
@@ -476,11 +507,13 @@ const tileBase =
                 >
                     <span
                         class="text-ink text-[72px] leading-[0.9] font-black tracking-[-0.03em]"
-                        >{{ placeholders.trade_proposals }}</span
+                        >{{ pendingTrades }}</span
                     >
-                    <span class="text-soft text-sm font-extrabold"
-                        >propostas de troca</span
-                    >
+                    <span class="text-soft text-sm font-extrabold">{{
+                        pendingTrades === 1
+                            ? 'proposta de troca'
+                            : 'propostas de troca'
+                    }}</span>
                 </button>
 
                 <button
@@ -501,7 +534,7 @@ const tileBase =
                         class="absolute inset-0 bg-[radial-gradient(70%_45%_at_50%_46%,rgba(77,217,232,0.16),rgba(77,217,232,0))]"
                     />
                     <span
-                        v-if="placeholders.feed.is_shiny"
+                        v-if="feedHighlight?.isShiny"
                         class="text-shiny relative flex h-[26px] items-center self-start rounded-full bg-[rgba(77,217,232,0.14)] px-2.5 text-xs font-extrabold tracking-[0.06em] uppercase"
                     >
                         Shiny
@@ -509,11 +542,19 @@ const tileBase =
                     <span
                         class="relative text-[30px] leading-[1.05] font-black tracking-[-0.025em] text-balance text-white"
                     >
-                        {{ placeholders.feed.headline }}
+                        {{
+                            feedHighlight
+                                ? `${feedHighlight.trainerNickname} abriu um ${feedHighlight.speciesName}`
+                                : 'Nada de raro por aqui ainda'
+                        }}
                     </span>
                     <span
                         class="relative text-sm font-semibold text-[#7d8794]"
-                        >{{ placeholders.feed.meta }}</span
+                        >{{
+                            feedHighlight
+                                ? `${feedHighlight.caughtAgo} · ${formatMint(feedHighlight.mintNumber)}`
+                                : 'shinies e raros do grupo aparecem aqui'
+                        }}</span
                     >
                 </button>
             </div>
@@ -538,7 +579,7 @@ const tileBase =
                     <div class="bg-online absolute inset-0 rounded-full" />
                 </div>
                 <div class="text-muted text-[12.5px] font-extrabold">
-                    {{ placeholders.friends_online }} amigos online
+                    {{ formatFriendsOnline(friendsOnline) }}
                 </div>
             </div>
         </footer>

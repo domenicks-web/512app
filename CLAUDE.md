@@ -187,23 +187,50 @@ pushado pro `main`.
       `BuildHomeSummary`); a `Welcome.vue` provisória morreu. Logout de
       verdade e link do admin ficam no menu "Ajustes" do dock.
 
-- **Pendências (dado fictício ou tela que ainda não existe)**:
-    - Home: ranking (`2º`), propostas de troca (`3`), item do feed
-      ("Ramon abriu um Rattata") e amigos online (`2`) vêm de
-      `config('game.home.placeholders')`. Trocar por dado real quando cada
-      feature existir e apagar a chave.
-    - Home: o tile "Pack de hoje" só levanta a tampa — abrir pack de
-      verdade é o subprojeto C. O "1 em 512" e a data são decorativos.
-    - Dock: Coleção, Packs, Ranking, Trocas e Amigos não navegam pra lugar
-      nenhum (só animam). Só "Ajustes" funciona.
+- **Subprojeto B pronto (13/10, feito sem o usuário presente — revisar as
+  decisões abaixo)**:
+    - Home sem nenhum dado fictício; `game.home.placeholders` morreu.
+      `BuildHomeSummary` agora junta: posição no ranking
+      (`BuildSpeciesRanking`), trocas pendentes *recebidas*, destaque do
+      feed (`FindFeedHighlight`) e outros jogadores online
+      (`GroupPresence`).
+    - Telas novas atrás de `auth` + `onboarded`, todas com a moldura
+      `components/group/GroupScreen.vue` (voltar, título, dock com o item
+      ativo): `/colecao` (151 em ordem de dex, silhueta pra quem falta,
+      filtro Todas/Tenho/Faltam), `/ranking`, `/trocas` (só leitura) e
+      `/amigos`. Tiles Coleção, Ranking e Trocas da Home abrem as telas.
+    - Decisões tomadas sozinho:
+        - **"Amigos" = todo mundo do grupo** que já fez onboarding. Não
+          existe tabela de amizade no `SPEC.md`; o jogo já é fechado por
+          convite.
+        - **Online = sessão com atividade nos últimos
+          `game.group.online_window_minutes` (5)**, lido da tabela
+          `sessions`. Só funciona com `SESSION_DRIVER=database`. Sem
+          Reverb (fase 4).
+        - **Ranking só por espécies distintas.** Empate divide a posição,
+          shinies só desempatam a ordem. Quem tem 0 espécies fica sem
+          posição ("—" na Home). Os outros rankings da fase 3 (shinies,
+          IV, mint) ficaram de fora.
+        - **Feed = abertura mais recente que é shiny ou de tier em
+          `game.group.feed_highlight_tiers`** (raro, lendário). "Quem
+          abriu" é o dono da `opening`, não o dono atual.
+        - **Trocas é só leitura**: propor/aceitar/recusar é a fase 4.
+    - Não deu pra conferir as telas novas no navegador (sem senha da conta
+      local, e criar sessão na mão foi barrado). Validado só por teste,
+      `vue-tsc`, lint e build.
+
+- **Pendências**:
+    - Home: o tile "Pack de hoje" e o item Packs do dock não fazem nada —
+      abrir pack de verdade é o subprojeto C. O "1 em 512" e a data são
+      decorativos.
+    - Tile do Feed não abre tela (não existe feed completo; fase 5).
     - Mobile: a grade de parceiros encolhe com `zoom` abaixo de 460px; vale
       revisar num aparelho de verdade.
+    - `vp check --fix` sem caminho formata também `CLAUDE.md`, `docs/` e o
+      handoff (e quebra no HTML dele). Rodar `vp fmt resources/js` e
+      `vp lint resources/js`.
 
-- **Próximos subprojetos combinados** (cada um com brainstorm próprio antes de
-  codar, não pular direto pra implementação):
-    - **B — Tela de Início**: o visual já está pronto (handoff). Falta
-      plugar dado real no que está em `home.placeholders` e dar destino
-      aos botões do dock.
+- **Próximo subprojeto** (com brainstorm antes de codar):
     - **C — Tela de abertura de pack** (fundo escuro): a maior. Envolve criar a
       action `OpenPack` (transação + lock em `mint_number`, chamando
       `ResolveSpecimen`), rota, e a animação de revelação em GSAP.

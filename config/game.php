@@ -132,25 +132,21 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Home
+    | Grupo
     |--------------------------------------------------------------------------
     |
-    | Valores provisórios pro que a Home mostra mas ainda não existe no jogo
-    | (ranking, trocas, feed, amigos online). Cada um sai daqui quando a
-    | feature ganhar dado de verdade — ver pendências no CLAUDE.md.
+    | `online_window_minutes`: quem teve atividade na sessão dentro dessa
+    | janela conta como online (lido da tabela `sessions`, sem realtime).
+    | `feed_highlight_tiers`: tiers que entram no feed do grupo além de
+    | todo shiny, que entra sempre.
     |
     */
 
-    'home' => [
-        'placeholders' => [
-            'ranking_position' => 2,
-            'trade_proposals' => 3,
-            'feed' => [
-                'is_shiny' => true,
-                'headline' => 'Ramon abriu um Rattata',
-                'meta' => 'há 12 min · #0004',
-            ],
-            'friends_online' => 2,
+    'group' => [
+        'online_window_minutes' => 5,
+        'feed_highlight_tiers' => [
+            RarityTier::Rare->value,
+            RarityTier::Legendary->value,
         ],
     ],
 
