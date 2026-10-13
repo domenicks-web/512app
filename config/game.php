@@ -122,6 +122,36 @@ return [
             149, // Dragonite
             52,  // Meowth
         ],
+
+        'nickname_min_length' => 2,
+        'nickname_max_length' => 16,
+
+        // Primeiro ano da roda de data de nascimento (o último é o ano atual).
+        'birth_year_min' => 1950,
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Home
+    |--------------------------------------------------------------------------
+    |
+    | Valores provisórios pro que a Home mostra mas ainda não existe no jogo
+    | (ranking, trocas, feed, amigos online). Cada um sai daqui quando a
+    | feature ganhar dado de verdade — ver pendências no CLAUDE.md.
+    |
+    */
+
+    'home' => [
+        'placeholders' => [
+            'ranking_position' => 2,
+            'trade_proposals' => 3,
+            'feed' => [
+                'is_shiny' => true,
+                'headline' => 'Ramon abriu um Rattata',
+                'meta' => 'há 12 min · #0004',
+            ],
+            'friends_online' => 2,
+        ],
     ],
 
     /*

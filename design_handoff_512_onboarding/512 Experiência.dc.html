@@ -1,0 +1,928 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@600;800;900&family=Nunito:wght@900&display=swap" rel="stylesheet">
+<style>
+  html, body { margin: 0; height: 100%; background: #eff0f2; color: #2b2f36; -webkit-font-smoothing: antialiased; overflow: hidden; }
+  a { color: #dc3a3a; text-decoration: none; }
+  a:hover { color: #b82d2d; }
+  input::placeholder { color: #b4b9c0; }
+  input[data-pw]::selection { background: transparent; color: transparent; }
+  @keyframes spin512 { to { transform: rotate(360deg); } }
+  @keyframes blink512 { 0%, 49% { opacity: 1; } 50%, 100% { opacity: 0; } }
+  @keyframes pulse512 { 0%, 100% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.8); opacity: 0.35; } }
+</style>
+</helmet>
+
+<div style="position: relative; width: 100%; height: 100vh; min-height: 600px; overflow: hidden; background: #eff0f2; font-family: 'Inter', sans-serif; font-optical-sizing: auto; color: #2b2f36;">
+
+  <canvas ref="{{ cv }}" style="position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 1;"></canvas>
+
+  <sc-if value="{{ showLoader }}" hint-placeholder-val="{{ false }}">
+    <div style="position: fixed; inset: 0; z-index: 8; display: flex; align-items: center; justify-content: center; pointer-events: none;">
+      <div ref="{{ lock }}" style="position: relative;">
+        <div data-k="slide" style="position: relative;">
+          <div data-k="squash" style="position: relative; width: 337.48px; height: 154.08px;">
+            <div data-k="field" style="position: absolute; inset: 0; background: #f24d4d; border-radius: 20.15px; box-shadow: 0 18px 40px rgba(242,77,77,0.32);"></div>
+            <div data-k="token" style="position: absolute; left: 18.57px; top: 31.96px; width: 96px; height: 96px;">
+              <div data-k="top" style="position: absolute; left: 0; top: 0; width: 96px; height: 48px; color: #ff5757; transform-origin: 6% 100%;"><svg width="96" height="48" viewBox="37.32 71.14 167.93 83.97" style="display: block; overflow: visible;"><path d="M 92.859375 72.496094 C 101.582031 69.308594 111.5625 67.214844 121.332031 67.214844 C 131.101562 67.214844 140.5 69.007812 149.160156 72.195312 C 149.347656 72.296875 149.53125 72.296875 149.714844 72.394531 C 182.242188 85.144531 206.203125 118.808594 206.664062 155.105469 L 35.910156 155.105469 C 36.371094 118.609375 59.960938 84.945312 92.859375 72.496094 Z M 92.859375 72.496094 " fill="currentColor"></path></svg></div>
+              <div data-k="bot" style="position: absolute; left: 0; top: 48px; width: 96px; height: 48px; background: #ffffff; border-radius: 0 0 48px 48px; transform-origin: 6% 0%; z-index: 2;">
+                <div style="position: absolute; left: 0; right: 0; top: -8.32px; height: 14.42px; border-radius: 3px; background: #434a53;"></div>
+                <div style="position: absolute; left: 50%; top: -1.12px; width: 32.33px; height: 32.33px; transform: translate(-50%, -50%); border-radius: 999px; background: #434a53; display: flex; align-items: center; justify-content: center;">
+                  <div data-k="hl" style="width: 17.02px; height: 17.02px; border-radius: 999px; background: #e4e7eb;"></div>
+                </div>
+              </div>
+            </div>
+            <div data-k="d" style="position: absolute; left: 142.98px; top: 33.99px; width: 59.43px; height: 84.04px;"><svg width="59.43" height="84.04" viewBox="254.93 74.7 103.96 147" style="display: block; overflow: visible;"><path transform="translate(244.592878, 218.000421)" d="M 57.5 3.6875 C 50.445312 3.6875 44.046875 3.144531 38.296875 2.0625 C 32.546875 0.988281 27.597656 -0.617188 23.453125 -2.765625 C 19.316406 -4.910156 16.097656 -7.550781 13.796875 -10.6875 C 11.492188 -13.832031 10.34375 -17.476562 10.34375 -21.625 C 10.34375 -25.914062 11.566406 -29.515625 14.015625 -32.421875 C 16.472656 -35.335938 19.238281 -37.640625 22.3125 -39.328125 C 26.601562 -36.109375 31.203125 -33.3125 36.109375 -30.9375 C 41.015625 -28.5625 47.222656 -27.375 54.734375 -27.375 C 61.941406 -27.375 67.078125 -28.984375 70.140625 -32.203125 C 73.210938 -35.421875 74.75 -39.328125 74.75 -43.921875 C 74.75 -48.367188 73.40625 -52.050781 70.71875 -54.96875 C 68.039062 -57.882812 63.40625 -59.34375 56.8125 -59.34375 C 52.664062 -59.34375 49.210938 -58.878906 46.453125 -57.953125 C 43.691406 -57.035156 40.550781 -55.734375 37.03125 -54.046875 C 29.519531 -54.347656 23.578125 -56.378906 19.203125 -60.140625 C 14.835938 -63.898438 12.65625 -69.6875 12.65625 -77.5 C 12.65625 -77.957031 12.65625 -78.53125 12.65625 -79.21875 C 12.65625 -79.914062 12.726562 -81.335938 12.875 -83.484375 L 15.640625 -118.4375 C 16.097656 -125.03125 18.164062 -130.242188 21.84375 -134.078125 C 25.53125 -137.910156 30.664062 -139.828125 37.25 -139.828125 L 103.5 -139.828125 C 104.414062 -138.140625 105.332031 -135.914062 106.25 -133.15625 C 107.164062 -130.394531 107.625 -127.484375 107.625 -124.421875 C 107.625 -118.597656 106.320312 -114.457031 103.71875 -112 C 101.113281 -109.550781 97.816406 -108.328125 93.828125 -108.328125 L 49.671875 -108.328125 L 48.0625 -86.703125 C 50.976562 -87.472656 53.929688 -88.160156 56.921875 -88.765625 C 59.910156 -89.378906 63.707031 -89.6875 68.3125 -89.6875 C 76.28125 -89.6875 83.175781 -88.5 89 -86.125 C 94.832031 -83.75 99.625 -80.488281 103.375 -76.34375 C 107.132812 -72.207031 109.894531 -67.378906 111.65625 -61.859375 C 113.414062 -56.347656 114.296875 -50.445312 114.296875 -44.15625 C 114.296875 -37.875 113.222656 -31.816406 111.078125 -25.984375 C 108.929688 -20.160156 105.554688 -15.0625 100.953125 -10.6875 C 96.359375 -6.320312 90.492188 -2.832031 83.359375 -0.21875 C 76.234375 2.382812 67.613281 3.6875 57.5 3.6875 Z M 57.5 3.6875 " fill="#ffffff"></path></svg></div>
+            <div data-k="d" style="position: absolute; left: 207.01px; top: 33.99px; width: 41.42px; height: 84.04px;"><svg width="41.42" height="84.04" viewBox="366.94 74.7 72.45 147" style="display: block; overflow: visible;"><path transform="translate(364.642032, 218.000421)" d="M 35.640625 -102.578125 L 12.65625 -95.4375 C 10.351562 -96.976562 8.050781 -99.125 5.75 -101.875 C 3.445312 -104.632812 2.296875 -108.46875 2.296875 -113.375 C 2.296875 -122.582031 7.894531 -129.023438 19.09375 -132.703125 L 44.84375 -141.4375 L 53.359375 -141.4375 C 59.953125 -141.4375 65.164062 -139.519531 69 -135.6875 C 72.832031 -131.851562 74.75 -126.640625 74.75 -120.046875 L 74.75 -0.234375 C 73.0625 0.0742188 70.566406 0.5 67.265625 1.03125 C 63.972656 1.570312 60.640625 1.84375 57.265625 1.84375 C 53.890625 1.84375 50.859375 1.609375 48.171875 1.140625 C 45.492188 0.679688 43.234375 -0.234375 41.390625 -1.609375 C 39.554688 -2.992188 38.140625 -4.875 37.140625 -7.25 C 36.140625 -9.625 35.640625 -12.726562 35.640625 -16.5625 Z M 35.640625 -102.578125 " fill="#ffffff"></path></svg></div>
+            <div data-k="d" style="position: absolute; left: 263.28px; top: 33.99px; width: 59.42px; height: 84.04px;"><svg width="59.42" height="84.04" viewBox="465.37 74.7 103.95 147" style="display: block; overflow: visible;"><path transform="translate(457.323725, 218.000421)" d="M 55.421875 -143.28125 C 64.160156 -143.28125 71.90625 -142.164062 78.65625 -139.9375 C 85.40625 -137.71875 91.15625 -134.691406 95.90625 -130.859375 C 100.65625 -127.023438 104.253906 -122.5 106.703125 -117.28125 C 109.160156 -112.070312 110.390625 -106.476562 110.390625 -100.5 C 110.390625 -84.40625 101.269531 -69.070312 83.03125 -54.5 L 52.890625 -30.359375 L 108.09375 -30.359375 C 109.007812 -28.671875 109.890625 -26.523438 110.734375 -23.921875 C 111.578125 -21.316406 112 -18.476562 112 -15.40625 C 112 -9.882812 110.769531 -5.9375 108.3125 -3.5625 C 105.863281 -1.1875 102.644531 0 98.65625 0 L 18.859375 0 C 15.484375 -2.300781 12.835938 -5.253906 10.921875 -8.859375 C 9.003906 -12.460938 8.046875 -16.71875 8.046875 -21.625 C 8.046875 -26.832031 9.117188 -31.238281 11.265625 -34.84375 C 13.410156 -38.445312 15.789062 -41.320312 18.40625 -43.46875 L 50.140625 -70.609375 C 54.117188 -73.984375 57.410156 -77.007812 60.015625 -79.6875 C 62.628906 -82.375 64.738281 -84.789062 66.34375 -86.9375 C 67.957031 -89.082031 69.109375 -91.070312 69.796875 -92.90625 C 70.484375 -94.75 70.828125 -96.515625 70.828125 -98.203125 C 70.828125 -102.492188 68.945312 -105.863281 65.1875 -108.3125 C 61.4375 -110.769531 56.800781 -112 51.28125 -112 C 45.15625 -112 39.675781 -111.039062 34.84375 -109.125 C 30.007812 -107.207031 25.984375 -105.175781 22.765625 -103.03125 C 20.160156 -104.875 18.015625 -107.175781 16.328125 -109.9375 C 14.640625 -112.695312 13.796875 -115.914062 13.796875 -119.59375 C 13.796875 -127.5625 17.550781 -133.5 25.0625 -137.40625 C 32.582031 -141.320312 42.703125 -143.28125 55.421875 -143.28125 Z M 55.421875 -143.28125 " fill="#ffffff"></path></svg></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div ref="{{ counterWrap }}" style="position: fixed; left: 0; right: 0; top: calc(50% + 136px); z-index: 8; display: flex; justify-content: center; pointer-events: none;">
+      <div ref="{{ counter }}" style="font-family: 'Inter', sans-serif; font-weight: 900; font-size: 15px; letter-spacing: 0.1em; color: #9aa0a8; font-variant-numeric: tabular-nums;">000 / 512</div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ isLogin }}" hint-placeholder-val="{{ true }}">
+    <div style="position: absolute; inset: 0; z-index: 3; display: flex; align-items: center; justify-content: center; padding: 16px; box-sizing: border-box;">
+      <form ref="{{ loginCard }}" onSubmit="{{ submitLogin }}" style="width: 100%; max-width: 400px; background: #ffffff; border-radius: 28px; box-shadow: 0 2px 4px rgba(43,47,54,0.05), 0 22px 56px rgba(43,47,54,0.18); padding: 34px 30px 30px; box-sizing: border-box; display: flex; flex-direction: column; gap: 22px;">
+        <div style="display: flex; justify-content: center;">
+          <div ref="{{ loginLogo }}" style="zoom: 0.5;">
+          <div style="position: relative; width: 337.48px; height: 154.08px;">
+            <div style="position: absolute; inset: 0; background: #f24d4d; border-radius: 20.15px; box-shadow: 0 18px 40px rgba(242,77,77,0.32);"></div>
+            <div style="position: absolute; left: 18.57px; top: 31.96px; width: 96px; height: 96px;">
+              <div style="position: absolute; left: 0; top: 0; width: 96px; height: 48px; color: #ff5757; transform-origin: 6% 100%;"><svg width="96" height="48" viewBox="37.32 71.14 167.93 83.97" style="display: block; overflow: visible;"><path d="M 92.859375 72.496094 C 101.582031 69.308594 111.5625 67.214844 121.332031 67.214844 C 131.101562 67.214844 140.5 69.007812 149.160156 72.195312 C 149.347656 72.296875 149.53125 72.296875 149.714844 72.394531 C 182.242188 85.144531 206.203125 118.808594 206.664062 155.105469 L 35.910156 155.105469 C 36.371094 118.609375 59.960938 84.945312 92.859375 72.496094 Z M 92.859375 72.496094 " fill="currentColor"></path></svg></div>
+              <div style="position: absolute; left: 0; top: 48px; width: 96px; height: 48px; background: #ffffff; border-radius: 0 0 48px 48px; transform-origin: 6% 0%; z-index: 2;">
+                <div style="position: absolute; left: 0; right: 0; top: -8.32px; height: 14.42px; border-radius: 3px; background: #434a53;"></div>
+                <div style="position: absolute; left: 50%; top: -1.12px; width: 32.33px; height: 32.33px; transform: translate(-50%, -50%); border-radius: 999px; background: #434a53; display: flex; align-items: center; justify-content: center;">
+                  <div style="width: 17.02px; height: 17.02px; border-radius: 999px; background: #e4e7eb;"></div>
+                </div>
+              </div>
+            </div>
+            <div style="position: absolute; left: 142.98px; top: 33.99px; width: 59.43px; height: 84.04px;"><svg width="59.43" height="84.04" viewBox="254.93 74.7 103.96 147" style="display: block; overflow: visible;"><path transform="translate(244.592878, 218.000421)" d="M 57.5 3.6875 C 50.445312 3.6875 44.046875 3.144531 38.296875 2.0625 C 32.546875 0.988281 27.597656 -0.617188 23.453125 -2.765625 C 19.316406 -4.910156 16.097656 -7.550781 13.796875 -10.6875 C 11.492188 -13.832031 10.34375 -17.476562 10.34375 -21.625 C 10.34375 -25.914062 11.566406 -29.515625 14.015625 -32.421875 C 16.472656 -35.335938 19.238281 -37.640625 22.3125 -39.328125 C 26.601562 -36.109375 31.203125 -33.3125 36.109375 -30.9375 C 41.015625 -28.5625 47.222656 -27.375 54.734375 -27.375 C 61.941406 -27.375 67.078125 -28.984375 70.140625 -32.203125 C 73.210938 -35.421875 74.75 -39.328125 74.75 -43.921875 C 74.75 -48.367188 73.40625 -52.050781 70.71875 -54.96875 C 68.039062 -57.882812 63.40625 -59.34375 56.8125 -59.34375 C 52.664062 -59.34375 49.210938 -58.878906 46.453125 -57.953125 C 43.691406 -57.035156 40.550781 -55.734375 37.03125 -54.046875 C 29.519531 -54.347656 23.578125 -56.378906 19.203125 -60.140625 C 14.835938 -63.898438 12.65625 -69.6875 12.65625 -77.5 C 12.65625 -77.957031 12.65625 -78.53125 12.65625 -79.21875 C 12.65625 -79.914062 12.726562 -81.335938 12.875 -83.484375 L 15.640625 -118.4375 C 16.097656 -125.03125 18.164062 -130.242188 21.84375 -134.078125 C 25.53125 -137.910156 30.664062 -139.828125 37.25 -139.828125 L 103.5 -139.828125 C 104.414062 -138.140625 105.332031 -135.914062 106.25 -133.15625 C 107.164062 -130.394531 107.625 -127.484375 107.625 -124.421875 C 107.625 -118.597656 106.320312 -114.457031 103.71875 -112 C 101.113281 -109.550781 97.816406 -108.328125 93.828125 -108.328125 L 49.671875 -108.328125 L 48.0625 -86.703125 C 50.976562 -87.472656 53.929688 -88.160156 56.921875 -88.765625 C 59.910156 -89.378906 63.707031 -89.6875 68.3125 -89.6875 C 76.28125 -89.6875 83.175781 -88.5 89 -86.125 C 94.832031 -83.75 99.625 -80.488281 103.375 -76.34375 C 107.132812 -72.207031 109.894531 -67.378906 111.65625 -61.859375 C 113.414062 -56.347656 114.296875 -50.445312 114.296875 -44.15625 C 114.296875 -37.875 113.222656 -31.816406 111.078125 -25.984375 C 108.929688 -20.160156 105.554688 -15.0625 100.953125 -10.6875 C 96.359375 -6.320312 90.492188 -2.832031 83.359375 -0.21875 C 76.234375 2.382812 67.613281 3.6875 57.5 3.6875 Z M 57.5 3.6875 " fill="#ffffff"></path></svg></div>
+            <div style="position: absolute; left: 207.01px; top: 33.99px; width: 41.42px; height: 84.04px;"><svg width="41.42" height="84.04" viewBox="366.94 74.7 72.45 147" style="display: block; overflow: visible;"><path transform="translate(364.642032, 218.000421)" d="M 35.640625 -102.578125 L 12.65625 -95.4375 C 10.351562 -96.976562 8.050781 -99.125 5.75 -101.875 C 3.445312 -104.632812 2.296875 -108.46875 2.296875 -113.375 C 2.296875 -122.582031 7.894531 -129.023438 19.09375 -132.703125 L 44.84375 -141.4375 L 53.359375 -141.4375 C 59.953125 -141.4375 65.164062 -139.519531 69 -135.6875 C 72.832031 -131.851562 74.75 -126.640625 74.75 -120.046875 L 74.75 -0.234375 C 73.0625 0.0742188 70.566406 0.5 67.265625 1.03125 C 63.972656 1.570312 60.640625 1.84375 57.265625 1.84375 C 53.890625 1.84375 50.859375 1.609375 48.171875 1.140625 C 45.492188 0.679688 43.234375 -0.234375 41.390625 -1.609375 C 39.554688 -2.992188 38.140625 -4.875 37.140625 -7.25 C 36.140625 -9.625 35.640625 -12.726562 35.640625 -16.5625 Z M 35.640625 -102.578125 " fill="#ffffff"></path></svg></div>
+            <div style="position: absolute; left: 263.28px; top: 33.99px; width: 59.42px; height: 84.04px;"><svg width="59.42" height="84.04" viewBox="465.37 74.7 103.95 147" style="display: block; overflow: visible;"><path transform="translate(457.323725, 218.000421)" d="M 55.421875 -143.28125 C 64.160156 -143.28125 71.90625 -142.164062 78.65625 -139.9375 C 85.40625 -137.71875 91.15625 -134.691406 95.90625 -130.859375 C 100.65625 -127.023438 104.253906 -122.5 106.703125 -117.28125 C 109.160156 -112.070312 110.390625 -106.476562 110.390625 -100.5 C 110.390625 -84.40625 101.269531 -69.070312 83.03125 -54.5 L 52.890625 -30.359375 L 108.09375 -30.359375 C 109.007812 -28.671875 109.890625 -26.523438 110.734375 -23.921875 C 111.578125 -21.316406 112 -18.476562 112 -15.40625 C 112 -9.882812 110.769531 -5.9375 108.3125 -3.5625 C 105.863281 -1.1875 102.644531 0 98.65625 0 L 18.859375 0 C 15.484375 -2.300781 12.835938 -5.253906 10.921875 -8.859375 C 9.003906 -12.460938 8.046875 -16.71875 8.046875 -21.625 C 8.046875 -26.832031 9.117188 -31.238281 11.265625 -34.84375 C 13.410156 -38.445312 15.789062 -41.320312 18.40625 -43.46875 L 50.140625 -70.609375 C 54.117188 -73.984375 57.410156 -77.007812 60.015625 -79.6875 C 62.628906 -82.375 64.738281 -84.789062 66.34375 -86.9375 C 67.957031 -89.082031 69.109375 -91.070312 69.796875 -92.90625 C 70.484375 -94.75 70.828125 -96.515625 70.828125 -98.203125 C 70.828125 -102.492188 68.945312 -105.863281 65.1875 -108.3125 C 61.4375 -110.769531 56.800781 -112 51.28125 -112 C 45.15625 -112 39.675781 -111.039062 34.84375 -109.125 C 30.007812 -107.207031 25.984375 -105.175781 22.765625 -103.03125 C 20.160156 -104.875 18.015625 -107.175781 16.328125 -109.9375 C 14.640625 -112.695312 13.796875 -115.914062 13.796875 -119.59375 C 13.796875 -127.5625 17.550781 -133.5 25.0625 -137.40625 C 32.582031 -141.320312 42.703125 -143.28125 55.421875 -143.28125 Z M 55.421875 -143.28125 " fill="#ffffff"></path></svg></div>
+          </div>
+          </div>
+        </div>
+
+        <div data-enter="1" style="display: flex; flex-direction: column; align-items: center; gap: 6px; text-align: center;">
+          <div style="font-weight: 900; letter-spacing: -0.025em; font-size: 27px; line-height: 1.1; color: #2b2f36;">Bem-vindo de volta</div>
+          <div style="font-size: 14.5px; font-weight: 600; color: #767c85;">Entre com sua conta pra continuar</div>
+        </div>
+
+        <div data-enter="1" style="display: flex; flex-direction: column; gap: 8px;">
+          <div style="font-size: 13.5px; font-weight: 800; color: #5a6069;">Email</div>
+          <input ref="{{ emailIn }}" type="email" value="{{ email }}" onChange="{{ onEmail }}" spellcheck="false" style="height: 52px; border-radius: 999px; border: 2px solid {{ emailBorder }}; background: #f4f5f6; padding: 0 20px; font-family: 'Inter', sans-serif; font-weight: 600; font-size: 15px; color: #2b2f36; outline: none; box-sizing: border-box; width: 100%; transition: border-color .2s, background .2s, box-shadow .3s, transform .45s cubic-bezier(.34,1.56,.64,1);" style-focus="border-color: #f24d4d; background: #ffffff; box-shadow: 0 0 0 6px rgba(242,77,77,0.12); transform: scale(1.015);"></input>
+          <sc-if value="{{ errEmail }}" hint-placeholder-val="{{ false }}">
+            <div data-err="1" style="align-self: flex-start; background: rgba(242,77,77,0.12); color: #c0342f; font-size: 12.5px; font-weight: 800; padding: 6px 12px; border-radius: 999px;">Esse email não parece certo</div>
+          </sc-if>
+        </div>
+
+        <div data-enter="1" style="display: flex; flex-direction: column; gap: 8px;">
+          <div style="font-size: 13.5px; font-weight: 800; color: #5a6069;">Senha</div>
+          <div style="position: relative;">
+            <input ref="{{ pwIn }}" data-pw="1" type="password" onSelect="{{ pwSel }}" value="{{ pw }}" onChange="{{ onPw }}" onFocus="{{ pwOn }}" onBlur="{{ pwOff }}" style="height: 52px; border-radius: 999px; border: 2px solid {{ pwBorder }}; background: #f4f5f6; padding: 0 56px 0 20px; font-family: 'Inter', sans-serif; font-weight: 600; font-size: 15px; color: transparent; -webkit-text-fill-color: transparent; caret-color: transparent; outline: none; box-sizing: border-box; width: 100%; transition: border-color .2s, background .2s, box-shadow .3s, transform .45s cubic-bezier(.34,1.56,.64,1);" style-focus="border-color: #f24d4d; background: #ffffff; box-shadow: 0 0 0 6px rgba(242,77,77,0.12); transform: scale(1.015);"></input>
+            <div style="position: absolute; left: 22px; right: 58px; top: 0; bottom: 0; display: flex; align-items: center; gap: 5px; pointer-events: none; overflow: hidden;">
+              <div ref="{{ pwRow }}" style="display: flex; align-items: center; gap: 5px;">
+                <sc-for list="{{ pwChars }}" as="ch" hint-placeholder-count="0">
+                  <div style="position: relative; width: 14px; height: 24px; flex: 0 0 auto; border-radius: 6px; background: {{ ch.selBg }}; box-shadow: 0 0 0 2.5px {{ ch.selBg }}; transition: background .15s, box-shadow .15s;">
+                    <svg data-p="ball" width="14" height="14" viewBox="0 0 24 24" style="position: absolute; left: 0; top: 5px; display: block; opacity: {{ pwBallOp }};"><circle cx="12" cy="12" r="10.8" fill="#ffffff" stroke="#434a53" stroke-width="1.6"></circle><path d="M1.2 12a10.8 10.8 0 0 1 21.6 0z" fill="#f24d4d"></path><rect x="1.2" y="10.3" width="21.6" height="3.4" fill="#434a53"></rect><circle cx="12" cy="12" r="4.6" fill="#434a53"></circle><circle cx="12" cy="12" r="2.3" fill="#e4e7eb"></circle></svg>
+                    <div data-p="ch" style="position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 17px; font-weight: 800; color: #2b2f36; opacity: {{ pwChOp }};">{{ ch.c }}</div>
+                  </div>
+                </sc-for>
+              </div>
+              <sc-if value="{{ pwFocus }}" hint-placeholder-val="{{ false }}">
+                <div style="width: 2px; height: 20px; border-radius: 2px; background: #f24d4d; animation: blink512 1s steps(1) infinite;"></div>
+              </sc-if>
+            </div>
+            <button ref="{{ eyeBtn }}" type="button" onMouseDown="{{ eyeDown }}" onClick="{{ togglePw }}" aria-label="{{ eyeLabel }}" style="position: absolute; right: 6px; top: 6px; width: 40px; height: 40px; border: 0; border-radius: 999px; background: transparent; color: {{ eyeColor }}; display: flex; align-items: center; justify-content: center; cursor: pointer; padding: 0; transition: background .2s, color .2s, transform .35s cubic-bezier(.34,1.56,.64,1);" style-hover="background: rgba(43,47,54,0.06);" style-active="transform: scale(0.9);">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: block; overflow: visible;"><path d="M2.5 12c2.3-4.2 5.5-6.5 9.5-6.5s7.2 2.3 9.5 6.5c-2.3 4.2-5.5 6.5-9.5 6.5S4.8 16.2 2.5 12z"></path><g data-p="pupil"><circle cx="12" cy="12" r="3.6" fill="currentColor" stroke="none"></circle><path d="M8.4 12a3.6 3.6 0 0 1 7.2 0z" fill="{{ eyeTop }}" stroke="none"></path><circle cx="12" cy="12" r="1.3" fill="#f4f5f6" stroke="none"></circle></g><path data-p="slash" d="M4 4l16 16" style="stroke-dasharray: 23; stroke-dashoffset: {{ slashOff }}; transition: stroke-dashoffset .35s cubic-bezier(.34,1.56,.64,1);"></path></svg>
+            </button>
+          </div>
+          <sc-if value="{{ errPw }}" hint-placeholder-val="{{ false }}">
+            <div data-err="1" style="align-self: flex-start; background: rgba(242,77,77,0.12); color: #c0342f; font-size: 12.5px; font-weight: 800; padding: 6px 12px; border-radius: 999px;">Falta a senha</div>
+          </sc-if>
+        </div>
+
+        <div data-enter="1" style="display: flex; justify-content: center; padding-top: 4px;">
+          <button ref="{{ loginBtn }}" type="submit" style="position: relative; width: 100%; height: 58px; border: 0; border-radius: 999px; background: #f24d4d; color: #ffffff; font-family: 'Inter', sans-serif; font-weight: 800; font-size: 17px; letter-spacing: -0.01em; cursor: pointer; box-shadow: 0 10px 24px rgba(242,77,77,0.42); display: flex; align-items: center; justify-content: center; overflow: hidden; padding: 0; transition: transform .35s cubic-bezier(.34,1.56,.64,1), box-shadow .25s;" style-hover="transform: translateY(-2px); box-shadow: 0 14px 30px rgba(242,77,77,0.42);" style-active="transform: scale(0.97);">
+            <span data-k="blabel" style="display: flex; align-items: center; gap: 10px;"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" style="flex: 0 0 auto;"><mask id="pb512"><rect width="24" height="24" fill="#ffffff"></rect><rect x="0" y="10.9" width="24" height="2.2" fill="#000000"></rect><circle cx="12" cy="12" r="4.6" fill="#000000"></circle><circle cx="12" cy="12" r="2.4" fill="#ffffff"></circle></mask><circle cx="12" cy="12" r="10" fill="currentColor" mask="url(#pb512)"></circle></svg>Entrar</span>
+            <div data-k="btok" style="position: absolute; left: 50%; top: 50%; width: 30px; height: 30px; margin: -15px 0 0 -15px; opacity: 0; transform-origin: 50% 90%; border-radius: 999px; overflow: hidden; background: #ffffff; box-shadow: 0 0 0 2px #ffffff;">
+              <div style="position: absolute; left: 0; top: 0; right: 0; height: 15px; background: #ff5757;"></div>
+              <div style="position: absolute; left: 0; right: 0; top: 13px; height: 4px; background: #434a53;"></div>
+              <div style="position: absolute; left: 50%; top: 50%; width: 11px; height: 11px; margin: -5.5px 0 0 -5.5px; border-radius: 999px; background: #434a53; display: flex; align-items: center; justify-content: center;"><div style="width: 5px; height: 5px; border-radius: 999px; background: #e4e7eb;"></div></div>
+            </div>
+          </button>
+        </div>
+      </form>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ isOnboard }}" hint-placeholder-val="{{ false }}">
+    <div style="position: absolute; inset: 0; z-index: 3; display: flex; flex-direction: column; align-items: center; justify-content: safe center; gap: 18px; padding: 24px 16px; box-sizing: border-box; overflow-y: auto;">
+
+      <div ref="{{ chip }}" style="width: 100%; max-width: 400px; height: 54px; border-radius: 999px; background: rgba(255,255,255,0.82); backdrop-filter: blur(10px); box-shadow: 0 0 0 1px rgba(28,32,38,0.06), 0 8px 22px rgba(28,32,38,0.07); display: flex; align-items: center; gap: 12px; padding: 0 9px; box-sizing: border-box;">
+        <div ref="{{ chipAv }}" style="width: 38px; height: 38px; border-radius: 999px; background: #ffffff; box-shadow: 0 0 0 2px #eceef0; display: flex; align-items: center; justify-content: center; flex: 0 0 auto;">
+          <sc-if value="{{ hasPartner }}" hint-placeholder-val="{{ false }}">
+            <div style="position: relative; width: 26px; height: 23px; background: {{ pColor }}; border-radius: {{ pShape }};">
+              <div style="position: absolute; left: 50%; top: 46%; display: flex; gap: 4px; transform: translate(-50%,-50%);">
+                <div style="width: 3.5px; height: 5px; border-radius: 3px; background: #2b2f36;"></div>
+                <div style="width: 3.5px; height: 5px; border-radius: 3px; background: #2b2f36;"></div>
+              </div>
+            </div>
+          </sc-if>
+          <sc-if value="{{ noPartner }}" hint-placeholder-val="{{ true }}">
+            <div style="width: 22px; height: 22px; border-radius: 999px; border: 2px dashed #c8ccd2; box-sizing: border-box;"></div>
+          </sc-if>
+        </div>
+        <div style="display: flex; align-items: baseline; font-size: 15.5px; font-weight: 900; line-height: 1.25;">
+          <span style="color: {{ nickColor }};">{{ nickShow }}</span>
+          <span style="color: #a3a8b0; display: flex;">#
+            <sc-for list="{{ tagCols }}" as="tc" hint-placeholder-count="4">
+              <span style="display: inline-block; height: 1.25em; overflow: hidden; font-variant-numeric: tabular-nums;">
+                <span style="display: flex; flex-direction: column; transform: {{ tc.ty }}; transition: {{ tc.tr }};">
+                  <sc-for list="{{ digits }}" as="dg" hint-placeholder-count="10">
+                    <span style="height: 1.25em; display: block;">{{ dg }}</span>
+                  </sc-for>
+                </span>
+              </span>
+            </sc-for>
+          </span>
+        </div>
+      </div>
+
+      <div ref="{{ pills }}" style="display: flex; gap: 8px;">
+        <sc-for list="{{ pillList }}" as="pl" hint-placeholder-count="3">
+          <div data-pill="1" style="width: 40px; height: 7px; border-radius: 999px; background: #dfe1e5; overflow: hidden;">
+            <div style="height: 100%; width: {{ pl.w }}; border-radius: 999px; background: #f24d4d; transition: width .6s cubic-bezier(.34,1.56,.64,1);"></div>
+          </div>
+        </sc-for>
+      </div>
+
+      <div ref="{{ obCard }}" style="width: 100%; max-width: 440px; background: #ffffff; border-radius: 28px; box-shadow: 0 2px 4px rgba(43,47,54,0.05), 0 22px 56px rgba(43,47,54,0.18); padding: 30px 30px 28px; box-sizing: border-box;">
+        <div ref="{{ obContent }}" style="display: flex; flex-direction: column; gap: 22px;">
+
+          <sc-if value="{{ s0 }}" hint-placeholder-val="{{ true }}">
+            <div data-enter="1" style="font-weight: 900; letter-spacing: -0.025em; font-size: 27px; line-height: 1.15; text-align: center; color: #2b2f36; text-wrap: balance;">Ei, treinador! Como posso te chamar?</div>
+            <div data-enter="1" style="display: flex; flex-direction: column; gap: 8px;">
+              <div style="font-size: 13.5px; font-weight: 800; color: #5a6069;">Nickname</div>
+              <input ref="{{ nickIn }}" value="{{ nick }}" onChange="{{ onNick }}" spellcheck="false" style="height: 52px; border-radius: 999px; border: 2px solid transparent; background: #f4f5f6; padding: 0 20px; font-family: 'Inter', sans-serif; font-weight: 600; font-size: 15px; color: #2b2f36; outline: none; box-sizing: border-box; width: 100%; transition: border-color .2s, background .2s, box-shadow .3s, transform .45s cubic-bezier(.34,1.56,.64,1);" style-focus="border-color: #f24d4d; background: #ffffff; box-shadow: 0 0 0 6px rgba(242,77,77,0.12); transform: scale(1.015);"></input>
+            </div>
+            <div data-enter="1" onClick="{{ next0 }}" style="height: 54px; border-radius: 999px; background: {{ next0Bg }}; color: #ffffff; font-weight: 800; font-size: 16px; display: flex; align-items: center; justify-content: center; gap: 10px; cursor: pointer; box-shadow: 0 10px 24px rgba(242,77,77,0.42); transition: transform .35s cubic-bezier(.34,1.56,.64,1), background .3s;" style-hover="transform: translateY(-2px);" style-active="transform: scale(0.97);"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" style="flex: 0 0 auto;"><mask id="pb512"><rect width="24" height="24" fill="#ffffff"></rect><rect x="0" y="10.9" width="24" height="2.2" fill="#000000"></rect><circle cx="12" cy="12" r="4.6" fill="#000000"></circle><circle cx="12" cy="12" r="2.4" fill="#ffffff"></circle></mask><circle cx="12" cy="12" r="10" fill="currentColor" mask="url(#pb512)"></circle></svg>Continuar</div>
+          </sc-if>
+
+          <sc-if value="{{ s1 }}" hint-placeholder-val="{{ false }}">
+            <div data-enter="1" style="display: flex; flex-direction: column; gap: 6px; text-align: center;">
+              <div style="font-weight: 900; letter-spacing: -0.025em; font-size: 27px; line-height: 1.15; color: #2b2f36; text-wrap: balance;">Qual é a sua data de nascimento, treinador?</div>
+              <div style="font-size: 14px; font-weight: 600; line-height: 1.45; color: #767c85; text-wrap: pretty;">Só pra garantir que você já pode aparecer no Pokédex.</div>
+            </div>
+            <div data-enter="1" style="display: flex; flex-direction: column; gap: 8px;">
+              <div style="font-size: 13.5px; font-weight: 800; color: #5a6069;">Data de nascimento</div>
+              <div style="position: relative; display: grid; grid-template-columns: 1fr 1.3fr 1.5fr; gap: 8px; height: 138px; border-radius: 22px; background: #f4f5f6; padding: 0 8px; overflow: hidden;">
+                <div style="position: absolute; left: 8px; right: 8px; top: 46px; height: 46px; border-radius: 14px; background: #ffffff; box-shadow: 0 1px 2px rgba(28,32,38,0.06), 0 4px 12px rgba(28,32,38,0.06);"></div>
+                <div onWheel="{{ wheelDay }}" style="position: relative; overflow: hidden; cursor: ns-resize;">
+                  <div style="transform: translateY({{ dayY }}); transition: transform .5s cubic-bezier(.34,1.56,.64,1);">
+                    <sc-for list="{{ dayItems }}" as="it" hint-placeholder-count="3">
+                      <div onClick="{{ it.pick }}" style="height: 46px; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 21px; color: {{ it.color }}; transform: {{ it.tf }}; transition: transform .35s cubic-bezier(.34,1.56,.64,1), color .25s; cursor: pointer;">{{ it.label }}</div>
+                    </sc-for>
+                  </div>
+                </div>
+                <div onWheel="{{ wheelMonth }}" style="position: relative; overflow: hidden; cursor: ns-resize;">
+                  <div style="transform: translateY({{ monthY }}); transition: transform .5s cubic-bezier(.34,1.56,.64,1);">
+                    <sc-for list="{{ monthItems }}" as="it" hint-placeholder-count="3">
+                      <div onClick="{{ it.pick }}" style="height: 46px; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 21px; color: {{ it.color }}; transform: {{ it.tf }}; transition: transform .35s cubic-bezier(.34,1.56,.64,1), color .25s; cursor: pointer;">{{ it.label }}</div>
+                    </sc-for>
+                  </div>
+                </div>
+                <div onWheel="{{ wheelYear }}" style="position: relative; overflow: hidden; cursor: ns-resize;">
+                  <div style="transform: translateY({{ yearY }}); transition: transform .5s cubic-bezier(.34,1.56,.64,1);">
+                    <sc-for list="{{ yearItems }}" as="it" hint-placeholder-count="3">
+                      <div onClick="{{ it.pick }}" style="height: 46px; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 21px; color: {{ it.color }}; transform: {{ it.tf }}; transition: transform .35s cubic-bezier(.34,1.56,.64,1), color .25s; cursor: pointer;">{{ it.label }}</div>
+                    </sc-for>
+                  </div>
+                </div>
+              </div>
+              <div style="font-size: 12px; font-weight: 600; color: #9aa0a8; text-align: center;">Role ou toque nos números</div>
+            </div>
+            <div data-enter="1" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+              <div onClick="{{ back }}" style="height: 54px; border-radius: 999px; background: #ffffff; box-shadow: inset 0 0 0 2px #e4e6ea; color: #2b2f36; font-weight: 800; font-size: 16px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: transform .35s cubic-bezier(.34,1.56,.64,1);" style-hover="transform: translateY(-2px);" style-active="transform: scale(0.97);">Voltar</div>
+              <div onClick="{{ next1 }}" style="height: 54px; border-radius: 999px; background: #f24d4d; color: #ffffff; font-weight: 800; font-size: 16px; display: flex; align-items: center; justify-content: center; gap: 10px; cursor: pointer; box-shadow: 0 10px 24px rgba(242,77,77,0.42); transition: transform .35s cubic-bezier(.34,1.56,.64,1);" style-hover="transform: translateY(-2px);" style-active="transform: scale(0.97);"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" style="flex: 0 0 auto;"><mask id="pb512"><rect width="24" height="24" fill="#ffffff"></rect><rect x="0" y="10.9" width="24" height="2.2" fill="#000000"></rect><circle cx="12" cy="12" r="4.6" fill="#000000"></circle><circle cx="12" cy="12" r="2.4" fill="#ffffff"></circle></mask><circle cx="12" cy="12" r="10" fill="currentColor" mask="url(#pb512)"></circle></svg>Continuar</div>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ s2 }}" hint-placeholder-val="{{ false }}">
+            <div data-enter="1" style="display: flex; flex-direction: column; gap: 6px; text-align: center;">
+              <div style="font-weight: 900; letter-spacing: -0.025em; font-size: 27px; line-height: 1.15; color: #2b2f36;">Escolha seu parceiro!</div>
+              <div style="font-size: 14px; font-weight: 600; line-height: 1.45; color: #767c85; text-wrap: pretty;">Ele vai te representar pra galera, então escolhe com o coração.</div>
+            </div>
+            <div data-enter="1" ref="{{ grid }}" onMouseMove="{{ gridMove }}" onMouseLeave="{{ gridLeave }}" style="display: grid; grid-template-columns: repeat(5, 64px); gap: 14px; justify-content: center; padding: 6px 0;">
+              <sc-for list="{{ critters }}" as="c" hint-placeholder-count="15">
+                <div data-tile="1" onClick="{{ c.pick }}" style="position: relative; width: 64px; height: 64px; border-radius: 999px; background: #ffffff; box-shadow: 0 0 0 2px #eceef0; display: flex; align-items: center; justify-content: center; cursor: pointer; transform: {{ c.tf }}; transition: transform .5s cubic-bezier(.34,1.56,.64,1);">
+                  <sc-if value="{{ c.sel }}" hint-placeholder-val="{{ false }}">
+                    <div style="position: absolute; inset: -6px; border-radius: 999px; padding: 3.5px; -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask-composite: exclude; overflow: hidden; pointer-events: none;">
+                      <div style="position: absolute; inset: -50%; background: conic-gradient(#f24d4d, #ffffff, #f24d4d); animation: spin512 2.2s linear infinite;"></div>
+                    </div>
+                  </sc-if>
+                  <div data-blob="1" style="position: relative; width: 40px; height: 36px; background: {{ c.color }}; border-radius: {{ c.shape }};">
+                    <div style="position: absolute; left: 50%; top: 44%; display: flex; gap: 7px; transform: translate(-50%,-50%) translate({{ c.ex }}px, {{ c.ey }}px); transition: transform .4s cubic-bezier(.34,1.56,.64,1);">
+                      <div style="width: 5.5px; height: 7.5px; border-radius: 4px; background: #2b2f36; transform: scaleY({{ c.es }}); transition: transform .12s;"></div>
+                      <div style="width: 5.5px; height: 7.5px; border-radius: 4px; background: #2b2f36; transform: scaleY({{ c.es }}); transition: transform .12s;"></div>
+                    </div>
+                  </div>
+                </div>
+              </sc-for>
+            </div>
+            <div data-enter="1" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+              <div onClick="{{ back }}" style="height: 54px; border-radius: 999px; background: #ffffff; box-shadow: inset 0 0 0 2px #e4e6ea; color: #2b2f36; font-weight: 800; font-size: 16px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: transform .35s cubic-bezier(.34,1.56,.64,1);" style-hover="transform: translateY(-2px);" style-active="transform: scale(0.97);">Voltar</div>
+              <div onClick="{{ finish }}" style="height: 54px; border-radius: 999px; background: {{ finishBg }}; color: #ffffff; font-weight: 800; font-size: 16px; display: flex; align-items: center; justify-content: center; gap: 10px; cursor: pointer; box-shadow: 0 10px 24px rgba(242,77,77,0.42); transition: transform .35s cubic-bezier(.34,1.56,.64,1), background .3s;" style-hover="transform: translateY(-2px);" style-active="transform: scale(0.97);"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" style="flex: 0 0 auto;"><mask id="pb512"><rect width="24" height="24" fill="#ffffff"></rect><rect x="0" y="10.9" width="24" height="2.2" fill="#000000"></rect><circle cx="12" cy="12" r="4.6" fill="#000000"></circle><circle cx="12" cy="12" r="2.4" fill="#ffffff"></circle></mask><circle cx="12" cy="12" r="10" fill="currentColor" mask="url(#pb512)"></circle></svg>Entrar no jogo</div>
+            </div>
+          </sc-if>
+
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ isHome }}" hint-placeholder-val="{{ false }}">
+    <div ref="{{ home }}" style="position: absolute; inset: 0; z-index: 3; display: flex; flex-direction: column;">
+
+      <div style="display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 22px 28px 0;">
+        <div data-enter="pop" style="display: flex; align-items: center; gap: 12px;">
+          <div style="width: 48px; height: 48px; border-radius: 999px; background: #ffffff; box-shadow: 0 0 0 3px #ffffff, 0 0 0 5px #f24d4d, 0 6px 14px rgba(28,32,38,0.12); display: flex; align-items: center; justify-content: center;">
+            <div style="position: relative; width: 32px; height: 29px; background: {{ pColor }}; border-radius: {{ pShape }};">
+              <div style="position: absolute; left: 50%; top: 45%; display: flex; gap: 5px; transform: translate(-50%,-50%) translateX({{ homeEye }}px); transition: transform .45s cubic-bezier(.34,1.56,.64,1);">
+                <div style="width: 4.5px; height: 6px; border-radius: 3px; background: #2b2f36;"></div>
+                <div style="width: 4.5px; height: 6px; border-radius: 3px; background: #2b2f36;"></div>
+              </div>
+            </div>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 1px;">
+            <div style="font-size: 15.5px; font-weight: 900; color: #2b2f36;">{{ nickShow }}</div>
+            <div style="font-size: 12px; font-weight: 600; color: #767c85;">48 de 151 espécies</div>
+          </div>
+        </div>
+      </div>
+
+      <div ref="{{ wrap }}" style="flex: 1; display: flex; flex-direction: column; justify-content: center; padding-left: clamp(24px, 7vw, 96px); min-height: 0;">
+        <div ref="{{ track }}" style="position: relative; display: flex; gap: 22px; padding-top: 40px; transition: transform .7s cubic-bezier(.34,1.3,.64,1);">
+          <div ref="{{ ringLabel }}" style="position: absolute; left: 0; top: 0; display: flex; align-items: center; gap: 8px; white-space: nowrap; transition: left .55s cubic-bezier(.34,1.4,.64,1);">
+            <div style="width: 14px; height: 14px; border-radius: 4px; background: #f24d4d;"></div>
+            <div style="font-size: 15px; font-weight: 900; color: #2b2f36;">{{ tileLabel }}</div>
+          </div>
+          <div ref="{{ ring }}" style="position: absolute; left: 0; top: 0; width: 0; height: 0; border-radius: 30px; pointer-events: none; z-index: 2; transition: left .55s cubic-bezier(.34,1.4,.64,1), top .55s, width .55s cubic-bezier(.34,1.4,.64,1), height .55s;">
+            <div style="position: absolute; inset: 0; border-radius: 30px; padding: 4px; -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask-composite: exclude; overflow: hidden;">
+              <div style="position: absolute; inset: -50%; background: conic-gradient(#f24d4d, #ffffff, #f24d4d); animation: spin512 3s linear infinite;"></div>
+            </div>
+          </div>
+
+          <div data-tile="1" data-enter="slide" data-delay="0" onMouseEnter="{{ tv0 }}" onClick="{{ tc0 }}" style="position: relative; width: clamp(200px, 23vw, 300px); aspect-ratio: 1; flex: 0 0 auto; border-radius: 22px; background: #f24d4d; overflow: hidden; cursor: pointer; box-shadow: 0 2px 4px rgba(28,32,38,0.06), 0 14px 30px rgba(242,77,77,0.25);">
+            <div style="position: absolute; top: 16px; right: 16px; font-size: 12.5px; font-weight: 900; letter-spacing: 0.08em; text-transform: uppercase; color: #ffffff;">13 out</div>
+            <div style="position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;">
+              <div data-k="ptoken" style="position: relative; width: 104px; height: 104px; flex: 0 0 auto;">
+              <div data-k="ptop" style="position: absolute; left: 0; top: 0; width: 104px; height: 52px; background: #ff5757; border-radius: 52px 52px 0 0; transform-origin: 6% 100%;"></div>
+              <div  style="position: absolute; left: 0; top: 52px; width: 104px; height: 52px; background: #ffffff; border-radius: 0 0 52px 52px; transform-origin: 6% 0%;">
+                <div style="position: absolute; left: 0; right: 0; top: -8px; height: 16px; border-radius: 3px; background: #434a53;"></div>
+                <div style="position: absolute; left: 50%; top: 0; width: 35px; height: 35px; margin: -17.5px 0 0 -17.5px; border-radius: 999px; background: #434a53; display: flex; align-items: center; justify-content: center;">
+                  <div  style="width: 19px; height: 19px; border-radius: 999px; background: #e4e7eb;"></div>
+                </div>
+              </div>
+            </div>
+            </div>
+            <div style="position: absolute; left: 16px; bottom: 16px; background: #ffffff; color: #c0342f; font-size: 12.5px; font-weight: 900; padding: 6px 12px; border-radius: 999px;">1 em 512</div>
+          </div>
+
+          <div data-tile="1" data-enter="slide" data-delay="70" onMouseEnter="{{ tv1 }}" onClick="{{ tc1 }}" style="position: relative; width: clamp(200px, 23vw, 300px); aspect-ratio: 1; flex: 0 0 auto; border-radius: 22px; background: #ffffff; overflow: hidden; cursor: pointer; box-shadow: 0 2px 4px rgba(28,32,38,0.06), 0 14px 30px rgba(28,32,38,0.08); display: flex; flex-direction: column; justify-content: flex-end; padding: 20px; box-sizing: border-box; gap: 12px;">
+            <div style="display: flex; align-items: baseline; gap: 4px;">
+              <div style="font-weight: 900; font-size: 64px; line-height: 0.9; letter-spacing: -0.03em; color: #2b2f36;">48</div>
+              <div style="font-weight: 900; font-size: 22px; color: #a3a8b0;">/151</div>
+            </div>
+            <div style="height: 8px; border-radius: 999px; background: #eff0f2; overflow: hidden;">
+              <div style="width: 32%; height: 100%; border-radius: 999px; background: #f24d4d;"></div>
+            </div>
+          </div>
+
+          <div data-tile="1" data-enter="slide" data-delay="140" onMouseEnter="{{ tv2 }}" onClick="{{ tc2 }}" style="position: relative; width: clamp(200px, 23vw, 300px); aspect-ratio: 1; flex: 0 0 auto; border-radius: 22px; background: #2b2f36; overflow: hidden; cursor: pointer; box-shadow: 0 2px 4px rgba(28,32,38,0.06), 0 14px 30px rgba(28,32,38,0.08); display: flex; flex-direction: column; justify-content: flex-end; padding: 20px; box-sizing: border-box; gap: 4px;">
+            <div style="font-weight: 900; font-size: 72px; line-height: 0.9; letter-spacing: -0.03em; color: #ffffff;">2º</div>
+            <div style="font-size: 14px; font-weight: 800; color: #c3cad4;">em espécies no grupo</div>
+          </div>
+
+          <div data-tile="1" data-enter="slide" data-delay="210" onMouseEnter="{{ tv3 }}" onClick="{{ tc3 }}" style="position: relative; width: clamp(200px, 23vw, 300px); aspect-ratio: 1; flex: 0 0 auto; border-radius: 22px; background: #ffffff; overflow: hidden; cursor: pointer; box-shadow: 0 2px 4px rgba(28,32,38,0.06), 0 14px 30px rgba(28,32,38,0.08); display: flex; flex-direction: column; justify-content: flex-end; padding: 20px; box-sizing: border-box; gap: 4px;">
+            <div style="font-weight: 900; font-size: 72px; line-height: 0.9; letter-spacing: -0.03em; color: #2b2f36;">3</div>
+            <div style="font-size: 14px; font-weight: 800; color: #767c85;">propostas de troca</div>
+          </div>
+
+          <div data-tile="1" data-enter="slide" data-delay="280" onMouseEnter="{{ tv4 }}" onClick="{{ tc4 }}" style="position: relative; width: clamp(200px, 23vw, 300px); aspect-ratio: 1; flex: 0 0 auto; border-radius: 22px; background: #1c1f26; overflow: hidden; cursor: pointer; box-shadow: 0 2px 4px rgba(28,32,38,0.06), 0 14px 30px rgba(28,32,38,0.16); display: flex; flex-direction: column; justify-content: flex-end; padding: 20px; box-sizing: border-box; gap: 6px;">
+            <div style="position: absolute; inset: 0; background: radial-gradient(70% 45% at 50% 46%, rgba(77,217,232,0.16), rgba(77,217,232,0));"></div>
+            <div style="position: relative; align-self: flex-start; display: flex; align-items: center; height: 26px; padding: 0 10px; border-radius: 999px; background: rgba(77,217,232,0.14); color: #4dd9e8; font-size: 12px; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase;">Shiny</div>
+            <div style="position: relative; font-weight: 900; letter-spacing: -0.025em; font-size: 30px; line-height: 1.05; color: #ffffff; text-wrap: balance;">Ramon abriu um Rattata</div>
+            <div style="position: relative; font-size: 14px; font-weight: 600; color: #7d8794;">há 12 min · #0004</div>
+          </div>
+        </div>
+      </div>
+
+      <div style="display: flex; justify-content: center; padding: 0 16px 18px;">
+        <div data-enter="rise" style="display: flex; align-items: center; gap: 10px; padding: 9px; border-radius: 999px; background: rgba(255,255,255,0.7); backdrop-filter: blur(12px); box-shadow: 0 0 0 1px rgba(28,32,38,0.05), 0 10px 26px rgba(28,32,38,0.08);">
+          <div style="width: 56px; height: 56px; border-radius: 999px; background: #f24d4d; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 18px; letter-spacing: -0.04em; color: #ffffff; box-shadow: 0 6px 14px rgba(242,77,77,0.3);"><svg width="34" height="34" viewBox="51 43 708 708" style="display: block;"><circle cx="405" cy="414" r="353" fill="#ffffff"></circle><path d="M 51.9 410 C 54 260 150 120 287.3 65.6 C 323.5 52.2 364.8 43.4 405 43.4 C 445 43.4 484 50.8 520 64 C 655 117 755 255 758 410 Z" fill="#ff5757"></path><rect x="51.7" y="352" width="707" height="106" rx="8" fill="#434a53"></rect><circle cx="405" cy="405" r="119" fill="#434a53"></circle><circle cx="405" cy="405" r="62.7" fill="#e4e7eb"></circle></svg></div>
+
+          <div onMouseEnter="{{ dh0 }}" onMouseLeave="{{ dhOff }}" style="position: relative; width: 56px; height: 56px; border-radius: 999px; background: #ffffff; box-shadow: 0 1px 2px rgba(28,32,38,0.06); display: flex; align-items: center; justify-content: center; cursor: pointer;">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#2b2f36" stroke-width="2.2" stroke-linejoin="round"><rect data-a="cardBack" x="3.5" y="5" width="10.5" height="14" rx="2.5" style="transform-box: fill-box; transform-origin: 0% 100%;"></rect><rect data-a="cardFront" x="10" y="5" width="10.5" height="14" rx="2.5" fill="#ffffff" style="transform-box: fill-box; transform-origin: 100% 100%;"></rect></svg>
+            <sc-if value="{{ tip0 }}" hint-placeholder-val="{{ false }}"><div style="position: absolute; bottom: 68px; left: 50%; transform: translateX(-50%); background: #2b2f36; color: #ffffff; font-size: 12.5px; font-weight: 800; padding: 6px 12px; border-radius: 999px; white-space: nowrap; pointer-events: none;">Coleção</div></sc-if>
+          </div>
+          <div onMouseEnter="{{ dh1 }}" onMouseLeave="{{ dhOff }}" style="position: relative; width: 56px; height: 56px; border-radius: 999px; background: #ffffff; box-shadow: 0 1px 2px rgba(28,32,38,0.06); display: flex; align-items: center; justify-content: center; cursor: pointer;">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#2b2f36" stroke-width="2.2" stroke-linejoin="round"><path data-a="capTop" d="M4 10.5a8 6.5 0 0 1 16 0z" style="transform-box: fill-box; transform-origin: 0% 100%;"></path><path data-a="capBot" d="M4 13.5a8 6.5 0 0 0 16 0z" style="transform-box: fill-box; transform-origin: 50% 0%;"></path></svg>
+            <sc-if value="{{ tip1 }}" hint-placeholder-val="{{ false }}"><div style="position: absolute; bottom: 68px; left: 50%; transform: translateX(-50%); background: #2b2f36; color: #ffffff; font-size: 12.5px; font-weight: 800; padding: 6px 12px; border-radius: 999px; white-space: nowrap; pointer-events: none;">Packs</div></sc-if>
+          </div>
+          <div onMouseEnter="{{ dh2 }}" onMouseLeave="{{ dhOff }}" style="position: relative; width: 56px; height: 56px; border-radius: 999px; background: #ffffff; box-shadow: 0 1px 2px rgba(28,32,38,0.06); display: flex; align-items: center; justify-content: center; cursor: pointer;">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#2b2f36" stroke-width="2.6" stroke-linecap="round"><path data-a="b1" d="M6 19v-7" style="transform-box: fill-box; transform-origin: 50% 100%;"></path><path data-a="b2" d="M12 19V6" style="transform-box: fill-box; transform-origin: 50% 100%;"></path><path data-a="b3" d="M18 19v-9" style="transform-box: fill-box; transform-origin: 50% 100%;"></path></svg>
+            <sc-if value="{{ tip2 }}" hint-placeholder-val="{{ false }}"><div style="position: absolute; bottom: 68px; left: 50%; transform: translateX(-50%); background: #2b2f36; color: #ffffff; font-size: 12.5px; font-weight: 800; padding: 6px 12px; border-radius: 999px; white-space: nowrap; pointer-events: none;">Ranking</div></sc-if>
+          </div>
+          <div onMouseEnter="{{ dh3 }}" onMouseLeave="{{ dhOff }}" style="position: relative; width: 56px; height: 56px; border-radius: 999px; background: #ffffff; box-shadow: 0 1px 2px rgba(28,32,38,0.06); display: flex; align-items: center; justify-content: center; cursor: pointer;">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#2b2f36" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><g data-a="arR"><path d="M5 9h13"></path><path d="M15 6l3 3-3 3"></path></g><g data-a="arL"><path d="M19 15H6"></path><path d="M9 12l-3 3 3 3"></path></g></svg>
+            <sc-if value="{{ tip3 }}" hint-placeholder-val="{{ false }}"><div style="position: absolute; bottom: 68px; left: 50%; transform: translateX(-50%); background: #2b2f36; color: #ffffff; font-size: 12.5px; font-weight: 800; padding: 6px 12px; border-radius: 999px; white-space: nowrap; pointer-events: none;">Trocas</div></sc-if>
+          </div>
+          <div onMouseEnter="{{ dh4 }}" onMouseLeave="{{ dhOff }}" style="position: relative; width: 56px; height: 56px; border-radius: 999px; background: #ffffff; box-shadow: 0 1px 2px rgba(28,32,38,0.06); display: flex; align-items: center; justify-content: center; cursor: pointer;">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#2b2f36" stroke-width="2.2" stroke-linecap="round"><circle cx="9" cy="9" r="3.2"></circle><path d="M3.5 19a5.5 5 0 0 1 11 0"></path><g data-a="wave" style="transform-box: fill-box; transform-origin: 50% 100%;"><circle cx="16.5" cy="8" r="2.6"></circle><path d="M14.8 13.2a5 4.6 0 0 1 6.7 4.8"></path></g></svg>
+            <sc-if value="{{ tip4 }}" hint-placeholder-val="{{ false }}"><div style="position: absolute; bottom: 68px; left: 50%; transform: translateX(-50%); background: #2b2f36; color: #ffffff; font-size: 12.5px; font-weight: 800; padding: 6px 12px; border-radius: 999px; white-space: nowrap; pointer-events: none;">Amigos</div></sc-if>
+          </div>
+          <div onMouseEnter="{{ dh5 }}" onMouseLeave="{{ dhOff }}" style="position: relative; width: 56px; height: 56px; border-radius: 999px; background: #ffffff; box-shadow: 0 1px 2px rgba(28,32,38,0.06); display: flex; align-items: center; justify-content: center; cursor: pointer;">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#2b2f36" stroke-width="2.2" stroke-linecap="round"><path d="M4 8h16M4 16h16"></path><circle data-a="k1" cx="9" cy="8" r="2.5" fill="#ffffff"></circle><circle data-a="k2" cx="15" cy="16" r="2.5" fill="#ffffff"></circle></svg>
+            <sc-if value="{{ tip5 }}" hint-placeholder-val="{{ false }}"><div style="position: absolute; bottom: 68px; left: 50%; transform: translateX(-50%); background: #2b2f36; color: #ffffff; font-size: 12.5px; font-weight: 800; padding: 6px 12px; border-radius: 999px; white-space: nowrap; pointer-events: none;">Ajustes</div></sc-if>
+          </div>
+        </div>
+      </div>
+
+      <div style="display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 0 28px 22px;">
+        <div data-enter="rise" data-delay="120" style="display: flex; align-items: center; gap: 9px; padding-left: 150px;">
+          <div style="position: relative; width: 9px; height: 9px;">
+            <div style="position: absolute; inset: 0; border-radius: 999px; background: #3f8f6b; animation: pulse512 2s ease-in-out infinite;"></div>
+            <div style="position: absolute; inset: 0; border-radius: 999px; background: #3f8f6b;"></div>
+          </div>
+          <div style="font-size: 12.5px; font-weight: 800; color: #5a6069;">2 amigos online</div>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <div onClick="{{ replay }}" style="position: fixed; bottom: 16px; left: 16px; z-index: 20; display: flex; align-items: center; gap: 7px; height: 30px; padding: 0 13px; border-radius: 999px; background: rgba(255,255,255,0.6); box-shadow: 0 0 0 1px rgba(28,32,38,0.06); font-size: 12px; font-weight: 800; color: #767c85; cursor: pointer; transition: background .2s, color .2s;" style-hover="background: #ffffff; color: #2b2f36;">
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12a8 8 0 1 0 2.4-5.7"></path><path d="M4 4v4.5h4.5"></path></svg>
+    Rever animação
+  </div>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;startAt&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;loading&quot;,&quot;login&quot;,&quot;onboarding&quot;,&quot;home&quot;],&quot;default&quot;:&quot;loading&quot;,&quot;tsType&quot;:&quot;'loading'|'login'|'onboarding'|'home'&quot;},&quot;speed&quot;:{&quot;editor&quot;:&quot;range&quot;,&quot;min&quot;:0.5,&quot;max&quot;:2,&quot;step&quot;:0.1,&quot;default&quot;:1,&quot;tsType&quot;:&quot;number&quot;},&quot;dotField&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;}}">
+class Component extends DCLogic {
+  static SH = 245;
+  static CRIT = [
+    ['#ffd36b','58% 42% 50% 50% / 62% 62% 38% 38%'], ['#8fd6a8','50% 50% 46% 46% / 56% 56% 44% 44%'], ['#ff9f7a','46% 54% 52% 48% / 58% 50% 50% 42%'],
+    ['#7fc4ef','50%'], ['#f5a35c','40% 60% 50% 50% / 50% 60% 40% 50%'], ['#c9a27e','50% 50% 50% 50% / 64% 64% 36% 36%'],
+    ['#6f9bb3','44% 44% 50% 50% / 50% 50% 50% 50%'], ['#9b8bd6','30% 70% 50% 50% / 50% 50% 50% 50%'], ['#dcd6ee','50% 50% 40% 40% / 60% 60% 40% 40%'],
+    ['#f6b8cf','60% 40% 46% 54% / 55% 55% 45% 45%'], ['#ffc0d0','50%'], ['#f2d27a','48% 52% 60% 40% / 52% 48% 52% 48%'],
+    ['#6e8fd6','36% 64% 42% 58% / 50% 50% 50% 50%'], ['#f0b56b','50% 50% 50% 50% / 70% 70% 30% 30%'], ['#e8d8b0','54% 46% 50% 50% / 58% 58% 42% 42%']
+  ];
+  static MONTHS = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+  static LABELS = ['Pack de hoje','Coleção','Ranking','Trocas','Feed do grupo'];
+  static DOCK = {
+    cardBack: ['none','rotate(-16deg) translateX(-1px)','none'], cardFront: ['none','rotate(12deg) translateX(1px)','none'],
+    capTop: ['none','translateY(-3px) rotate(-16deg)','none'], capBot: ['none','translateY(2px)','none'],
+    b1: ['scaleY(1)','scaleY(1.45)','scaleY(.85)','scaleY(1)'], b2: ['scaleY(1)','scaleY(1.25)','scaleY(.9)','scaleY(1)'], b3: ['scaleY(1)','scaleY(1.5)','scaleY(.85)','scaleY(1)'],
+    arR: ['none','translateX(3px)','none'], arL: ['none','translateX(-3px)','none'],
+    wave: ['none','rotate(16deg)','rotate(-10deg)','none'], k1: ['none','translateX(6px)','none'], k2: ['none','translateX(-6px)','none']
+  };
+
+  R = {}; _gen = 0; _sp = {}; ripples = []; dots = []; mode = 'ambient'; ptr = null; W = 0; H = 0;
+  state = { screen: null };
+
+  ref(n) { return this.R[n] || (this.R[n] = React.createRef()); }
+  el(n) { return this.R[n] ? this.R[n].current : null; }
+  clock() { try { return new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }); } catch (e) { return '13:30'; } }
+  flipPw(show) {
+    const row = this.el('pwRow'), eb = this.el('eyeBtn');
+    if (eb) { const svg = eb.querySelector('svg'); this.anim(svg, [{ transform: 'none' }, { transform: 'scaleY(.1)', offset: 0.4 }, { transform: 'scale(1.15)', offset: 0.7 }, { transform: 'none' }], 380, { e: 'ease-out', fill: 'none' }); }
+    if (!row) return;
+    [...row.children].forEach((slot, i) => {
+      const b = slot.querySelector('[data-p="ball"]'), c = slot.querySelector('[data-p="ch"]'), d = i * 38;
+      const out = [{ transform: 'none', opacity: 1 }, { transform: 'translateY(-9px) rotate(200deg) scale(.2)', opacity: 0 }];
+      const pop = [{ transform: 'translateY(8px) scale(.2)', opacity: 0 }, { transform: 'translateY(-3px) scale(1.25)', opacity: 1, offset: 0.55 }, { transform: 'none', opacity: 1 }];
+      if (show) { this.anim(b, out, 260, { delay: d, e: 'cubic-bezier(.5,0,.8,.4)', fill: 'both' }); this.anim(c, pop, 460, { delay: d + 120, e: 'ease-out', fill: 'both' }); }
+      else { this.anim(c, [{ transform: 'none', opacity: 1 }, { transform: 'translateY(-8px) scale(.3)', opacity: 0 }], 200, { delay: d, e: 'ease-in', fill: 'both' }); this.anim(b, [{ transform: 'translateY(-16px) scale(.3) rotate(-50deg)', opacity: 0 }, { transform: 'none', opacity: 1 }], 520, { delay: d + 90, e: this.spr(320, 13), fill: 'both' }); }
+    });
+  }
+  fresh(screen) {
+    return { screen, showLoader: screen === 'loading', email: '', pw: '', pwFocus: false, showPw: false, err: null, busy: false, step: 0,
+      nick: screen === 'home' ? 'Lin' : '', tag: [6,4,0,1], day: 12, month: 8, year: 54, pick: -1, partner: screen === 'home' ? 0 : -1,
+      look: null, blink: -1, tile: 0, dock: -1, now: this.clock() };
+  }
+  get sp() { return Math.max(0.25, this.props.speed ?? 1); }
+  T(ms) { return ms / this.sp; }
+  later(ms, fn) { const g = this._gen; setTimeout(() => { if (g === this._gen) fn(); }, this.T(ms)); }
+  wait(ms) { return new Promise(r => setTimeout(r, this.T(ms))); }
+  anim(el, kf, dur, o = {}) {
+    if (!el || !el.animate) return null;
+    return el.animate(kf, { duration: this.T(dur), delay: this.T(o.delay || 0), easing: o.e || 'cubic-bezier(.4,0,.2,1)', fill: o.fill || 'backwards', iterations: o.it || 1 });
+  }
+  spr(k, c) {
+    const key = k + '_' + c;
+    if (this._sp[key]) return this._sp[key];
+    if (!this._lin) return (this._sp[key] = 'cubic-bezier(.34,1.5,.64,1)');
+    let x = 0, v = 0; const N = 50, sub = 4, dt = 1.1 / N / sub, pts = [0];
+    for (let i = 1; i <= N; i++) { for (let j = 0; j < sub; j++) { const a = -k * (x - 1) - c * v; v += a * dt; x += v * dt; } pts.push(+x.toFixed(4)); }
+    pts[pts.length - 1] = 1;
+    return (this._sp[key] = 'linear(' + pts.join(',') + ')');
+  }
+
+  componentDidMount() {
+    this._lin = typeof CSS !== 'undefined' && CSS.supports && CSS.supports('animation-timing-function', 'linear(0, 1)');
+    this.onPtr = e => { this.ptr = { x: e.clientX, y: e.clientY }; };
+    this.onLeave = () => { this.ptr = null; };
+    this.onResize = () => this.resize();
+    this.onKey = e => this.key(e);
+    window.addEventListener('pointermove', this.onPtr);
+    document.addEventListener('pointerleave', this.onLeave);
+    window.addEventListener('resize', this.onResize);
+    window.addEventListener('keydown', this.onKey);
+    this._clk = setInterval(() => this.setState({ now: this.clock() }), 20000);
+    this._blk = setInterval(() => {
+      if (this.state.screen !== 'onboarding' || this.state.step !== 2) return;
+      const i = Math.floor(Math.random() * 15); this.setState({ blink: i });
+      setTimeout(() => this.setState({ blink: -1 }), 140);
+    }, 900);
+    this.initField();
+    this.boot(this.props.startAt ?? 'loading');
+  }
+  componentWillUnmount() {
+    cancelAnimationFrame(this.raf); clearInterval(this._clk); clearInterval(this._blk);
+    window.removeEventListener('pointermove', this.onPtr); document.removeEventListener('pointerleave', this.onLeave);
+    window.removeEventListener('resize', this.onResize); window.removeEventListener('keydown', this.onKey);
+  }
+  componentDidUpdate() {
+    const pp = this._pp || this.props, ps = this._ps || this.state, s = this.state;
+    this._pp = this.props; this._ps = s;
+    if (pp.startAt !== this.props.startAt) { this.boot(this.props.startAt ?? 'loading'); return; }
+    if (ps.screen !== s.screen && s.screen && s.screen !== 'loading') this.onEnter(s.screen);
+    if (s.screen === 'login' && ps.showPw !== s.showPw) this.flipPw(s.showPw);
+    if (s.screen === 'login' && ps.screen === 'login' && s.pw.length > ps.pw.length) {
+      const row = this.el('pwRow'); const last = row && row.lastElementChild;
+      this.anim(last, [{ transform: 'translateY(-16px) scale(.3) rotate(-50deg)', opacity: 0 }, { transform: 'none', opacity: 1 }], 520, { e: this.spr(320, 13) });
+    }
+    if (s.screen === 'home' && ps.screen === 'home' && ps.tile !== s.tile) {
+      this.placeRing(true);
+      this.anim(this.el('ringLabel'), [{ opacity: 0, transform: 'translateY(8px)' }, { opacity: 1, transform: 'none' }], 380, { e: this.spr(220, 18) });
+    }
+  }
+
+  boot(s) {
+    this._gen++; this._moving = false; this.ripples = [];
+    document.querySelectorAll('[data-ghost512]').forEach(g => g.remove());
+    this.setState({ screen: null }, () => this.setState(this.fresh(s), () => { if (s === 'loading') this.runLoading(); }));
+  }
+
+  /* ---------- dot field ---------- */
+  initField() {
+    const c = this.el('cv'); if (!c) return;
+    this.ctx = c.getContext('2d');
+    for (let i = 0; i < 512; i++) this.dots.push({ x: 0, y: 0, vx: 0, vy: 0, tx: 0, ty: 0, r: 0, vr: 0, tr: 0, a: 0, ta: 0, spawn: 0 });
+    this.resize();
+    this.tick = this.tick.bind(this);
+    this.raf = requestAnimationFrame(this.tick);
+  }
+  resize() {
+    const c = this.el('cv'); if (!c || !this.ctx) return;
+    const dpr = Math.min(2, window.devicePixelRatio || 1);
+    this.W = window.innerWidth; this.H = window.innerHeight;
+    c.width = this.W * dpr; c.height = this.H * dpr; this.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    if (this.mode === 'grid' || this.mode === 'ambient') this.layout(this.mode, false);
+    if (this.state.screen === 'home') this.placeRing(false);
+  }
+  layout(mode, snap) {
+    this.mode = mode; const W = this.W, H = this.H;
+    this.dots.forEach((d, i) => {
+      const col = i % 32, row = Math.floor(i / 32);
+      if (mode === 'grid') { d.tx = W / 2 + (col - 15.5) * 13; d.ty = H / 2 + (row - 7.5) * 13; }
+      else { d.tx = (col + 0.5) * W / 32; d.ty = (row + 0.5) * H / 16; }
+      if (snap) { d.x = d.tx; d.y = d.ty; d.vx = d.vy = 0; }
+    });
+  }
+  setField(mode, o = {}) {
+    const SH = Component.SH;
+    if (mode === 'grid') {
+      this.layout('grid', true);
+      const order = this.dots.map((_, i) => i).filter(i => i !== SH);
+      for (let i = order.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [order[i], order[j]] = [order[j], order[i]]; }
+      order.push(SH);
+      const now = performance.now();
+      order.forEach((idx, rank) => { const d = this.dots[idx]; d.r = d.tr = d.a = d.ta = 0; d.spawn = now + this.T(Math.pow(rank / 511, 0.8) * 1400); });
+    } else if (mode === 'ambient') {
+      this.layout('ambient', !!o.snap);
+      this.dots.forEach((d, i) => { d.spawn = 0; d.tr = i === SH ? 2.4 : 1.5; d.ta = i === SH ? 0.7 : 0.2; if (o.snap) { d.r = d.tr; d.a = d.ta; } });
+    } else if (mode === 'point') {
+      this.mode = 'point';
+      this.dots.forEach((d, i) => {
+        d.tx = o.x; d.ty = o.y;
+        if (o.swirl) { d.vx += -(d.y - o.y) * o.swirl; d.vy += (d.x - o.x) * o.swirl; }
+        d.tr = i === SH ? (o.redR ?? 0.8) : 0.8;
+      });
+    } else if (mode === 'hide') {
+      this.dots.forEach(d => { d.ta = 0; d.tr = 0; });
+    }
+  }
+  ripple(x, y, s = 1) { this.ripples.push({ x, y, t: performance.now(), s }); if (this.ripples.length > 8) this.ripples.shift(); }
+  tick(now) {
+    this.raf = requestAnimationFrame(this.tick);
+    const ctx = this.ctx; if (!ctx) return;
+    ctx.clearRect(0, 0, this.W, this.H);
+    if (this.props.dotField === false) return;
+    const sp = this.sp, K = 0.05 * sp, D = 0.86, SH = Component.SH;
+    const amb = this.mode === 'ambient', p = this.ptr;
+    this.ripples = this.ripples.filter(r => (now - r.t) * sp < 1700);
+    let born = 0;
+    for (let i = 0; i < 512; i++) {
+      const d = this.dots[i];
+      if (d.spawn) { if (now >= d.spawn) { d.spawn = 0; d.tr = i === SH ? 3.4 : 2.1; d.ta = i === SH ? 1 : 0.55; d.vr = 1.4; } }
+      else if (this.mode === 'grid') born++;
+      d.vx = (d.vx + (d.tx - d.x) * K) * D; d.x += d.vx;
+      d.vy = (d.vy + (d.ty - d.y) * K) * D; d.y += d.vy;
+      d.vr = (d.vr + (d.tr - d.r) * 0.2) * 0.74; d.r += d.vr;
+      d.a += (d.ta - d.a) * 0.1;
+      let x = d.x, y = d.y, r = d.r, h = i === SH ? 1 : 0;
+      if (amb && p) {
+        const dx = x - p.x, dy = y - p.y, ds = Math.hypot(dx, dy) || 1;
+        if (ds < 150) { const f = 1 - ds / 150; x += dx / ds * f * 12; y += dy / ds * f * 12; r += f * f * 2.6; }
+      }
+      for (const rp of this.ripples) {
+        const age = (now - rp.t) * sp, rr = age * 0.85, ds = Math.hypot(d.x - rp.x, d.y - rp.y), band = Math.abs(ds - rr);
+        if (band < 50) { const f = (1 - band / 50) * Math.max(0, 1 - age / 1700); r += f * 3 * rp.s; h = Math.max(h, f); }
+      }
+      const a = Math.min(1, d.a + h * 0.55 * (d.a > 0.05 ? 1 : 0));
+      if (r < 0.1 || a < 0.01) continue;
+      ctx.fillStyle = `rgba(${Math.round(43 + 199 * h)},${Math.round(47 + 30 * h)},${Math.round(54 + 23 * h)},${a})`;
+      ctx.beginPath(); ctx.arc(x, y, r, 0, 6.2832); ctx.fill();
+    }
+    if (this.mode === 'grid') {
+      const el = this.el('counter');
+      if (el) { const t = String(born).padStart(3, '0') + ' / 512'; if (t !== this._ct) { this._ct = t; el.textContent = t; el.style.color = born >= 512 ? '#f24d4d' : '#9aa0a8'; } }
+    }
+  }
+
+  /* ---------- loading ---------- */
+  async runLoading() {
+    const g = this._gen;
+    try { await Promise.race([document.fonts.load("900 112px Nunito"), new Promise(r => setTimeout(r, 1500))]); } catch (e) {}
+    if (g !== this._gen) return;
+    const L = this.el('lock'); if (!L) return;
+    const q = k => L.querySelector(`[data-k="${k}"]`), qa = k => [...L.querySelectorAll(`[data-k="${k}"]`)];
+    const lr = L.getBoundingClientRect(), tr = q('token').getBoundingClientRect();
+    const W = lr.width, H = lr.height, tcx = tr.left + tr.width / 2 - lr.left;
+    const slide0 = W / 2 - tcx;
+    const A = (el, kf, dur, delay, e, fill = 'both') => this.anim(el, kf, dur, { delay, e, fill });
+    const S = this.spr.bind(this);
+    this._ct = '';
+    this.setField('grid');
+    const cw = this.el('counterWrap');
+    A(cw, [{ opacity: 0, transform: 'translateY(8px)' }, { opacity: 1, transform: 'none' }], 400, 100, 'ease-out');
+    A(cw, [{ opacity: 1 }, { opacity: 0 }], 260, 1650, 'ease-in', 'forwards');
+    this.later(1520, () => this.setField('point', { x: this.W / 2, y: this.H / 2, swirl: 0.045, redR: 7 }));
+    this.later(1820, () => this.dots.forEach((d, i) => { if (i !== Component.SH) d.ta = 0; }));
+    this.later(1980, () => { const d = this.dots[Component.SH]; d.tr = 0; d.ta = 0; this.ripple(this.W / 2, this.H / 2, 1.2); });
+
+    A(L, [{ opacity: 0 }, { opacity: 1 }], 1, 1950, 'linear');
+    A(q('slide'), [{ transform: `translateX(${slide0}px)` }, { transform: 'none' }], 820, 2300, S(150, 19));
+    A(q('token'), [{ transform: 'scale(0) rotate(-30deg)' }, { transform: 'none' }], 800, 1950, S(300, 13));
+    const top = q('top'), bot = q('bot');
+    A(top, [{ color: '#f24d4d' }, { color: '#ff5757' }], 220, 2320, 'linear'); A(bot, [{ background: '#f24d4d' }, { background: '#ffffff' }], 220, 2320, 'linear');
+    A(top, [{ transform: 'none' }, { transform: 'translateY(-20px) rotate(-18deg)' }], 240, 2240, 'cubic-bezier(.2,.8,.3,1)');
+    A(bot, [{ transform: 'none' }, { transform: 'translateY(12px) rotate(9deg)' }], 240, 2240, 'cubic-bezier(.2,.8,.3,1)');
+    A(top, [{ transform: 'translateY(-20px) rotate(-18deg)' }, { transform: 'none' }], 620, 2680, S(380, 16), 'forwards');
+    A(bot, [{ transform: 'translateY(12px) rotate(9deg)' }, { transform: 'none' }], 620, 2680, S(380, 16), 'forwards');
+    const T0 = tr.top - lr.top - 3, B0 = lr.bottom - tr.bottom - 3, L0 = tr.left - lr.left - 3, R0 = lr.right - tr.right - 3;
+    A(q('field'), [
+      { clipPath: `inset(${T0}px ${R0}px ${B0}px ${L0}px round 51px)`, opacity: 0 },
+      { opacity: 1, offset: 0.04 },
+      { clipPath: 'inset(-40px -40px -40px -40px round 60px)', opacity: 1 }
+    ], 820, 2300, S(150, 19), 'backwards');
+    qa('d').forEach((d, i) => {
+      const r = d.getBoundingClientRect(); const off = tr.left + tr.width / 2 - (r.left + r.width / 2);
+      A(d, [{ transform: `translateX(${off}px) scale(.15) rotate(-35deg)`, opacity: 0 }, { opacity: 1, offset: 0.12 }, { transform: 'none', opacity: 1 }], 900, 2360 + i * 80, S(220, 13));
+    });
+    A(q('squash'), [{ transform: 'none' }, { transform: 'scale(1.07,.9)', offset: 0.22 }, { transform: 'scale(.97,1.04)', offset: 0.55 }, { transform: 'none' }], 520, 2700, 'ease-out', 'none');
+    A(q('hl'), [{ transform: 'scaleY(1)' }, { transform: 'scaleY(.08)', offset: 0.45 }, { transform: 'scaleY(1)' }], 260, 3150, 'ease-in-out', 'none');
+    this.later(3600, () => this.setState({ screen: 'login' }));
+  }
+
+  /* ---------- screen entries ---------- */
+  onEnter(s) {
+    if (s === 'login') {
+      if (this.state.showLoader) this.flight();
+      else { this.setField('ambient', { snap: this.mode !== 'ambient' && this.mode !== 'point' ? false : false }); this.enterLogin(0, true); }
+    } else if (s === 'onboarding') this.enterOnboarding();
+    else if (s === 'home') this.enterHome();
+  }
+  flight() {
+    const L = this.el('lock'), logo = this.el('loginLogo'); if (!L || !logo) return;
+    const a = L.getBoundingClientRect(), b = logo.getBoundingClientRect();
+    const dx = b.left + b.width / 2 - (a.left + a.width / 2), dy = b.top + b.height / 2 - (a.top + a.height / 2), s = b.width / a.width;
+    const F = 780;
+    this.anim(L, [{ transform: 'none' }, { transform: `translate(${dx * 0.55}px, ${dy * 0.35}px) scale(${(1 + s) / 2 + 0.06})`, offset: 0.45 }, { transform: `translate(${dx}px, ${dy}px) scale(${s})` }], F, { e: 'cubic-bezier(.6,0,.25,1)', fill: 'forwards' });
+    this.setField('ambient');
+    this.enterLogin(F - 40, false);
+    this.later(F + 20, () => this.setState({ showLoader: false }));
+  }
+  enterLogin(delay, popLogo) {
+    const card = this.el('loginCard'), logo = this.el('loginLogo'); if (!card || !logo) return;
+    const c = card.getBoundingClientRect(), l = logo.getBoundingClientRect();
+    const ins = `inset(${l.top - c.top}px ${c.right - l.right}px ${c.bottom - l.bottom}px ${l.left - c.left}px round 20px)`;
+    this.anim(card, [{ clipPath: ins, opacity: 0 }, { opacity: 1, offset: 0.06 }, { clipPath: 'inset(0px 0px 0px 0px round 28px)', opacity: 1 }], 780, { delay, e: this.spr(170, 19) });
+    if (popLogo) this.anim(logo, [{ transform: 'scale(0) rotate(-20deg)' }, { transform: 'none' }], 700, { delay, e: this.spr(280, 14) });
+    else {
+      this.anim(logo, [{ opacity: 0 }, { opacity: 1 }], 1, { delay: delay + 30 });
+      this.anim(logo, [{ transform: 'none' }, { transform: 'scale(1.08,.9)', offset: 0.25 }, { transform: 'scale(.97,1.03)', offset: 0.6 }, { transform: 'none' }], 480, { delay: delay + 40, fill: 'none' });
+    }
+    [...card.querySelectorAll('[data-enter]')].forEach((el, i) =>
+      this.anim(el, [{ opacity: 0, transform: 'translateY(16px)' }, { opacity: 1, transform: 'none' }], 700, { delay: delay + 200 + i * 70, e: this.spr(200, 17) }));
+  }
+  pillEls() { const p = this.el('pills'); return p ? [...p.querySelectorAll('[data-pill]')] : []; }
+  enterOnboarding() {
+    const chip = this.el('chip');
+    this.anim(chip, [{ transform: 'translateY(-60px) scale(.6)', opacity: 0 }, { opacity: 1, offset: 0.1 }, { transform: 'none', opacity: 1 }], 760, { e: this.spr(220, 15) });
+    this.pillEls().forEach((p, i) => this.anim(p, [{ transform: 'scaleX(0)' }, { transform: 'none' }], 600, { delay: 160 + i * 70, e: this.spr(260, 15) }));
+    this.morphFromPill(0, 300);
+    this.later(900, () => { const n = this.el('nickIn'); n && n.focus({ preventScroll: true }); });
+  }
+  morphFromPill(i, delay) {
+    const card = this.el('obCard'), cont = this.el('obContent'), p = this.pillEls()[i]; if (!card || !p) return;
+    card.getAnimations().forEach(a => a.cancel()); cont && cont.getAnimations().forEach(a => a.cancel());
+    const c = card.getBoundingClientRect(), r = p.getBoundingClientRect();
+    const dx = (r.left + r.width / 2) - (c.left + c.width / 2), dy = (r.top + r.height / 2) - (c.top + c.height / 2);
+    const sx = p.offsetWidth / card.offsetWidth, sy = p.offsetHeight / card.offsetHeight;
+    this.anim(card, [{ transform: `translate(${dx}px,${dy}px) scale(${sx},${sy})`, borderRadius: '999px', opacity: 0 }, { opacity: 1, offset: 0.08 }, { transform: 'none', borderRadius: '28px', opacity: 1 }], 780, { delay, e: this.spr(190, 16) });
+    if (cont) [...cont.querySelectorAll('[data-enter]')].forEach((el, k) =>
+      this.anim(el, [{ opacity: 0, transform: 'translateY(12px) scale(.98)' }, { opacity: 1, transform: 'none' }], 560, { delay: delay + 240 + k * 70, e: this.spr(220, 18) }));
+    this.ripple(r.left + r.width / 2, r.top + r.height / 2, 0.9);
+  }
+  collapseToPill(i) {
+    const card = this.el('obCard'), cont = this.el('obContent'), p = this.pillEls()[i]; if (!card || !p) return Promise.resolve();
+    const c = card.getBoundingClientRect(), r = p.getBoundingClientRect();
+    const dx = (r.left + r.width / 2) - (c.left + c.width / 2), dy = (r.top + r.height / 2) - (c.top + c.height / 2);
+    const sx = p.offsetWidth / card.offsetWidth, sy = p.offsetHeight / card.offsetHeight;
+    this.anim(cont, [{ opacity: 1 }, { opacity: 0 }], 140, { fill: 'forwards' });
+    const a = this.anim(card, [
+      { transform: 'none', borderRadius: '28px', opacity: 1 },
+      { transform: 'scale(1.03,.96)', offset: 0.2 },
+      { transform: `translate(${dx}px,${dy}px) scale(${sx},${sy})`, borderRadius: '999px', opacity: 1, offset: 0.9 },
+      { transform: `translate(${dx}px,${dy}px) scale(${sx},${sy})`, borderRadius: '999px', opacity: 0 }
+    ], 480, { delay: 80, e: 'cubic-bezier(.5,0,.75,.35)', fill: 'forwards' });
+    return a ? a.finished.catch(() => {}) : Promise.resolve();
+  }
+  gulp(i) { const p = this.pillEls()[i]; this.anim(p, [{ transform: 'none' }, { transform: 'scale(1.3,2.1)', offset: 0.3 }, { transform: 'none' }], 520, { e: 'ease-out', fill: 'none' }); }
+  async goStep(n) {
+    if (this._moving) return; this._moving = true;
+    const g = this._gen, cur = this.state.step;
+    await this.collapseToPill(cur); if (g !== this._gen) return;
+    this.gulp(cur);
+    this.setState({ step: n, look: null }, () => {
+      this.morphFromPill(n, 40); this._moving = false;
+      if (n === 0) this.later(500, () => { const el = this.el('nickIn'); el && el.focus({ preventScroll: true }); });
+    });
+  }
+  shake(el) { this.anim(el, [{ transform: 'none' }, { transform: 'translateX(-10px) rotate(-1.5deg)' }, { transform: 'translateX(8px) rotate(1.2deg)' }, { transform: 'translateX(-5px)' }, { transform: 'translateX(3px)' }, { transform: 'none' }], 480, { e: 'ease-out', fill: 'none' }); }
+  tileEls() { const g = this.el('grid'); return g ? [...g.querySelectorAll('[data-tile]')] : []; }
+  hopAll(from) {
+    this.tileEls().forEach((t, i) => {
+      const d = from < 0 ? i : Math.hypot(i % 5 - from % 5, Math.floor(i / 5) - Math.floor(from / 5));
+      if (i === from) return;
+      this.anim(t, [{ translate: '0 0' }, { translate: '0 -9px', offset: 0.4 }, { translate: '0 0' }], 420, { delay: d * 55, e: 'ease-out', fill: 'none' });
+    });
+  }
+  pick(i) {
+    if (this._moving) return;
+    if (this.state.pick === i) return;
+    this.setState({ pick: i });
+    this.hopAll(i);
+    const t = this.tileEls()[i], av = this.el('chipAv'); if (!t || !av) { this.setState({ partner: i }); return; }
+    const b = t.querySelector('[data-blob]').getBoundingClientRect(), to = av.getBoundingClientRect();
+    const [color, shape] = Component.CRIT[i];
+    const gh = document.createElement('div'); gh.setAttribute('data-ghost512', '1');
+    Object.assign(gh.style, { position: 'fixed', left: b.left + 'px', top: b.top + 'px', width: b.width + 'px', height: b.height + 'px', background: color, borderRadius: shape, zIndex: 60, pointerEvents: 'none' });
+    document.body.appendChild(gh);
+    const dx = to.left + to.width / 2 - (b.left + b.width / 2), dy = to.top + to.height / 2 - (b.top + b.height / 2), s = 26 / b.width;
+    const g = this._gen;
+    const a = this.anim(gh, [{ transform: 'none' }, { transform: `translate(${dx * 0.45}px, ${dy * 0.5 - 70}px) scale(1.15) rotate(-24deg)`, offset: 0.45 }, { transform: `translate(${dx}px, ${dy}px) scale(${s}) rotate(0deg)` }], 620, { e: 'cubic-bezier(.45,0,.3,1)', fill: 'forwards' });
+    const done = () => { gh.remove(); if (g !== this._gen) return; this.setState({ partner: i }, () => this.anim(this.el('chipAv'), [{ transform: 'scale(1.35)' }, { transform: 'none' }], 520, { e: this.spr(320, 12), fill: 'none' })); };
+    if (a) a.onfinish = done; else done();
+  }
+  async finishOnboarding() {
+    if (this._moving) return;
+    if (this.state.pick < 0) { this.hopAll(-1); this.shake(this.el('grid')); return; }
+    this._moving = true; const g = this._gen;
+    await this.collapseToPill(2); if (g !== this._gen) return;
+    this.gulp(2);
+    this.setState({ step: 3 });
+    await this.wait(260); if (g !== this._gen) return;
+    const chip = this.el('chip'), av = this.el('chipAv');
+    const r = av.getBoundingClientRect(), tx = 28 + 24, ty = 22 + 24;
+    const dx = tx - (r.left + r.width / 2), dy = ty - (r.top + r.height / 2);
+    this.setField('point', { x: tx, y: ty, swirl: 0.02 });
+    this.anim(chip, [{ transform: 'none', opacity: 1 }, { transform: `translate(${dx}px, ${dy}px) scale(.6)`, opacity: 0 }], 620, { e: 'cubic-bezier(.6,0,.3,1)', fill: 'forwards' });
+    this.anim(this.el('pills'), [{ opacity: 1 }, { opacity: 0, transform: 'scale(.6)' }], 300, { fill: 'forwards' });
+    await this.wait(560); if (g !== this._gen) return;
+    this.dots.forEach(d => { d.ta = 0; });
+    this._moving = false;
+    this.setState({ screen: 'home', tile: 0 });
+  }
+  enterHome() {
+    this.setField('hide');
+    const home = this.el('home'); if (!home) return;
+    this.placeRing(false);
+    const kf = {
+      pop: [{ transform: 'scale(.3)', opacity: 0 }, { transform: 'none', opacity: 1 }],
+      drop: [{ transform: 'translateY(-40px)', opacity: 0 }, { transform: 'none', opacity: 1 }],
+      rise: [{ transform: 'translateY(50px)', opacity: 0 }, { transform: 'none', opacity: 1 }],
+      slide: [{ transform: 'translateX(180px) rotate(5deg) scale(.9)', opacity: 0 }, { transform: 'none', opacity: 1 }]
+    };
+    const base = { pop: 0, drop: 120, slide: 220, rise: 560 };
+    [...home.querySelectorAll('[data-enter]')].forEach(el => {
+      const t = el.dataset.enter; const d = (base[t] || 0) + (+el.dataset.delay || 0);
+      this.anim(el, kf[t] || kf.rise, 900, { delay: d, e: this.spr(170, 16) });
+    });
+    this.anim(this.el('ring'), [{ opacity: 0, transform: 'scale(1.18)' }, { opacity: 1, transform: 'none' }], 700, { delay: 720, e: this.spr(240, 15) });
+    this.anim(this.el('ringLabel'), [{ opacity: 0, transform: 'translateY(10px)' }, { opacity: 1, transform: 'none' }], 500, { delay: 780, e: this.spr(220, 18) });
+    const tok = home.querySelector('[data-k="ptoken"]');
+    this.anim(tok, [{ transform: 'translateY(0) rotate(0)' }, { transform: 'translateY(-7px) rotate(-3deg)' }, { transform: 'translateY(0) rotate(0)' }], 3200, { e: 'ease-in-out', it: Infinity, fill: 'none', delay: 1200 });
+  }
+  placeRing(animate) {
+    const track = this.el('track'), ring = this.el('ring'), lab = this.el('ringLabel'), wrap = this.el('wrap');
+    if (!track || !ring) return;
+    const tiles = [...track.querySelectorAll('[data-tile]')], t = tiles[this.state.tile]; if (!t) return;
+    const padL = parseFloat(getComputedStyle(wrap).paddingLeft) || 0;
+    const vis = wrap.clientWidth - padL;
+    const shift = Math.max(0, Math.min(t.offsetLeft - 8, t.offsetLeft + t.offsetWidth - vis + 70));
+    const els = [track, ring, lab], prev = els.map(e => e.style.transition);
+    if (!animate) { els.forEach(e => e.style.transition = 'none'); }
+    track.style.transform = `translateX(${-shift}px)`;
+    Object.assign(ring.style, { left: t.offsetLeft - 8 + 'px', top: t.offsetTop - 8 + 'px', width: t.offsetWidth + 16 + 'px', height: t.offsetHeight + 16 + 'px' });
+    lab.style.left = t.offsetLeft + 'px'; lab.style.top = t.offsetTop - 34 + 'px';
+    if (!animate) { void track.offsetWidth; els.forEach((e, k) => e.style.transition = prev[k]); }
+  }
+  pressTile(i) {
+    const track = this.el('track'); if (!track) return;
+    const t = [...track.querySelectorAll('[data-tile]')][i];
+    this.anim(t, [{ transform: 'none' }, { transform: 'scale(.94)', offset: 0.25 }, { transform: 'scale(1.03)', offset: 0.6 }, { transform: 'none' }], 460, { fill: 'none', e: 'ease-out' });
+    if (i === 0) {
+      const top = t.querySelector('[data-k="ptop"]');
+      this.anim(top, [{ transform: 'none' }, { transform: 'translateY(-14px) rotate(-18deg)', offset: 0.35 }, { transform: 'translateY(-14px) rotate(-18deg)', offset: 0.6 }, { transform: 'none' }], 900, { fill: 'none', e: 'ease-in-out' });
+    }
+  }
+  key(e) {
+    const s = this.state;
+    if (s.screen === 'home') {
+      if (e.key === 'ArrowRight') this.setState({ tile: Math.min(4, s.tile + 1) });
+      else if (e.key === 'ArrowLeft') this.setState({ tile: Math.max(0, s.tile - 1) });
+      else if (e.key === 'Enter' || e.key.toLowerCase() === 'a') this.pressTile(s.tile);
+    } else if (s.screen === 'onboarding' && e.key === 'Enter') {
+      if (s.step === 0) this.next0(); else if (s.step === 1) this.goStep(2); else if (s.step === 2) this.finishOnboarding();
+    }
+  }
+  next0() { if (!this.state.nick.trim()) { this.shake(this.el('nickIn')); return; } this.goStep(1); }
+
+  /* ---------- login ---------- */
+  rippleInput(el, w) {
+    if (!el) return;
+    const r = el.getBoundingClientRect();
+    if (w == null) { this._m = this._m || document.createElement('canvas').getContext('2d'); this._m.font = '600 15px Inter'; w = this._m.measureText(el.value).width; }
+    this.ripple(Math.min(r.right - 22, r.left + 22 + w), r.top + r.height / 2, 0.75);
+  }
+  submitLogin(e) {
+    e && e.preventDefault && e.preventDefault();
+    if (this.state.busy) return;
+    const { email, pw } = this.state;
+    const err = !/.+@.+\..+/.test(email) ? 'email' : (!pw ? 'pw' : null);
+    if (err) {
+      this.setState({ err }, () => {
+        const card = this.el('loginCard'); this.shake(card);
+        const pill = card && card.querySelector('[data-err]');
+        this.anim(pill, [{ transform: 'translateY(-8px) scale(.6)', opacity: 0 }, { transform: 'none', opacity: 1 }], 520, { e: this.spr(300, 14) });
+        const f = this.el(err === 'email' ? 'emailIn' : 'pwIn'); f && f.focus({ preventScroll: true });
+      });
+      return;
+    }
+    this.loginGo();
+  }
+  async loginGo() {
+    const g = this._gen; this.setState({ busy: true, err: null });
+    const b = this.el('loginBtn'), card = this.el('loginCard'); if (!b) return;
+    const lab = b.querySelector('[data-k="blabel"]'), tok = b.querySelector('[data-k="btok"]');
+    document.activeElement && document.activeElement.blur && document.activeElement.blur();
+    this.anim(b, [{ width: b.offsetWidth + 'px' }, { width: '54px' }], 520, { e: this.spr(200, 20), fill: 'forwards' });
+    this.anim(lab, [{ opacity: 1 }, { opacity: 0, transform: 'scale(.7)' }], 160, { fill: 'forwards' });
+    this.anim(tok, [{ transform: 'scale(0) rotate(-60deg)', opacity: 1 }, { transform: 'none', opacity: 1 }], 600, { delay: 220, e: this.spr(300, 13), fill: 'both' });
+    this.anim(tok, [
+      { transform: 'none' }, { transform: 'none', offset: 0.1 },
+      { transform: 'rotate(-24deg)', offset: 0.18 }, { transform: 'rotate(0)', offset: 0.28 },
+      { transform: 'rotate(0)', offset: 0.42 }, { transform: 'rotate(22deg)', offset: 0.5 }, { transform: 'rotate(0)', offset: 0.6 },
+      { transform: 'rotate(0)', offset: 0.74 }, { transform: 'rotate(-16deg)', offset: 0.82 }, { transform: 'rotate(0)', offset: 0.9 },
+      { transform: 'none' }
+    ], 1500, { delay: 780, e: 'ease-in-out', fill: 'none' });
+    await this.wait(2320); if (g !== this._gen) return;
+    const r = b.getBoundingClientRect();
+    this.anim(tok, [{ transform: 'none', opacity: 1 }, { transform: 'scale(1.7)', opacity: 1, offset: 0.4 }, { transform: 'scale(0)', opacity: 0 }], 360, { e: 'ease-out', fill: 'forwards' });
+    this.anim(b, [{ boxShadow: '0 0 0 0 rgba(242,77,77,.5)' }, { boxShadow: '0 0 0 26px rgba(242,77,77,0)' }], 500, { fill: 'none' });
+    this.ripple(r.left + r.width / 2, r.top + r.height / 2, 1.6);
+    await this.wait(260); if (g !== this._gen) return;
+    const a = this.anim(card, [{ transform: 'none' }, { transform: 'scale(1.025,.96)', offset: 0.22 }, { transform: 'translateY(-110px) scale(.92,.06)', opacity: 0 }], 460, { e: 'cubic-bezier(.5,0,.75,.35)', fill: 'forwards' });
+    if (a) await a.finished.catch(() => {});
+    if (g !== this._gen) return;
+    this.setState({ screen: 'onboarding', step: 0, busy: false });
+  }
+
+  /* ---------- render ---------- */
+  renderVals() {
+    const s = this.state, C = Component.CRIT;
+    const pc = s.partner >= 0 ? C[s.partner] : ['#f24d4d', '50%'];
+    const mk = (list, sel, setter) => list.map((label, i) => ({ label, color: i === sel ? '#2b2f36' : '#b9bdc4', tf: i === sel ? 'scale(1)' : 'scale(.78)', pick: () => setter(i) }));
+    const days = Array.from({ length: 31 }, (_, i) => String(i + 1).padStart(2, '0'));
+    const years = Array.from({ length: 67 }, (_, i) => String(1950 + i));
+    const wheel = (k, max) => e => {
+      const now = performance.now(); if (now - (this._wt || 0) < 70) return; this._wt = now;
+      const dir = e.deltaY > 0 ? 1 : -1; this.setState(st => ({ [k]: Math.max(0, Math.min(max, st[k] + dir)) }));
+    };
+    const G = 78, cx = i => (i % 5) * G + 32, cy = i => Math.floor(i / 5) * G + 32;
+    let lx = null, ly = null;
+    if (s.look) { lx = s.look.x; ly = s.look.y; } else if (s.pick >= 0) { lx = cx(s.pick); ly = cy(s.pick); }
+    const critters = C.map(([color, shape], i) => {
+      let ex = 0, ey = 0, tf = 'none';
+      if (lx != null && i !== s.pick) {
+        const vx = lx - cx(i), vy = ly - cy(i), l = Math.hypot(vx, vy) || 1;
+        ex = +(vx / l * 3.4).toFixed(2); ey = +(vy / l * 2.6).toFixed(2);
+        if (s.pick >= 0 && !s.look) tf = `rotate(${(vx / l * 7).toFixed(1)}deg)`;
+      }
+      const sel = i === s.pick;
+      if (sel) tf = 'scale(1.12)';
+      return { color, shape, ex, ey, tf, sel, es: sel ? 0.3 : (s.blink === i ? 0.1 : 1), pick: () => this.pick(i) };
+    });
+    const dock = i => e => {
+      const tgt = e.currentTarget; this.setState({ dock: i });
+      this.anim(tgt, [{ transform: 'none' }, { transform: 'translateY(-6px) scale(1.08)', offset: 0.4 }, { transform: 'none' }], 520, { e: 'ease-out', fill: 'none' });
+      tgt.querySelectorAll('[data-a]').forEach((p, k) => {
+        const f = Component.DOCK[p.getAttribute('data-a')]; if (!f) return;
+        this.anim(p, f.map(t => ({ transform: t })), 560, { delay: k * 50, e: 'ease-in-out', fill: 'none' });
+      });
+    };
+    const tile = i => () => { if (this.state.tile !== i) this.setState({ tile: i }); };
+    const tclick = i => () => { if (this.state.tile === i) this.pressTile(i); else this.setState({ tile: i }); };
+    const v = {
+      cv: this.ref('cv'), lock: this.ref('lock'), counter: this.ref('counter'), counterWrap: this.ref('counterWrap'),
+      loginCard: this.ref('loginCard'), loginLogo: this.ref('loginLogo'), loginBtn: this.ref('loginBtn'), emailIn: this.ref('emailIn'), pwIn: this.ref('pwIn'), pwRow: this.ref('pwRow'),
+      chip: this.ref('chip'), chipAv: this.ref('chipAv'), pills: this.ref('pills'), obCard: this.ref('obCard'), obContent: this.ref('obContent'), nickIn: this.ref('nickIn'), grid: this.ref('grid'),
+      home: this.ref('home'), wrap: this.ref('wrap'), track: this.ref('track'), ring: this.ref('ring'), ringLabel: this.ref('ringLabel'),
+      showLoader: !!s.showLoader, isLogin: s.screen === 'login', isOnboard: s.screen === 'onboarding', isHome: s.screen === 'home',
+      email: s.email || '', pw: s.pw || '', pwFocus: !!s.pwFocus,
+      pwChars: Array.from((s.pw || '').slice(0, 24), (c, i) => ({ c, i, selBg: s.pwFocus && s.selB > s.selA && i >= s.selA && i < s.selB ? 'rgba(242,77,77,0.22)' : 'transparent' })),
+      pwBallOp: s.showPw ? 0 : 1, pwChOp: s.showPw ? 1 : 0, eyeBtn: this.ref('eyeBtn'),
+      eyeLabel: s.showPw ? 'Esconder senha' : 'Mostrar senha', eyeColor: s.showPw ? '#f24d4d' : '#8a9099', eyeTop: s.showPw ? '#f24d4d' : 'currentColor', slashOff: s.showPw ? 23 : 0,
+      eyeDown: e => e.preventDefault(), pwSel: e => { const t = e.target, a = t.selectionStart, b = t.selectionEnd; if (a !== this.state.selA || b !== this.state.selB) this.setState({ selA: a, selB: b }); }, togglePw: () => this.setState(st => ({ showPw: !st.showPw })),
+      errEmail: s.err === 'email', errPw: s.err === 'pw',
+      emailBorder: s.err === 'email' ? '#f24d4d' : 'transparent', pwBorder: s.err === 'pw' ? '#f24d4d' : 'transparent',
+      onEmail: e => { this.setState({ email: e.target.value, err: null }); this.rippleInput(e.target); },
+      onPw: e => { const val = e.target.value; this.setState({ pw: val, err: null }); this.rippleInput(e.target, Math.min(24, val.length) * 19); },
+      pwOn: () => this.setState({ pwFocus: true }), pwOff: () => this.setState({ pwFocus: false }),
+      submitLogin: e => this.submitLogin(e),
+      s0: s.step === 0, s1: s.step === 1, s2: s.step === 2,
+      nick: s.nick || '', nickShow: s.nick || 'Treinador', nickColor: s.nick ? '#2b2f36' : '#a3a8b0',
+      onNick: e => { const val = e.target.value.slice(0, 16); this.setState({ nick: val, tag: [0,0,0,0].map(() => Math.floor(Math.random() * 10)) }); this.rippleInput(e.target); },
+      tagCols: (s.tag || [6,4,0,1]).map((d, i) => ({ ty: `translateY(-${d * 1.25}em)`, tr: `transform ${0.55 + i * 0.13}s cubic-bezier(.34,1.56,.64,1)` })),
+      tagStr: (s.tag || [6,4,0,1]).join(''), digits: [0,1,2,3,4,5,6,7,8,9],
+      pillList: [0,1,2].map(i => ({ w: i < s.step ? '100%' : i === s.step ? '34%' : '0%' })),
+      hasPartner: s.partner >= 0, noPartner: !(s.partner >= 0), pColor: pc[0], pShape: pc[1],
+      next0Bg: s.nick ? '#f24d4d' : '#f5a3a3', next0: () => this.next0(),
+      next1: () => this.goStep(2), back: () => this.goStep(Math.max(0, this.state.step - 1)), finish: () => this.finishOnboarding(),
+      finishBg: s.pick >= 0 ? '#f24d4d' : '#f5a3a3',
+      dayItems: mk(days, s.day, i => this.setState({ day: i })), monthItems: mk(Component.MONTHS, s.month, i => this.setState({ month: i })), yearItems: mk(years, s.year, i => this.setState({ year: i })),
+      dayY: `${(1 - s.day) * 46}px`, monthY: `${(1 - s.month) * 46}px`, yearY: `${(1 - s.year) * 46}px`,
+      wheelDay: wheel('day', 30), wheelMonth: wheel('month', 11), wheelYear: wheel('year', 66),
+      critters,
+      gridMove: e => { const r = e.currentTarget.getBoundingClientRect(); const gw = 5 * 64 + 4 * 14; this.setState({ look: { x: e.clientX - r.left - (r.width - gw) / 2, y: e.clientY - r.top - 6 } }); },
+      gridLeave: () => this.setState({ look: null }),
+      tileLabel: Component.LABELS[s.tile || 0], homeEye: ((s.tile || 0) - 1.5) * 1.6, now: s.now || '',
+      dhOff: () => this.setState({ dock: -1 }),
+      replay: () => this.boot(this.props.startAt ?? 'loading')
+    };
+    for (let i = 0; i < 6; i++) { v['dh' + i] = dock(i); v['tip' + i] = s.dock === i; }
+    for (let i = 0; i < 5; i++) { v['tv' + i] = tile(i); v['tc' + i] = tclick(i); }
+    return v;
+  }
+}
+</script>
+</body>
+</html>

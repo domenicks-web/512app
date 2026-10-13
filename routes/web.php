@@ -2,10 +2,11 @@
 
 declare(strict_types=1);
 
+use App\Http\Controllers\Home\ShowHomeController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware(['auth', 'onboarded'])->group(function () {
-    Route::inertia('/', 'Welcome')->name('home');
+    Route::get('/', ShowHomeController::class)->name('home');
 });
 
 if (! app()->isProduction()) {

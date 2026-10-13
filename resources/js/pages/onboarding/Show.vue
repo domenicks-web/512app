@@ -1,463 +1,461 @@
 <script setup lang="ts">
-import { Head, useForm } from '@inertiajs/vue3';
-import { computed, onMounted, ref } from 'vue';
+import { Head, router, useHttp } from '@inertiajs/vue3';
+import { computed, nextTick, onBeforeUnmount, onMounted, ref } from 'vue';
 import { store } from '@/actions/App/Http/Controllers/Onboarding/CompleteOnboardingController';
-import AppButton from '@/components/AppButton.vue';
-import AppInput from '@/components/AppInput.vue';
-import ThemeToggle from '@/components/ThemeToggle.vue';
+import PreviewUserTagController from '@/actions/App/Http/Controllers/Onboarding/PreviewUserTagController';
+import BirthdateWheels from '@/components/entry/BirthdateWheels.vue';
+import EntryField from '@/components/entry/EntryField.vue';
+import PartnerGrid from '@/components/entry/PartnerGrid.vue';
+import type { PartnerOption } from '@/components/entry/PartnerGrid.vue';
+import PrimaryButton from '@/components/entry/PrimaryButton.vue';
+import SecondaryButton from '@/components/entry/SecondaryButton.vue';
+import StepPills from '@/components/entry/StepPills.vue';
+import TrainerChip from '@/components/entry/TrainerChip.vue';
+import { useDotField } from '@/composables/useDotField';
+import { waitForIntro } from '@/composables/useIntro';
+import { usePillMorph } from '@/composables/usePillMorph';
+import EntryLayout from '@/layouts/EntryLayout.vue';
+import { animate, shake, spring, wait } from '@/lib/motion';
+import { home } from '@/routes';
 
-type AvatarOption = {
-    id: number;
-    name: string;
-    artwork_path: string;
-};
+defineOptions({ layout: EntryLayout });
 
+/**
+ * Wizard pós-login em 3 passos (nickname → nascimento → parceiro), com o
+ * chip de treinador se preenchendo em cima e a mecânica de pills entre os
+ * passos. A tag vem do servidor (prévia guardada na sessão) e o perfil só
+ * é gravado no último passo.
+ */
 const props = defineProps<{
-    avatarOptions: AvatarOption[];
+    avatarOptions: PartnerOption[];
+    nicknameMaxLength: number;
+    birthYearRange: [number, number];
 }>();
 
-const step = ref<1 | 2 | 3>(1);
+const TAG_DEBOUNCE_MS = 400;
+/** Centro do avatar da home (padding 28/22 + metade dos 48px). */
+const HOME_AVATAR_CENTER = { x: 52, y: 46 };
 
-const form = useForm({
+const field = useDotField();
+
+const chip = ref<InstanceType<typeof TrainerChip> | null>(null);
+const pills = ref<InstanceType<typeof StepPills> | null>(null);
+const pillsRoot = ref<HTMLElement | null>(null);
+const card = ref<HTMLElement | null>(null);
+const content = ref<HTMLElement | null>(null);
+const nicknameField = ref<InstanceType<typeof EntryField> | null>(null);
+const partnerGrid = ref<InstanceType<typeof PartnerGrid> | null>(null);
+
+const morph = usePillMorph(card, content, pillsRoot);
+
+const step = ref(0);
+const isMoving = ref(false);
+const tag = ref<string | null>(null);
+const chipAvatarPath = ref<string | null>(null);
+const nicknameError = ref<string | null>(null);
+
+// Padrão inicial das rodas: 13 de setembro, 20 anos atrás do ano mais recente.
+const day = ref(13);
+const month = ref(8);
+const year = ref(
+    Math.max(props.birthYearRange[0], props.birthYearRange[1] - 20),
+);
+
+const profile = useHttp({
     nickname: '',
     birthdate: '',
     avatar_species_id: null as number | null,
 });
+const tagPreview = useHttp({ nickname: '' });
 
-const canAdvanceFromStep1 = computed(() => form.nickname.trim().length >= 2);
-const canAdvanceFromStep2 = computed(() => form.birthdate.length > 0);
-
-const headlines: Record<1 | 2 | 3, string> = {
-    1: 'Ei, treinador! Como posso te chamar?',
-    2: 'Qual é a sua data de nascimento, treinador?',
-    3: 'Escolha seu parceiro!',
-};
-
-const subtitles: Record<1 | 2 | 3, string | null> = {
-    1: null,
-    2: 'Só pra garantir que você já pode aparecer no Pokédex.',
-    3: 'Ele vai te representar pra galera, então escolhe com o coração.',
-};
-
-const headline = computed(() => headlines[step.value]);
-const subtitle = computed(() => subtitles[step.value]);
-
-const selectedAvatar = computed(
+const hasNickname = computed(() => profile.nickname.trim().length > 0);
+const birthdate = computed(
     () =>
-        props.avatarOptions.find(
-            (option) => option.id === form.avatar_species_id,
-        ) ?? null,
+        `${year.value}-${String(month.value + 1).padStart(2, '0')}-${String(day.value).padStart(2, '0')}`,
 );
 
-// Antes de escolher, o retrato de fundo mostra a primeira espécie da lista
-// curada (config/game.php); depois que a pessoa escolhe, o fundo passa a
-// refletir a escolha dela.
-const backdropAvatar = computed(
-    () => selectedAvatar.value ?? props.avatarOptions[0] ?? null,
-);
+let tagTimer = 0;
 
-// Prévia só visual do número depois do nickname — a tag de verdade é
-// sorteada no servidor (com checagem de colisão contra pares
-// nickname+tag já existentes), então pode não bater com essa aqui quando
-// a conta for criada de fato.
-const tagPreview = computed(() => {
-    const nickname = form.nickname.trim();
+function onNicknameInput() {
+    nicknameError.value = null;
+    profile.clearErrors();
+    window.clearTimeout(tagTimer);
+    const nickname = profile.nickname.trim();
 
     if (nickname.length < 2) {
-        return null;
+        return;
     }
 
-    let hash = 0;
+    tagTimer = window.setTimeout(async () => {
+        tagPreview.nickname = nickname;
 
-    for (const char of nickname) {
-        hash = (hash * 31 + char.charCodeAt(0)) >>> 0;
+        try {
+            const response = (await tagPreview.get(
+                PreviewUserTagController.url(),
+            )) as {
+                tag: string;
+            } | null;
+
+            if (response && profile.nickname.trim() === nickname) {
+                tag.value = response.tag;
+            }
+        } catch {
+            // Sem prévia a tag fica como estava; o servidor sorteia no fim.
+        }
+    }, TAG_DEBOUNCE_MS);
+}
+
+onMounted(async () => {
+    pillsRoot.value = pills.value?.root ?? null;
+    await waitForIntro();
+
+    if (field.mode() !== 'ambient') {
+        field.ambient();
     }
 
-    return String(hash % 10000).padStart(4, '0');
+    await nextTick();
+    animate(
+        chip.value?.root,
+        [
+            { transform: 'translateY(-60px) scale(.6)', opacity: 0 },
+            { opacity: 1, offset: 0.1 },
+            { transform: 'none', opacity: 1 },
+        ],
+        760,
+        { easing: spring(220, 15) },
+    );
+    morph.enterPills();
+    morph.morphFromPill(0, 300);
+    window.setTimeout(
+        () => nicknameField.value?.input?.focus({ preventScroll: true }),
+        900,
+    );
+    window.addEventListener('keydown', onKeydown);
 });
 
-const transitionName = ref<'slide-fwd' | 'slide-back'>('slide-fwd');
+onBeforeUnmount(() => {
+    window.clearTimeout(tagTimer);
+    window.removeEventListener('keydown', onKeydown);
+});
 
-function goToStep(target: 1 | 2 | 3) {
-    transitionName.value = target > step.value ? 'slide-fwd' : 'slide-back';
-    step.value = target;
-}
+async function goToStep(target: number) {
+    if (isMoving.value) {
+        return;
+    }
 
-function submit() {
-    form.post(store().url, {
-        onError: (errors) => {
-            if (errors.nickname) {
-                goToStep(1);
-            } else if (errors.birthdate) {
-                goToStep(2);
-            }
-        },
+    isMoving.value = true;
+    await morph.goStep(step.value, target, async () => {
+        step.value = target;
+        await nextTick();
     });
+    isMoving.value = false;
+
+    if (target === 0) {
+        window.setTimeout(
+            () => nicknameField.value?.input?.focus({ preventScroll: true }),
+            500,
+        );
+    }
 }
 
-// Cortina de entrada ("entrando no mundo...") e de saída (durante o
-// submit final) — mesmo ritual de tela preta que o SPEC.md reserva pra
-// abertura de pack, só que resolvido em CSS puro (opacity), sem nenhuma
-// biblioteca de animação: pesa o mesmo que qualquer transição comum.
-const isEntering = ref(true);
-
-onMounted(() => {
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-        isEntering.value = false;
+function nextFromNickname() {
+    if (!hasNickname.value) {
+        shake(nicknameField.value?.input);
 
         return;
     }
 
-    window.setTimeout(() => {
-        isEntering.value = false;
-    }, 650);
-});
+    void goToStep(1);
+}
 
-const overlayMessage = computed(() => {
-    if (isEntering.value) {
-        return 'Entrando no mundo...';
+/** O sprite escolhido voa em arco até o avatar do chip, que dá um pop. */
+function onPicked(index: number, sprite: HTMLImageElement) {
+    const target = chip.value?.avatar;
+    const option = props.avatarOptions[index];
+
+    if (!target || !option) {
+        chipAvatarPath.value = option?.sprite_path ?? null;
+
+        return;
     }
 
-    if (form.processing) {
-        return 'Bem-vindo, treinador!';
+    const from = sprite.getBoundingClientRect();
+    const to = target.getBoundingClientRect();
+    const ghost = sprite.cloneNode() as HTMLImageElement;
+    Object.assign(ghost.style, {
+        position: 'fixed',
+        left: `${from.left}px`,
+        top: `${from.top}px`,
+        width: `${from.width}px`,
+        height: `${from.height}px`,
+        zIndex: '60',
+        pointerEvents: 'none',
+        transform: 'none',
+    });
+    document.body.appendChild(ghost);
+
+    const dx = to.left + to.width / 2 - (from.left + from.width / 2);
+    const dy = to.top + to.height / 2 - (from.top + from.height / 2);
+    const scale = 48 / from.width;
+    const flight = animate(
+        ghost,
+        [
+            { transform: 'none' },
+            {
+                transform: `translate(${dx * 0.45}px, ${dy * 0.5 - 70}px) scale(1.15) rotate(-24deg)`,
+                offset: 0.45,
+            },
+            {
+                transform: `translate(${dx}px, ${dy}px) scale(${scale}) rotate(0deg)`,
+            },
+        ],
+        620,
+        { easing: 'cubic-bezier(.45,0,.3,1)', fill: 'forwards' },
+    );
+
+    const land = () => {
+        ghost.remove();
+        chipAvatarPath.value = option.sprite_path;
+        animate(
+            target,
+            [{ transform: 'scale(1.35)' }, { transform: 'none' }],
+            520,
+            {
+                easing: spring(320, 12),
+                fill: 'none',
+            },
+        );
+    };
+
+    if (flight) {
+        flight.onfinish = land;
+    } else {
+        land();
+    }
+}
+
+async function finish() {
+    if (isMoving.value || profile.processing) {
+        return;
     }
 
-    return null;
-});
+    if (profile.avatar_species_id === null) {
+        partnerGrid.value?.nudge();
+
+        return;
+    }
+
+    profile.nickname = profile.nickname.trim();
+    profile.birthdate = birthdate.value;
+
+    try {
+        await profile.post(store().url);
+    } catch {
+        shake(card.value);
+
+        return;
+    }
+
+    if (profile.errors.nickname) {
+        nicknameError.value = profile.errors.nickname;
+        await goToStep(0);
+
+        return;
+    }
+
+    if (Object.keys(profile.errors).length > 0) {
+        await goToStep(profile.errors.birthdate ? 1 : 2);
+
+        return;
+    }
+
+    await leaveToHome();
+}
+
+/** Fecha o card na última pill e o chip voa pro canto onde fica o avatar da home. */
+async function leaveToHome() {
+    isMoving.value = true;
+    await morph.collapseToPill(2);
+    morph.gulp(2);
+    step.value = 3;
+    await wait(260);
+
+    const avatar = chip.value?.avatar?.getBoundingClientRect();
+
+    if (avatar) {
+        const dx = HOME_AVATAR_CENTER.x - (avatar.left + avatar.width / 2);
+        const dy = HOME_AVATAR_CENTER.y - (avatar.top + avatar.height / 2);
+        field.converge(HOME_AVATAR_CENTER.x, HOME_AVATAR_CENTER.y, {
+            swirl: 0.02,
+        });
+        animate(
+            chip.value?.root,
+            [
+                { transform: 'none', opacity: 1 },
+                {
+                    transform: `translate(${dx}px, ${dy}px) scale(.6)`,
+                    opacity: 0,
+                },
+            ],
+            620,
+            {
+                easing: 'cubic-bezier(.6,0,.3,1)',
+                fill: 'forwards',
+            },
+        );
+    }
+
+    animate(
+        pillsRoot.value,
+        [{ opacity: 1 }, { opacity: 0, transform: 'scale(.6)' }],
+        300,
+        { fill: 'forwards' },
+    );
+    await wait(560);
+    field.fade();
+    router.visit(home().url);
+}
+
+function onKeydown(event: KeyboardEvent) {
+    if (event.key !== 'Enter' || isMoving.value) {
+        return;
+    }
+
+    if (step.value === 0) {
+        event.preventDefault();
+        nextFromNickname();
+    } else if (step.value === 1) {
+        void goToStep(2);
+    } else if (step.value === 2) {
+        void finish();
+    }
+}
 </script>
 
 <template>
     <Head title="Complete seu perfil" />
 
-    <Transition name="fade">
-        <div
-            v-if="overlayMessage"
-            class="fixed inset-0 z-20 flex items-center justify-center bg-black"
-            aria-hidden="true"
-        >
-            <p class="font-display text-sm tracking-wide text-white/70">
-                {{ overlayMessage }}
-            </p>
-        </div>
-    </Transition>
-
     <div
-        class="bg-base relative flex min-h-screen items-center justify-center overflow-hidden p-6"
+        class="justify-[safe_center] absolute inset-0 z-[3] flex flex-col items-center gap-[18px] overflow-y-auto px-4 py-6"
     >
+        <TrainerChip
+            ref="chip"
+            :nickname="profile.nickname.trim()"
+            :tag="tag"
+            :avatar-sprite-path="chipAvatarPath"
+        />
+
+        <StepPills ref="pills" :count="3" :current="step" />
+
         <div
-            class="pointer-events-none absolute inset-0 overflow-hidden"
-            aria-hidden="true"
+            ref="card"
+            class="w-full max-w-[440px] rounded-[28px] bg-white px-[30px] pt-[30px] pb-7 shadow-[0_2px_4px_rgba(43,47,54,0.05),0_22px_56px_rgba(43,47,54,0.18)]"
+            :class="{ invisible: step === 3 }"
         >
-            <img
-                v-if="backdropAvatar"
-                :key="backdropAvatar.id"
-                :src="`/storage/${backdropAvatar.artwork_path}`"
-                alt=""
-                class="absolute inset-0 h-full w-full scale-125 object-cover object-center opacity-30 blur-3xl saturate-150 transition-opacity duration-700 dark:opacity-60"
-            />
-            <div class="bg-base/85 absolute inset-0" />
-        </div>
-
-        <div class="absolute top-6 right-6">
-            <ThemeToggle />
-        </div>
-
-        <div class="relative z-10 flex w-full max-w-sm flex-col items-center gap-5">
-            <div
-                class="bg-surface/90 ring-ink/10 flex min-h-[52px] w-full items-center gap-3 rounded-full px-3 py-1.5 ring-1 backdrop-blur-xl"
-            >
-                <div
-                    class="flex h-10 w-10 flex-shrink-0 items-center justify-center overflow-hidden rounded-full bg-white shadow-[inset_0_0_0_1px_rgb(0_0_0/8%)]"
-                >
-                    <img
-                        v-if="selectedAvatar"
-                        :src="`/storage/${selectedAvatar.artwork_path}`"
-                        :alt="selectedAvatar.name"
-                        class="h-full w-full object-contain p-1"
-                    />
-                    <svg
-                        v-else
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        class="text-ink/35 h-5 w-5"
-                        aria-hidden="true"
+            <div ref="content" class="flex flex-col gap-[22px]">
+                <template v-if="step === 0">
+                    <h1
+                        data-enter
+                        class="text-ink text-center text-[27px] leading-[1.15] font-black tracking-[-0.025em] text-balance"
                     >
-                        <circle
-                            cx="12"
-                            cy="12"
-                            r="8.5"
-                            stroke="currentColor"
-                            stroke-width="1.75"
-                        />
-                        <path
-                            d="M3.5 12h17"
-                            stroke="currentColor"
-                            stroke-width="1.75"
-                        />
-                        <circle cx="12" cy="12" r="2.5" fill="currentColor" />
-                    </svg>
-                </div>
-                <p class="text-ink/70 truncate text-sm font-semibold">
-                    <template v-if="tagPreview">
-                        <span class="text-ink">{{ form.nickname.trim() }}</span>
-                        <span class="text-ink/40 font-medium"
-                            >#{{ tagPreview }}</span
-                        >
-                    </template>
-                    <template v-else>Seu cartão de treinador</template>
-                </p>
-            </div>
-
-            <div class="flex gap-2">
-                <div
-                    v-for="n in 3"
-                    :key="n"
-                    class="bg-ink/10 h-1.5 w-9 overflow-hidden rounded-full"
-                >
-                    <div
-                        class="bg-holo h-full rounded-full transition-all duration-500"
-                        :style="{ width: n <= step ? '100%' : '0%' }"
-                    />
-                </div>
-            </div>
-
-            <div
-                class="bg-surface ring-ink/10 relative w-full rounded-3xl p-8 shadow-xl ring-1 backdrop-blur-xl ring-inset"
-            >
-                <h1
-                    class="font-display text-ink text-center text-[28px] leading-tight font-extrabold text-balance"
-                >
-                    {{ headline }}
-                </h1>
-                <p v-if="subtitle" class="text-ink/60 mt-1 text-center text-sm">
-                    {{ subtitle }}
-                </p>
-
-                <Transition :name="transitionName" mode="out-in">
-                    <form
-                        v-if="step === 1"
-                        key="1"
-                        class="mt-6 flex flex-col gap-4"
-                        @submit.prevent="goToStep(2)"
-                    >
-                        <AppInput
-                            v-model="form.nickname"
+                        Ei, treinador! Como posso te chamar?
+                    </h1>
+                    <div data-enter>
+                        <EntryField
+                            ref="nicknameField"
+                            v-model="profile.nickname"
                             label="Nickname"
                             name="nickname"
                             autocomplete="nickname"
-                            required
-                            :error="form.errors.nickname"
+                            :maxlength="nicknameMaxLength"
+                            :error="nicknameError"
+                            @update:model-value="onNicknameInput"
                         />
-
-                        <AppButton
-                            type="submit"
-                            :disabled="!canAdvanceFromStep1"
-                            class="mt-2 w-full"
+                    </div>
+                    <div data-enter>
+                        <PrimaryButton
+                            :dimmed="!hasNickname"
+                            @click="nextFromNickname"
                         >
                             Continuar
-                        </AppButton>
-                    </form>
+                        </PrimaryButton>
+                    </div>
+                </template>
 
-                    <form
-                        v-else-if="step === 2"
-                        key="2"
-                        class="mt-6 flex flex-col gap-4"
-                        @submit.prevent="goToStep(3)"
-                    >
-                        <AppInput
-                            v-model="form.birthdate"
-                            label="Data de nascimento"
-                            name="birthdate"
-                            type="date"
-                            autocomplete="bday"
-                            required
-                            :error="form.errors.birthdate"
-                        />
-
-                        <div class="mt-2 flex gap-3">
-                            <AppButton
-                                type="button"
-                                variant="secondary"
-                                class="w-full"
-                                @click="goToStep(1)"
-                            >
-                                Voltar
-                            </AppButton>
-                            <AppButton
-                                type="submit"
-                                :disabled="!canAdvanceFromStep2"
-                                class="w-full"
-                            >
-                                Continuar
-                            </AppButton>
-                        </div>
-                    </form>
-
-                    <form
-                        v-else
-                        key="3"
-                        class="mt-6 flex flex-col gap-4"
-                        @submit.prevent="submit"
-                    >
-                        <div class="grid grid-cols-3 gap-3">
-                            <button
-                                v-for="option in avatarOptions"
-                                :key="option.id"
-                                type="button"
-                                class="avatar-tile"
-                                :class="{
-                                    'avatar-tile--selected':
-                                        form.avatar_species_id === option.id,
-                                }"
-                                :aria-label="option.name"
-                                :aria-pressed="
-                                    form.avatar_species_id === option.id
-                                "
-                                @click="form.avatar_species_id = option.id"
-                            >
-                                <img
-                                    :src="`/storage/${option.artwork_path}`"
-                                    :alt="option.name"
-                                />
-                            </button>
-                        </div>
-
-                        <span
-                            v-if="form.errors.avatar_species_id"
-                            class="text-center text-xs font-semibold text-red-500"
-                            >{{ form.errors.avatar_species_id }}</span
+                <template v-else-if="step === 1">
+                    <div data-enter class="flex flex-col gap-1.5 text-center">
+                        <h1
+                            class="text-ink text-[27px] leading-[1.15] font-black tracking-[-0.025em] text-balance"
                         >
+                            Qual é a sua data de nascimento, treinador?
+                        </h1>
+                        <p
+                            class="text-soft text-[14px] leading-[1.45] font-semibold text-pretty"
+                        >
+                            Só pra garantir que você já pode aparecer no
+                            Pokédex.
+                        </p>
+                    </div>
+                    <div data-enter>
+                        <BirthdateWheels
+                            v-model:day="day"
+                            v-model:month="month"
+                            v-model:year="year"
+                            :year-range="birthYearRange"
+                        />
+                        <span
+                            v-if="profile.errors.birthdate"
+                            role="alert"
+                            class="text-brand-ink mt-2 inline-block rounded-full bg-[rgba(242,77,77,0.12)] px-3 py-1.5 text-[12.5px] font-extrabold"
+                        >
+                            {{ profile.errors.birthdate }}
+                        </span>
+                    </div>
+                    <div data-enter class="grid grid-cols-2 gap-3">
+                        <SecondaryButton @click="goToStep(0)"
+                            >Voltar</SecondaryButton
+                        >
+                        <PrimaryButton @click="goToStep(2)"
+                            >Continuar</PrimaryButton
+                        >
+                    </div>
+                </template>
 
-                        <div class="mt-2 flex gap-3">
-                            <AppButton
-                                type="button"
-                                variant="secondary"
-                                class="w-full"
-                                @click="goToStep(2)"
-                            >
-                                Voltar
-                            </AppButton>
-                            <AppButton
-                                type="submit"
-                                :disabled="
-                                    form.avatar_species_id === null ||
-                                    form.processing
-                                "
-                                class="w-full"
-                            >
-                                {{
-                                    form.processing
-                                        ? 'Entrando...'
-                                        : 'Entrar no jogo'
-                                }}
-                            </AppButton>
-                        </div>
-                    </form>
-                </Transition>
+                <template v-else-if="step === 2">
+                    <div data-enter class="flex flex-col gap-1.5 text-center">
+                        <h1
+                            class="text-ink text-[27px] leading-[1.15] font-black tracking-[-0.025em]"
+                        >
+                            Escolha seu parceiro!
+                        </h1>
+                        <p
+                            class="text-soft text-[14px] leading-[1.45] font-semibold text-pretty"
+                        >
+                            Ele vai te representar pra galera, então escolhe com
+                            o coração.
+                        </p>
+                    </div>
+                    <div data-enter>
+                        <PartnerGrid
+                            ref="partnerGrid"
+                            v-model="profile.avatar_species_id"
+                            :options="avatarOptions"
+                            @picked="onPicked"
+                        />
+                    </div>
+                    <div data-enter class="grid grid-cols-2 gap-3">
+                        <SecondaryButton @click="goToStep(1)"
+                            >Voltar</SecondaryButton
+                        >
+                        <PrimaryButton
+                            :dimmed="profile.avatar_species_id === null"
+                            @click="finish"
+                        >
+                            Entrar no jogo
+                        </PrimaryButton>
+                    </div>
+                </template>
             </div>
         </div>
     </div>
 </template>
-
-<style scoped>
-.avatar-tile {
-    aspect-ratio: 1;
-    border-radius: 9999px;
-    background: #fff;
-    padding: 10px;
-    cursor: pointer;
-    position: relative;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: inset 0 0 0 1px rgb(0 0 0 / 8%);
-    transition: transform 220ms cubic-bezier(0.2, 0.8, 0.2, 1);
-}
-
-.avatar-tile img {
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
-}
-
-.avatar-tile::before {
-    content: '';
-    position: absolute;
-    inset: -4px;
-    border-radius: 9999px;
-    background-image: var(--holo-gradient);
-    opacity: 0;
-    transition: opacity 220ms;
-    z-index: -1;
-}
-
-.avatar-tile--selected {
-    transform: scale(1.08);
-}
-
-.avatar-tile--selected::before {
-    opacity: 1;
-    animation: avatar-holo-spin 4s linear infinite;
-}
-
-@keyframes avatar-holo-spin {
-    to {
-        filter: hue-rotate(360deg);
-    }
-}
-
-.fade-enter-active,
-.fade-leave-active {
-    transition: opacity 350ms ease;
-}
-
-.fade-enter-from,
-.fade-leave-to {
-    opacity: 0;
-}
-
-.slide-fwd-enter-active,
-.slide-fwd-leave-active,
-.slide-back-enter-active,
-.slide-back-leave-active {
-    transition:
-        opacity 200ms ease,
-        transform 200ms cubic-bezier(0.2, 0.8, 0.2, 1);
-}
-
-.slide-fwd-enter-from {
-    opacity: 0;
-    transform: translateX(20px);
-}
-
-.slide-fwd-leave-to {
-    opacity: 0;
-    transform: translateX(-20px);
-}
-
-.slide-back-enter-from {
-    opacity: 0;
-    transform: translateX(-20px);
-}
-
-.slide-back-leave-to {
-    opacity: 0;
-    transform: translateX(20px);
-}
-
-@media (prefers-reduced-motion: reduce) {
-    .avatar-tile--selected::before {
-        animation: none;
-    }
-
-    .avatar-tile,
-    .fade-enter-active,
-    .fade-leave-active,
-    .slide-fwd-enter-active,
-    .slide-fwd-leave-active,
-    .slide-back-enter-active,
-    .slide-back-leave-active {
-        transition: none;
-    }
-}
-</style>

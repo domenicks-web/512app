@@ -11,24 +11,24 @@ uses(RefreshDatabase::class);
 it('autentica o jogador com credenciais válidas', function () {
     $user = User::factory()->create(['password' => Hash::make('segredo123')]);
 
-    $response = $this->post('/login', [
+    $response = $this->postJson('/login', [
         'email' => $user->email,
         'password' => 'segredo123',
     ]);
 
-    $response->assertRedirect(route('home'));
+    $response->assertNoContent();
     $this->assertAuthenticatedAs($user);
 });
 
 it('rejeita senha incorreta sem dizer qual campo errou', function () {
     $user = User::factory()->create(['password' => Hash::make('segredo123')]);
 
-    $response = $this->post('/login', [
+    $response = $this->postJson('/login', [
         'email' => $user->email,
         'password' => 'senha-errada',
     ]);
 
-    $response->assertSessionHasErrors('email');
+    $response->assertJsonValidationErrors('email');
     $this->assertGuest();
 });
 
@@ -36,11 +36,11 @@ it('bloqueia depois de muitas tentativas erradas pro mesmo email', function () {
     $user = User::factory()->create(['password' => Hash::make('segredo123')]);
 
     foreach (range(1, 5) as $attempt) {
-        $this->post('/login', ['email' => $user->email, 'password' => 'errada']);
+        $this->postJson('/login', ['email' => $user->email, 'password' => 'errada']);
     }
 
-    $response = $this->post('/login', ['email' => $user->email, 'password' => 'segredo123']);
+    $response = $this->postJson('/login', ['email' => $user->email, 'password' => 'segredo123']);
 
-    $response->assertSessionHasErrors('email');
+    $response->assertJsonValidationErrors('email');
     $this->assertGuest();
 });

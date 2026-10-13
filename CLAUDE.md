@@ -165,12 +165,45 @@ pushado pro `main`.
   se a porta 8000/5173 já estiver ocupada ao retomar, é provavelmente ele.
   `storage:link` já foi rodado no ambiente local.
 
+- **Fluxo de entrada no design do handoff (13/10)**
+  (`design_handoff_512_onboarding/`): loading → login → cadastro →
+  onboarding → home, tudo sob o layout persistente `EntryLayout` (campo de
+  512 pontos em canvas, `useDotField`, sobrevive às visitas). Animação em
+  WAAPI puro com molas `linear()` (`resources/js/lib/motion.ts`), sem lib.
+  Só tema claro nessas telas (`.entry-light` devolve os tokens claros).
+    - `/cadastro` é em 2 passos com pills: convite (validado no servidor e
+      guardado na sessão) → email/senha. Login, cadastro, convite e
+      `completar-perfil` respondem JSON (204/422) via `useHttp`: o cliente
+      roda a animação da pokébola enquanto espera e só navega depois.
+    - Tag do onboarding: prévia sorteada no servidor
+      (`GET completar-perfil/tag`, guardada na sessão) e gravada no fim se
+      o par nickname+tag ainda estiver livre. O cliente nunca sorteia.
+    - Abertura (loading) mora no `EntryLayout` e toca inteira a cada
+      carregamento do app (F5, primeiro acesso), em qualquer tela do fluxo,
+      mesmo que a página carregue antes. Visita do Inertia não toca de novo.
+      As páginas esperam `waitForIntro()` antes de entrar; no login o logo
+      voa até o card, nas outras ele amassa e some.
+    - Home nova (`pages/Home.vue`, `ShowHomeController` +
+      `BuildHomeSummary`); a `Welcome.vue` provisória morreu. Logout de
+      verdade e link do admin ficam no menu "Ajustes" do dock.
+
+- **Pendências (dado fictício ou tela que ainda não existe)**:
+    - Home: ranking (`2º`), propostas de troca (`3`), item do feed
+      ("Ramon abriu um Rattata") e amigos online (`2`) vêm de
+      `config('game.home.placeholders')`. Trocar por dado real quando cada
+      feature existir e apagar a chave.
+    - Home: o tile "Pack de hoje" só levanta a tampa — abrir pack de
+      verdade é o subprojeto C. O "1 em 512" e a data são decorativos.
+    - Dock: Coleção, Packs, Ranking, Trocas e Amigos não navegam pra lugar
+      nenhum (só animam). Só "Ajustes" funciona.
+    - Mobile: a grade de parceiros encolhe com `zoom` abaixo de 460px; vale
+      revisar num aparelho de verdade.
+
 - **Próximos subprojetos combinados** (cada um com brainstorm próprio antes de
   codar, não pular direto pra implementação):
-    - **B — Tela de Início** (fundo claro): pack de hoje, coleção, amigos
-      online, e o logout de verdade (hoje só o link provisório na
-      `Welcome`). Precisa de dados reais ou mock, já que `OpenPack` ainda
-      não existe.
+    - **B — Tela de Início**: o visual já está pronto (handoff). Falta
+      plugar dado real no que está em `home.placeholders` e dar destino
+      aos botões do dock.
     - **C — Tela de abertura de pack** (fundo escuro): a maior. Envolve criar a
       action `OpenPack` (transação + lock em `mint_number`, chamando
       `ResolveSpecimen`), rota, e a animação de revelação em GSAP.

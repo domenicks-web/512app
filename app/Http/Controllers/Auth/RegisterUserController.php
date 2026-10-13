@@ -8,21 +8,26 @@ use App\Actions\RegisterUser;
 use App\Exceptions\InviteNotRedeemableException;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\RegisterUserRequest;
-use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\ValidationException;
 
 class RegisterUserController extends Controller
 {
-    public function store(RegisterUserRequest $request, RegisterUser $action): RedirectResponse
+    public function store(RegisterUserRequest $request, RegisterUser $action): Response
     {
         try {
             $user = $action->handle($request->toRegisterUserData());
         } catch (InviteNotRedeemableException $exception) {
-            return back()->withErrors(['invite_code' => $exception->getMessage()])->withInput();
+            $request->session()->forget(ValidateInviteController::SESSION_KEY);
+
+            throw ValidationException::withMessages(['invite_code' => $exception->getMessage()]);
         }
 
+        $request->session()->forget(ValidateInviteController::SESSION_KEY);
         Auth::login($user);
+        $request->session()->regenerate();
 
-        return redirect()->route('home');
+        return response()->noContent();
     }
 }

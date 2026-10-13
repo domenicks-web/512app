@@ -106,12 +106,12 @@ it('um convite criado pelo painel funciona no cadastro de ponta a ponta', functi
     $code = Invite::sole()->code;
     auth()->logout();
 
-    $this->post('/cadastro', [
+    $this->postJson('/cadastro/convite', ['invite_code' => $code])->assertOk();
+    $this->postJson('/cadastro', [
         'email' => 'amigo@example.com',
         'password' => 'segredo-forte-123',
         'password_confirmation' => 'segredo-forte-123',
-        'invite_code' => $code,
-    ])->assertRedirect(route('home'));
+    ])->assertNoContent();
 
     expect(Invite::sole()->uses_count)->toBe(1)
         ->and(Invite::sole()->isRedeemable())->toBeFalse();

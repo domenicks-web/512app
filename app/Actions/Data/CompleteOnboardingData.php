@@ -12,5 +12,6 @@ final readonly class CompleteOnboardingData
         public string $nickname,
         public CarbonInterface $birthdate,
         public int $avatarSpeciesId,
+        public ?string $previewedTag = null,
     ) {}
 }

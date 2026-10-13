@@ -39,3 +39,18 @@ it('gera tags diferentes pra nicknames repetidos', function () {
 
     expect($result->tag)->not->toBe('0001');
 });
+
+it('sorteia outra tag quando a da prévia foi ocupada no meio-tempo', function () {
+    User::factory()->create(['nickname' => 'Ramon', 'tag' => '6401']);
+    $user = User::factory()->withoutProfile()->create();
+    $species = Species::factory()->create();
+
+    $result = (new CompleteOnboarding)->handle($user, new CompleteOnboardingData(
+        nickname: 'Ramon',
+        birthdate: now()->subYears(25),
+        avatarSpeciesId: $species->id,
+        previewedTag: '6401',
+    ));
+
+    expect($result->tag)->toMatch('/^\d{4}$/')->not->toBe('6401');
+});

@@ -26,6 +26,60 @@
     --color-base: #eff0f2;
     --color-screen-dark: #1c1f26;
     --color-surface: #ffffff;
+
+    /* Fluxo de entrada (handoff 512): login, cadastro, onboarding, home. */
+    --color-brand-cap: #ff5757;
+    --color-brand-ink: #c0342f;
+    --color-brand-disabled: #f5a3a3;
+    --color-steel: #434a53;
+    --color-steel-light: #e4e7eb;
+    --color-field: #f4f5f6;
+    --color-line: #eceef0;
+    --color-line-strong: #e4e6ea;
+    --color-track: #dfe1e5;
+    --color-muted: #5a6069;
+    --color-soft: #767c85;
+    --color-faint: #9aa0a8;
+    --color-faint-2: #a3a8b0;
+    --color-placeholder: #b4b9c0;
+    --color-online: #3f8f6b;
+    --color-shiny: #4dd9e8;
+
+    --animate-spin-ring: spin-ring 2.2s linear infinite;
+    --animate-spin-ring-slow: spin-ring 3s linear infinite;
+    --animate-caret: caret-blink 1s steps(1) infinite;
+    --animate-online-pulse: online-pulse 2s ease-in-out infinite;
+
+    @keyframes spin-ring {
+        to {
+            transform: rotate(360deg);
+        }
+    }
+
+    @keyframes caret-blink {
+        0%,
+        49% {
+            opacity: 1;
+        }
+
+        50%,
+        100% {
+            opacity: 0;
+        }
+    }
+
+    @keyframes online-pulse {
+        0%,
+        100% {
+            transform: scale(1);
+            opacity: 1;
+        }
+
+        50% {
+            transform: scale(1.8);
+            opacity: 0.35;
+        }
+    }
 }
 
 /*
@@ -62,6 +116,87 @@
     --color-ink: #f5f5f6;
     --color-brand-blush: rgb(255 255 255 / 8%);
     --color-surface: rgb(255 255 255 / 6%);
+}
+
+/*
+ * O fluxo de entrada só existe em tema claro (handoff). O layout dele usa
+ * esta classe pra devolver os tokens claros mesmo com `.dark` no <html>.
+ */
+.entry-light {
+    color-scheme: light;
+
+    --color-base: #eff0f2;
+    --color-ink: #2b2f36;
+    --color-surface: #ffffff;
+
+    font-optical-sizing: auto;
+}
+
+/*
+ * Anel giratório (vermelho → branco → vermelho) do parceiro escolhido e do
+ * tile ativo da home: só a borda aparece, via máscara com `exclude`.
+ */
+.ring-mask {
+    -webkit-mask:
+        linear-gradient(#000 0 0) content-box,
+        linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+}
+
+.entry-input {
+    height: 52px;
+    width: 100%;
+    border-radius: 999px;
+    border: 2px solid transparent;
+    background: var(--color-field);
+    padding: 0 20px;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--color-ink);
+    outline: none;
+    transition:
+        border-color 0.2s,
+        background-color 0.2s,
+        box-shadow 0.3s,
+        transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.entry-input::placeholder {
+    color: var(--color-placeholder);
+}
+
+.entry-input:focus {
+    border-color: var(--color-brand);
+    background: #ffffff;
+    box-shadow: 0 0 0 6px rgb(242 77 77 / 0.12);
+    transform: scale(1.015);
+}
+
+.entry-input--masked {
+    color: transparent;
+    -webkit-text-fill-color: transparent;
+    caret-color: transparent;
+}
+
+.entry-input--masked::selection {
+    background: transparent;
+    color: transparent;
+}
+
+.entry-input--error {
+    border-color: var(--color-brand);
+}
+
+.entry-button {
+    transition:
+        transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1),
+        box-shadow 0.25s,
+        background-color 0.3s;
+}
+
+.pixelated {
+    image-rendering: pixelated;
 }
 
 /*

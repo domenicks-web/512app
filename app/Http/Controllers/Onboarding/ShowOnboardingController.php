@@ -26,15 +26,16 @@ class ShowOnboardingController extends Controller
         $avatarSpeciesIds = config('game.onboarding.avatar_species_ids');
 
         // Mantém a ordem curada do config (Pikachu primeiro, etc.) em vez da
-        // ordem crua do banco por id — é a espécie na primeira posição que
-        // aparece no fundo antes do jogador escolher um avatar.
+        // ordem crua do banco por id — é a ordem da grade de parceiros.
         $avatarOptions = Species::whereIn('id', $avatarSpeciesIds)
-            ->get(['id', 'name', 'artwork_path'])
+            ->get(['id', 'name', 'sprite_path'])
             ->sortBy(fn (Species $species): int => array_search($species->id, $avatarSpeciesIds, true))
             ->values();
 
         return Inertia::render('onboarding/Show', [
             'avatarOptions' => $avatarOptions,
+            'nicknameMaxLength' => config('game.onboarding.nickname_max_length'),
+            'birthYearRange' => [config('game.onboarding.birth_year_min'), now()->year],
         ]);
     }
 }
