@@ -229,17 +229,32 @@ pushado pro `main`.
     - Conferido no navegador (desktop e 390px) com a conta de teste, só nos
       estados vazios — ainda não existe espécime no banco local.
 
-- **Pendências**:
-    - Home: o tile "Pack de hoje" e o item Packs do dock não fazem nada —
-      abrir pack de verdade é o subprojeto C. O "1 em 512" e a data são
-      decorativos.
-    - Tile do Feed não abre tela (não existe feed completo; fase 5).
-    - Mobile: a grade de parceiros encolhe com `zoom` abaixo de 460px; vale
-      revisar num aparelho de verdade.
-    - PWA ainda não existe (sem `vite-plugin-pwa`, sem manifest), apesar
-      de estar no SPEC.
-    - Polimento adiado: a confirmação "Desfazer amizade com X?" fica
-      apertada no cartão (quebra em 3 linhas).
+- **Pendências** (por fase do `SPEC.md`):
+    - **Ajustes no que já existe:**
+        - Home: o tile "Pack de hoje" e o item Packs do dock não fazem
+          nada — abrir pack de verdade é o subprojeto C. O "1 em 512" e a
+          data são decorativos.
+        - PWA ainda não existe (sem `vite-plugin-pwa`, sem manifest),
+          apesar de estar no SPEC. É o que faz o jogo parecer app no
+          celular (instalar na tela inicial).
+        - Mobile: a grade de parceiros do onboarding encolhe com `zoom`
+          abaixo de 460px; revisar num aparelho de verdade.
+        - A confirmação "Desfazer amizade com X?" fica apertada no cartão
+          (quebra em 3 linhas).
+        - Tile do Feed na Home não abre tela (feed completo é fase 5).
+    - **Fase 2 — a prova (provably fair):** commit e reveal de seeds
+      (hash mostrado antes, seed revelada depois), página `/verificar`,
+      ficha detalhada do espécime (IVs, natureza, tamanho, hash). Decidir
+      no brainstorm do C se commit/reveal já entra junto.
+    - **Fase 3 — o social:** perfil público de cada jogador; comparar dois
+      espécimes da mesma espécie lado a lado; rankings que faltam (mais
+      shinies, maior IV, menor mint — hoje só existe o de espécies).
+    - **Fase 4 — as trocas:** propor, aceitar e recusar (hoje `/trocas` é
+      só leitura); notificação em tempo real via Reverb (também
+      substituiria o poll de 60s de presença e pedidos de amizade);
+      histórico de donos anteriores de cada espécime.
+    - **Fase 5 — o polimento:** tilt com giroscópio, som de abertura,
+      apelido no espécime e feed completo do grupo.
 - **CI (13/10)**: voltou a rodar no `main` (PHP 8.4, SQLite no setup,
   PHPStan com 1G). `composer ci:check` local reproduz o CI inteiro.
   Formatador ignora handoff, `docs/superpowers/` e `CLAUDE.md`.
