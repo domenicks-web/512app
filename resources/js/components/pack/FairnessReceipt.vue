@@ -1,6 +1,8 @@
 <script setup lang="ts">
+import { Link } from '@inertiajs/vue3';
 import { CYAN, TIER_META } from '@/lib/pack/meta';
 import type { PackSpecimen, Receipt } from '@/lib/pack/types';
+import { show as verifyShow } from '@/routes/verify';
 import PackModal from './PackModal.vue';
 
 /** Comprovante: hash mostrado antes, server seed revelada e o HMAC de cada slot. */
@@ -139,6 +141,21 @@ const dotColor = (specimen: PackSpecimen) =>
                     </div>
                 </div>
             </div>
+            <Link
+                :href="
+                    verifyShow({
+                        query: {
+                            server_seed: receipt.serverSeed,
+                            server_seed_hash: receipt.serverSeedHash,
+                            client_seed: receipt.clientSeed,
+                            nonce: receipt.nonce,
+                        },
+                    })
+                "
+                class="flex h-12 items-center justify-center rounded-full bg-white/8 text-[14.5px] font-extrabold text-white transition-transform active:scale-[0.98]"
+            >
+                Conferir de novo na verificação
+            </Link>
         </div>
     </PackModal>
 </template>

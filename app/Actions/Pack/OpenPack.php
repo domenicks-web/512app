@@ -6,7 +6,6 @@ namespace App\Actions\Pack;
 
 use App\Actions\DrawPack;
 use App\Actions\ResolveSpecimen;
-use App\Enums\RarityTier;
 use App\Exceptions\PackOnCooldownException;
 use App\Models\Opening;
 use App\Models\Species;
@@ -31,6 +30,7 @@ class OpenPack
         private readonly ResolveSpecimen $resolveSpecimen = new ResolveSpecimen,
         private readonly CommitServerSeed $commitServerSeed = new CommitServerSeed,
         private readonly ProvablyFair $provablyFair = new ProvablyFair,
+        private readonly ListSpeciesIdsByTier $listSpeciesIdsByTier = new ListSpeciesIdsByTier,
     ) {}
 
     public function handle(User $user): Opening
@@ -45,7 +45,7 @@ class OpenPack
 
             $this->commitServerSeed->handle($locked);
             $serverSeed = (string) $locked->next_server_seed;
-            $draws = $this->drawPack->handle($serverSeed, $locked->client_seed, $locked->nonce, $this->speciesIdsByTier());
+            $draws = $this->drawPack->handle($serverSeed, $locked->client_seed, $locked->nonce, $this->listSpeciesIdsByTier->handle());
 
             $speciesIds = array_values(array_unique(array_map(fn ($draw): int => $draw->speciesId, $draws)));
             $species = Species::whereKey($speciesIds)->orderBy('id')->lockForUpdate()->get()->keyBy('id');
@@ -107,20 +107,5 @@ class OpenPack
 
             return $opening;
         });
-    }
-
-    /**
-     * @return array<string, list<int>>
-     */
-    private function speciesIdsByTier(): array
-    {
-        $byTier = [];
-
-        foreach (RarityTier::cases() as $tier) {
-            $byTier[$tier->value] = Species::where('rarity_tier', $tier->value)->orderBy('id')->pluck('id')->map(fn ($id): int => (int) $id)->values()->all();
-            $byTier[$tier->value] = array_values($byTier[$tier->value]);
-        }
-
-        return $byTier;
     }
 }

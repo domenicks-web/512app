@@ -16,6 +16,7 @@ use App\Http\Controllers\Profile\ProfileController;
 use App\Http\Controllers\Profile\ShowProfileController;
 use App\Http\Controllers\Ranking\ShowRankingController;
 use App\Http\Controllers\Trades\ShowTradesController;
+use App\Http\Controllers\Verify\VerifyPackController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware(['auth', 'onboarded'])->group(function () {
@@ -32,6 +33,8 @@ Route::middleware(['auth', 'onboarded'])->group(function () {
     Route::post('pack/abrir', [PackController::class, 'open'])->name('pack.open');
     Route::post('pack/{opening}/bolas/{slot}', [PackController::class, 'reveal'])->whereNumber('slot')->name('pack.reveal');
     Route::patch('pack/client-seed', [ClientSeedController::class, 'update'])->name('pack.client-seed.update');
+    Route::get('verificar', [VerifyPackController::class, 'show'])->name('verify.show');
+    Route::post('verificar', [VerifyPackController::class, 'store'])->middleware('throttle:30,1')->name('verify.store');
     Route::post('amigos/pedidos', SendFriendRequestController::class)->name('friends.requests.store');
     Route::post('amigos/pedidos/{friendship}/aceitar', AcceptFriendRequestController::class)
         ->can('accept', 'friendship')

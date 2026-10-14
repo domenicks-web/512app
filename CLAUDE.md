@@ -404,9 +404,19 @@ pushado pro `main`.
     - `ResetUnownedAvatar` precisa ser chamado no `AcceptTrade` (fase 4).
     - Conferir no Gmail o email real do "esqueci a senha".
     - Arrastar com o dedo entre abas (oferecido, não pedido ainda).
-    - Fase 2: `/verificar`. Fase 3: perfil público, comparar espécimes,
+    - ~~Fase 2: `/verificar`~~ — feito (branch `verificar`, ver abaixo). Fase 3: perfil público, comparar espécimes,
       rankings de shinies/IV/mint. Fase 4: trocas, Reverb, banimento.
       Fase 5: polimento (giroscópio, apelido no espécime).
     - PWA por último (pedido do usuário).
     - Conta de teste (`claudetest@512app.com` / `claude`) sem dados,
       avatar Pikachu, pack disponível.
+- **Verificar (14/10, branch `verificar`, a partir do `main`, não mergeado
+  nem enviado)**: `/verificar` (Ajustes → "Verificar um pack", ou
+  "Conferir de novo na verificação" no Comprovante, que já preenche via
+  query). Calculadora pura: `POST /verificar` (JSON) roda o mesmo
+  `DrawPack` + `ResolveSpecimen` da abertura sem gravar nada
+  (`VerifyPack`); hash opcional (sem ele não diz se bate). Não confronta
+  com o banco (decidido com o usuário). Mint não aparece (não sai da
+  seed). As espécies por tier saíram do `OpenPack` pra
+  `ListSpeciesIdsByTier`, usada pelos dois. Client seed aceita até 255
+  na verificação (a gerada passa dos 24 da edição).
