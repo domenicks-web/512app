@@ -71,21 +71,32 @@ class RarityTable
      */
     public function rollTier(float $roll, bool $guaranteedMinRarity = false): RarityTier
     {
+        return $this->rollTierWithResidual($roll, $guaranteedMinRarity)[0];
+    }
+
+    /**
+     * Igual ao rollTier, mais onde o roll caiu dentro da faixa do tier, em
+     * [0, 1). O resto escolhe a espécie dentro do tier sem gastar outro byte.
+     *
+     * @return array{0: RarityTier, 1: float}
+     */
+    public function rollTierWithResidual(float $roll, bool $guaranteedMinRarity = false): array
+    {
         $weights = $this->weights($guaranteedMinRarity);
         $target = $roll * array_sum($weights);
 
         $cumulative = 0.0;
 
         foreach ($weights as $tier => $weight) {
-            $cumulative += $weight;
-
-            if ($target < $cumulative) {
-                return RarityTier::from($tier);
+            if ($target < $cumulative + $weight) {
+                return [RarityTier::from($tier), ($target - $cumulative) / $weight];
             }
+
+            $cumulative += $weight;
         }
 
         // Ponto flutuante pode deixar o roll cair 1 ULP acima do total
         // acumulado; devolve o último tier da lista de pesos nesse caso.
-        return RarityTier::from(array_key_last($weights));
+        return [RarityTier::from((string) array_key_last($weights)), 0.999999];
     }
 }

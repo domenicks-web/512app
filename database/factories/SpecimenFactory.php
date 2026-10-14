@@ -46,6 +46,14 @@ class SpecimenFactory extends Factory
             'hash' => Str::random(64),
             'nickname' => null,
             'caught_at' => now(),
+            'slot' => 1,
+            'revealed_at' => now(),
         ];
+    }
+
+    /** Bola ainda fechada: não aparece em coleção, ranking nem feed. */
+    public function unrevealed(): static
+    {
+        return $this->state(fn (array $attributes): array => ['revealed_at' => null]);
     }
 }

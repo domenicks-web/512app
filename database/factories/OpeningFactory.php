@@ -29,6 +29,7 @@ class OpeningFactory extends Factory
             'server_seed_hash' => hash('sha256', $serverSeed),
             'client_seed' => Str::random(32),
             'nonce' => 0,
+            'opened_slots' => 0b11111,
             'revealed_at' => now(),
         ];
     }

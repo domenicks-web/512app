@@ -6,8 +6,10 @@ namespace App\Models;
 
 use App\Enums\Nature;
 use App\Enums\SizeClass;
+use App\Models\Scopes\RevealedScope;
 use Database\Factories\SpecimenFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Attributes\ScopedBy;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -34,6 +36,8 @@ use Illuminate\Support\Carbon;
  * @property string $hash
  * @property string|null $nickname
  * @property Carbon $caught_at
+ * @property int $slot
+ * @property Carbon|null $revealed_at
  */
 #[Fillable([
     'opening_id',
@@ -54,7 +58,10 @@ use Illuminate\Support\Carbon;
     'hash',
     'nickname',
     'caught_at',
+    'slot',
+    'revealed_at',
 ])]
+#[ScopedBy(RevealedScope::class)]
 class Specimen extends Model
 {
     /** @use HasFactory<SpecimenFactory> */
@@ -95,6 +102,8 @@ class Specimen extends Model
             'size_class' => SizeClass::class,
             'nature' => Nature::class,
             'caught_at' => 'datetime',
+            'slot' => 'integer',
+            'revealed_at' => 'datetime',
         ];
     }
 }

@@ -8,6 +8,8 @@ use App\Http\Controllers\Friends\RemoveFriendshipController;
 use App\Http\Controllers\Friends\SendFriendRequestController;
 use App\Http\Controllers\Friends\ShowFriendsController;
 use App\Http\Controllers\Home\ShowHomeController;
+use App\Http\Controllers\Pack\ClientSeedController;
+use App\Http\Controllers\Pack\PackController;
 use App\Http\Controllers\Profile\ProfileController;
 use App\Http\Controllers\Profile\ShowProfileController;
 use App\Http\Controllers\Ranking\ShowRankingController;
@@ -20,6 +22,11 @@ Route::middleware(['auth', 'onboarded'])->group(function () {
     Route::get('ranking', ShowRankingController::class)->name('ranking.show');
     Route::get('trocas', ShowTradesController::class)->name('trades.index');
     Route::get('amigos', ShowFriendsController::class)->name('friends.index');
+
+    Route::get('pack', [PackController::class, 'show'])->name('pack.show');
+    Route::post('pack/abrir', [PackController::class, 'open'])->name('pack.open');
+    Route::post('pack/{opening}/bolas/{slot}', [PackController::class, 'reveal'])->whereNumber('slot')->name('pack.reveal');
+    Route::patch('pack/client-seed', [ClientSeedController::class, 'update'])->name('pack.client-seed.update');
     Route::post('amigos/pedidos', SendFriendRequestController::class)->name('friends.requests.store');
     Route::post('amigos/pedidos/{friendship}/aceitar', AcceptFriendRequestController::class)
         ->can('accept', 'friendship')

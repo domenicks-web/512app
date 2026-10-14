@@ -33,12 +33,14 @@ use Illuminate\Support\Carbon;
  * @property string|null $remember_token
  * @property string $client_seed
  * @property int $nonce
+ * @property string|null $next_server_seed
+ * @property string|null $next_server_seed_hash
  * @property Carbon|null $next_pack_at
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  */
 #[Fillable(['nickname', 'tag', 'email', 'password', 'birthdate', 'avatar_species_id', 'invited_by', 'client_seed'])]
-#[Hidden(['password', 'remember_token'])]
+#[Hidden(['password', 'remember_token', 'next_server_seed'])]
 class User extends Authenticatable implements MustVerifyEmail
 {
     /** @use HasFactory<UserFactory> */
@@ -164,6 +166,7 @@ class User extends Authenticatable implements MustVerifyEmail
             'password' => 'hashed',
             'nonce' => 'integer',
             'next_pack_at' => 'datetime',
+            'next_server_seed' => 'encrypted',
         ];
     }
 }

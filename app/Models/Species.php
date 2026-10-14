@@ -25,6 +25,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property string $base_weight_kg
  * @property string $sprite_path
  * @property string $sprite_shiny_path
+ * @property string|null $sprite_animated_path
+ * @property string|null $sprite_animated_shiny_path
  * @property string $artwork_path
  * @property string|null $flavor_pt
  */
@@ -41,6 +43,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
     'base_weight_kg',
     'sprite_path',
     'sprite_shiny_path',
+    'sprite_animated_path',
+    'sprite_animated_shiny_path',
     'artwork_path',
     'flavor_pt',
 ])]

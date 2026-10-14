@@ -11,8 +11,10 @@ return [
     | Pack
     |--------------------------------------------------------------------------
     |
-    | Tamanho do pack, cooldown entre aberturas e qual slot (1-indexado)
-    | garante incomum ou acima.
+    | Tamanho do pack, cooldown entre aberturas, qual slot (1-indexado)
+    | garante incomum ou acima e o tamanho máximo da client seed editável.
+    | `holo` são as faixas do brilho da carta, derivadas dos bytes 29–31 da
+    | seed do espécime (só visual).
     |
     */
 
@@ -20,6 +22,12 @@ return [
         'slots' => 5,
         'cooldown_hours' => 24,
         'guaranteed_slot' => 5,
+        'client_seed_max_length' => 24,
+        'holo' => [
+            'angle' => [20, 160],
+            'offset' => [0, 100],
+            'intensity' => [0.35, 0.85],
+        ],
     ],
 
     /*
