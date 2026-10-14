@@ -156,6 +156,8 @@ return [
     'profile' => [
         'nickname_cooldown_days' => 15,
         'email_change_link_minutes' => 60,
+        // Quantos espécimes aparecem no Time do Cartão de Treinador.
+        'team_size' => 6,
     ],
 
     // Fuso usado em datas e horas mostradas pro jogador (o app roda em UTC).
