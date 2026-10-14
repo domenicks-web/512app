@@ -4,7 +4,15 @@ import tailwindcss from '@tailwindcss/vite';
 import vue from '@vitejs/plugin-vue';
 import laravel from 'laravel-vite-plugin';
 import { bunny } from 'laravel-vite-plugin/fonts';
-import { defineConfig, lazyPlugins } from 'vite-plus';
+import { defineConfig, lazyPlugins, loadEnv } from 'vite-plus';
+
+// `DEV_LAN_HOST` no .env (ex: 192.168.1.26) abre o dev server pra rede:
+// celular e outros aparelhos acessam pelo IP do PC. Sem ele, só localhost.
+const lanHost = loadEnv(
+    process.env.NODE_ENV ?? 'development',
+    process.cwd(),
+    '',
+).DEV_LAN_HOST;
 
 export default defineConfig({
     plugins: lazyPlugins(() => [
@@ -35,6 +43,9 @@ export default defineConfig({
         }),
     ]),
     server: {
+        ...(lanHost
+            ? { host: '0.0.0.0', hmr: { host: lanHost }, cors: true }
+            : {}),
         watch: {
             ignored: [
                 '**/.agents/**',
