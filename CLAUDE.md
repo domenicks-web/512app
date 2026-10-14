@@ -339,7 +339,12 @@ pushado pro `main`.
       trades, nonce, cooldown e seeds comprometidas). Contas e convites
       mantidos.
 - **Estado do git (14/10)**: `perfil`, `admin` e `pack` mergeados no
-  `main` (fast-forward) e enviados.
+  `main` (fast-forward) e enviados. CI verde em `d62efd1` (o Wayfinder
+  tipa `{species}` como string no MySQL e number no SQLite do CI — a
+  coleção usa `speciesKey()` pra não depender disso).
+- **Onde paramos (14/10, 13h)**: o Claude perguntou "Quer que eu comece o
+  avatar da Pokédex?" e o usuário pausou ali. Retomar por essa resposta
+  (decisões do avatar já registradas acima).
 
 ===
 
