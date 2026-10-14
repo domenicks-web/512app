@@ -44,6 +44,7 @@ class PackSpecimenResource extends JsonResource
             'sizePercentile' => $this->sizePercentile($sizeRoll),
             'heightM' => round((float) $species->base_height_m * (0.7 + $sizeRoll * 0.6), 2),
             'nature' => $this->nature->label(),
+            'natureEffect' => $this->nature->effect(),
             'natureIndex' => $natureIndex,
             'ivs' => [$this->iv_hp, $this->iv_atk, $this->iv_def, $this->iv_spa, $this->iv_spd, $this->iv_spe],
             'ivTotal' => $this->iv_hp + $this->iv_atk + $this->iv_def + $this->iv_spa + $this->iv_spd + $this->iv_spe,

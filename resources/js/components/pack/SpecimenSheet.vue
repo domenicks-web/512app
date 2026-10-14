@@ -341,6 +341,9 @@ const tone = computed(() =>
                                 }"
                             />{{ specimen.nature }}
                         </div>
+                        <div class="text-[11px] font-bold" :class="tone.muted">
+                            {{ specimen.natureEffect }}
+                        </div>
                     </div>
                     <div class="flex flex-col gap-[5px]">
                         <div

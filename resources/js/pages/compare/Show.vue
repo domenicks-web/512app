@@ -29,7 +29,13 @@ const props = defineProps<{
     comparison: {
         stats: { key: string; mine: number; theirs: number; winner: Winner }[];
         mint: { mine: number; theirs: number; winner: Winner };
-        info: { key: 'size' | 'nature'; mine: string; theirs: string }[];
+        info: {
+            key: 'size' | 'nature';
+            mine: string;
+            theirs: string;
+            mineNote: string | null;
+            theirsNote: string | null;
+        }[];
         score: { mine: number; theirs: number; total: number };
     };
     choices: {
@@ -195,29 +201,49 @@ const card =
                     :key="row.key"
                     class="grid grid-cols-[1fr_auto_1fr] items-center gap-2 border-t border-[#eceef0] px-2 py-2.5"
                 >
-                    <span
-                        class="text-ink text-center text-[14px] font-black"
-                        :style="
-                            row.key === 'nature'
-                                ? { color: natureColor(mine.natureIndex) }
-                                : undefined
-                        "
-                        >{{ row.mine }}</span
-                    >
+                    <span class="flex flex-col items-center text-center">
+                        <span
+                            class="text-ink text-[14px] font-black"
+                            :style="
+                                row.key === 'nature'
+                                    ? { color: natureColor(mine.natureIndex) }
+                                    : undefined
+                            "
+                            >{{ row.mine }}</span
+                        >
+                        <span
+                            v-if="row.mineNote"
+                            class="text-faint text-[11px] font-bold"
+                            >{{ row.mineNote }}</span
+                        >
+                    </span>
                     <span
                         class="text-soft w-16 text-center text-xs font-extrabold"
                         >{{ INFO_LABELS[row.key] }}</span
                     >
-                    <span
-                        class="text-ink text-center text-[14px] font-black"
-                        :style="
-                            row.key === 'nature'
-                                ? { color: natureColor(theirs.natureIndex) }
-                                : undefined
-                        "
-                        >{{ row.theirs }}</span
-                    >
+                    <span class="flex flex-col items-center text-center">
+                        <span
+                            class="text-ink text-[14px] font-black"
+                            :style="
+                                row.key === 'nature'
+                                    ? { color: natureColor(theirs.natureIndex) }
+                                    : undefined
+                            "
+                            >{{ row.theirs }}</span
+                        >
+                        <span
+                            v-if="row.theirsNote"
+                            class="text-faint text-[11px] font-bold"
+                            >{{ row.theirsNote }}</span
+                        >
+                    </span>
                 </div>
+                <p
+                    class="text-soft border-t border-[#eceef0] px-3 pt-2.5 pb-1 text-center text-[11.5px] leading-snug font-semibold"
+                >
+                    Tamanho e natureza não contam pontos: são a personalidade de
+                    cada um.
+                </p>
             </section>
 
             <section

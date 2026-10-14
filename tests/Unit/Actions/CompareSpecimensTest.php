@@ -37,7 +37,8 @@ it('diz quem ganha em cada IV, no total e no mint, com empate neutro', function 
         ->and($result['stats'][0])->toMatchArray(['mine' => 51, 'theirs' => 70])
         ->and($result['mint'])->toBe(['mine' => 3, 'theirs' => 7, 'winner' => 'mine'])
         ->and($result['score'])->toBe(['mine' => 2, 'theirs' => 3, 'total' => 7])
-        ->and(array_column($result['info'], 'key'))->toBe(['size', 'nature']);
+        ->and(array_column($result['info'], 'key'))->toBe(['size', 'nature'])
+        ->and($result['info'][1])->toMatchArray(['mine' => 'Hardy', 'mineNote' => 'Neutra']);
 });
 
 it('comparar um espécime com ele mesmo empata tudo', function () {

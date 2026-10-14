@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace App\Enums;
 
 /**
- * As 25 naturezas. O valor (inglês) é o que vai pro banco e pra seed;
- * `label()` é o nome que o jogador vê.
+ * As 25 naturezas, na ordem dos jogos (a seed depende dela). O jogador
+ * vê o nome dos jogos, em inglês, e o efeito que ela teria lá.
  */
 enum Nature: string
 {
@@ -38,32 +38,22 @@ enum Nature: string
 
     public function label(): string
     {
-        return match ($this) {
-            self::Hardy => 'Resistente',
-            self::Lonely => 'Solitária',
-            self::Brave => 'Corajosa',
-            self::Adamant => 'Obstinada',
-            self::Naughty => 'Travessa',
-            self::Bold => 'Ousada',
-            self::Docile => 'Dócil',
-            self::Relaxed => 'Relaxada',
-            self::Impish => 'Arteira',
-            self::Lax => 'Desleixada',
-            self::Timid => 'Tímida',
-            self::Hasty => 'Apressada',
-            self::Serious => 'Séria',
-            self::Jolly => 'Alegre',
-            self::Naive => 'Ingênua',
-            self::Modest => 'Modesta',
-            self::Mild => 'Branda',
-            self::Quiet => 'Quieta',
-            self::Bashful => 'Acanhada',
-            self::Rash => 'Imprudente',
-            self::Calm => 'Calma',
-            self::Gentle => 'Gentil',
-            self::Sassy => 'Atrevida',
-            self::Careful => 'Cuidadosa',
-            self::Quirky => 'Excêntrica',
-        };
+        return ucfirst($this->value);
+    }
+
+    /**
+     * O que ela faz nos jogos (+10% num atributo, −10% noutro), só como
+     * curiosidade: aqui a natureza não mexe em nada. Na ordem dos jogos,
+     * a posição na lista diz o atributo que sobe (÷5) e o que cai (resto);
+     * as cinco da diagonal são neutras.
+     */
+    public function effect(): string
+    {
+        $stats = ['Atk', 'Def', 'Spe', 'SpA', 'SpD'];
+        $index = (int) array_search($this, self::cases(), true);
+        $up = intdiv($index, 5);
+        $down = $index % 5;
+
+        return $up === $down ? 'Neutra' : "+{$stats[$up]} −{$stats[$down]}";
     }
 }

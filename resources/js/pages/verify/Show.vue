@@ -30,6 +30,7 @@ type VerifiedSlot = {
     sprite: string;
     sizeClass: string;
     nature: string;
+    natureEffect: string;
     natureIndex: number;
     ivs: number[];
     ivTotal: number;

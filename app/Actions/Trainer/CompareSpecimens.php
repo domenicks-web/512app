@@ -27,7 +27,7 @@ class CompareSpecimens
      * @return array{
      *     stats: list<array{key: string, mine: int, theirs: int, winner: 'mine'|'theirs'|'tie'}>,
      *     mint: array{mine: int, theirs: int, winner: 'mine'|'theirs'|'tie'},
-     *     info: list<array{key: string, mine: string, theirs: string}>,
+     *     info: list<array{key: string, mine: string, theirs: string, mineNote: string|null, theirsNote: string|null}>,
      *     score: array{mine: int, theirs: int, total: int},
      * }
      */
@@ -51,8 +51,8 @@ class CompareSpecimens
                 'winner' => $this->winner($theirs->mint_number <=> $mine->mint_number),
             ],
             'info' => [
-                ['key' => 'size', 'mine' => strtoupper($mine->size_class->value), 'theirs' => strtoupper($theirs->size_class->value)],
-                ['key' => 'nature', 'mine' => $mine->nature->label(), 'theirs' => $theirs->nature->label()],
+                ['key' => 'size', 'mine' => strtoupper($mine->size_class->value), 'theirs' => strtoupper($theirs->size_class->value), 'mineNote' => null, 'theirsNote' => null],
+                ['key' => 'nature', 'mine' => $mine->nature->label(), 'theirs' => $theirs->nature->label(), 'mineNote' => $mine->nature->effect(), 'theirsNote' => $theirs->nature->effect()],
             ],
             'score' => [
                 'mine' => $winners['mine'] ?? 0,

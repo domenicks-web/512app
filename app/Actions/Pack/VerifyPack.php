@@ -50,6 +50,7 @@ class VerifyPack
                 'sprite' => '/storage/'.($data->isShiny ? $drawnSpecies->sprite_shiny_path : $drawnSpecies->sprite_path),
                 'sizeClass' => $data->sizeClass->value,
                 'nature' => $data->nature->label(),
+                'natureEffect' => $data->nature->effect(),
                 'natureIndex' => (int) array_search($data->nature, Nature::cases(), true),
                 'ivs' => $ivs,
                 'ivTotal' => $data->ivTotal(),
