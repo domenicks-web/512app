@@ -1,10 +1,12 @@
 <script setup lang="ts">
 import { Form, Head, Link, usePage } from '@inertiajs/vue3';
-import { onBeforeUnmount, onMounted, ref, watch } from 'vue';
+import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
+import FittedSprite from '@/components/FittedSprite.vue';
 import LogoutUserController from '@/actions/App/Http/Controllers/Auth/LogoutUserController';
 import { home } from '@/routes';
 import { index as invitesIndex } from '@/routes/admin/invites';
 import { index as playersIndex } from '@/routes/admin/players';
+import { edit as profileEdit } from '@/routes/profile';
 import { showToast, toastKey, toastMessage } from './toast';
 import AdminIcon from './AdminIcon.vue';
 
@@ -19,6 +21,10 @@ defineProps<{
 
 const page = usePage();
 const nickname = (page.props.auth.user.nickname as string | null) ?? 'Admin';
+const tag = page.props.auth.user.tag as string | null;
+const avatarSpritePath = computed(
+    () => page.props.auth.avatarSpritePath ?? null,
+);
 
 const tabs = [
     {
@@ -116,27 +122,42 @@ onBeforeUnmount(() => document.removeEventListener('click', closeOnOutside));
                 <div ref="menu" class="relative">
                     <button
                         type="button"
-                        class="flex cursor-pointer items-center gap-3 text-right"
+                        class="flex cursor-pointer items-center gap-3 rounded-full text-left"
                         :aria-expanded="menuOpen"
+                        aria-label="Menu da conta"
                         @click="menuOpen = !menuOpen"
                     >
-                        <span class="flex flex-col leading-tight">
-                            <span class="text-sm font-extrabold">{{
-                                nickname
-                            }}</span>
+                        <span
+                            class="flex size-11 shrink-0 items-center justify-center overflow-hidden rounded-full bg-white shadow-[0_0_0_3px_#fff,0_0_0_5px_#f24d4d,0_6px_14px_rgba(28,32,38,0.12)]"
+                        >
+                            <FittedSprite
+                                v-if="avatarSpritePath"
+                                :src="`/storage/${avatarSpritePath}`"
+                                :size="44"
+                                :padding="6"
+                            />
+                        </span>
+                        <span class="hidden flex-col gap-px sm:flex">
+                            <span class="text-ink text-[15px] font-black"
+                                >{{ nickname
+                                }}<span class="text-faint-2"
+                                    >#{{ tag }}</span
+                                ></span
+                            >
                             <span class="text-soft text-xs font-semibold"
                                 >Admin</span
                             >
                         </span>
-                        <span
-                            class="bg-ink flex size-[38px] items-center justify-center rounded-full text-[15px] font-black text-white"
-                            >{{ nickname.charAt(0).toUpperCase() }}</span
-                        >
                     </button>
                     <div
                         v-if="menuOpen"
                         class="absolute top-full right-0 z-30 mt-2 flex w-48 flex-col rounded-2xl bg-white p-1.5 shadow-[0_2px_4px_rgba(28,32,38,0.06),0_16px_40px_rgba(28,32,38,0.16)]"
                     >
+                        <Link
+                            :href="profileEdit.url()"
+                            class="hover:bg-field rounded-xl px-3 py-2.5 text-sm font-extrabold"
+                            >Editar perfil</Link
+                        >
                         <Link
                             :href="home.url()"
                             class="hover:bg-field rounded-xl px-3 py-2.5 text-sm font-extrabold"

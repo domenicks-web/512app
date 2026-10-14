@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import FittedSprite from '@/components/FittedSprite.vue';
-import { Head, router, usePoll } from '@inertiajs/vue3';
+import { Head, Link, router, usePoll } from '@inertiajs/vue3';
 import {
     computed,
     nextTick,
@@ -15,6 +15,7 @@ import { waitForIntro } from '@/composables/useIntro';
 import EntryLayout from '@/layouts/EntryLayout.vue';
 import { formatFriendsOnline, formatMint } from '@/lib/format';
 import { animate, spring } from '@/lib/motion';
+import { edit as profileEdit } from '@/routes/profile';
 import { show as collectionShow } from '@/routes/collection';
 import { show as rankingShow } from '@/routes/ranking';
 import { index as tradesIndex } from '@/routes/trades';
@@ -340,7 +341,12 @@ const compactLabel =
         <header
             class="flex items-center justify-between gap-4 px-5 pt-[18px] sm:px-7 sm:pt-[22px]"
         >
-            <div data-enter="pop" class="flex items-center gap-3">
+            <Link
+                :href="profileEdit.url()"
+                data-enter="pop"
+                class="flex items-center gap-3 rounded-full pr-3 outline-none focus-visible:shadow-[0_0_0_3px_rgba(242,77,77,0.35)]"
+                aria-label="Editar perfil"
+            >
                 <div
                     class="flex size-12 items-center justify-center overflow-hidden rounded-full bg-white shadow-[0_0_0_3px_#fff,0_0_0_5px_#f24d4d,0_6px_14px_rgba(28,32,38,0.12)]"
                 >
@@ -361,7 +367,7 @@ const compactLabel =
                         {{ collection.totalSpecies }} espécies
                     </div>
                 </div>
-            </div>
+            </Link>
         </header>
 
         <div

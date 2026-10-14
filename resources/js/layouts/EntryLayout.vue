@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { nextTick, onBeforeUnmount, onMounted, ref } from 'vue';
+import GameToast from '@/components/entry/GameToast.vue';
 import IntroLoader from '@/components/entry/IntroLoader.vue';
 import { mountDotField } from '@/composables/useDotField';
 import {
@@ -71,5 +72,6 @@ onBeforeUnmount(() => {
         <div :class="{ invisible: isContentHidden }">
             <slot />
         </div>
+        <GameToast />
     </div>
 </template>

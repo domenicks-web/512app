@@ -11,4 +11,6 @@ export type User = {
 
 export type Auth = {
     user: User;
+    /** Sprite do parceiro de quem está logado (pasta `storage`). */
+    avatarSpritePath?: string | null;
 };
