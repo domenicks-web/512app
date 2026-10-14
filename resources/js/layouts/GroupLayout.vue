@@ -25,6 +25,7 @@ const SCREENS: Record<string, { order: number; dock?: DockKey }> = {
     'settings/Show': { order: 6, dock: 'settings' },
     'profile/Edit': { order: 7, dock: 'settings' },
     'verify/Show': { order: 8, dock: 'settings' },
+    'trainer/Show': { order: 9 },
 };
 
 const page = usePage<{ friendsOnline?: number }>();
