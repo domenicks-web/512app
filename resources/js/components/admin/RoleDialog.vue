@@ -124,7 +124,7 @@ function submit() {
                     autocomplete="off"
                     autocapitalize="off"
                     spellcheck="false"
-                    class="bg-field text-ink h-[50px] rounded-full px-5 text-center font-mono text-base font-extrabold outline-none focus:bg-white focus:shadow-[inset_0_0_0_2px_#f24d4d]"
+                    class="bg-field text-ink h-[50px] rounded-full px-5 text-center font-mono text-[16px] font-extrabold outline-none focus:bg-white focus:shadow-[inset_0_0_0_2px_#f24d4d]"
                 />
                 <p
                     v-if="error"

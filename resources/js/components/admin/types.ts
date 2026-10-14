@@ -25,3 +25,47 @@ export type Player = {
     specimens_count: number;
     created_at: string | null;
 };
+
+export type InviteStatus = 'active' | 'exhausted' | 'expired' | 'revoked';
+
+export type Invite = {
+    id: number;
+    code: string;
+    status: InviteStatus;
+    max_uses: number;
+    uses_count: number;
+    expires_at: string | null;
+    created_at: string;
+    created_by: string;
+    redemptions: {
+        nickname: string;
+        handle: string;
+        avatar_sprite_path: string | null;
+    }[];
+};
+
+export const inviteStatusMeta: Record<
+    InviteStatus,
+    { label: string; plural: string; pill: string }
+> = {
+    active: {
+        label: 'Ativo',
+        plural: 'Ativos',
+        pill: 'bg-[#e3f1ea] text-[#2f7556]',
+    },
+    exhausted: {
+        label: 'Esgotado',
+        plural: 'Esgotados',
+        pill: 'bg-[#eceef1] text-[#656b74]',
+    },
+    expired: {
+        label: 'Expirado',
+        plural: 'Expirados',
+        pill: 'bg-[#f6e9df] text-[#8f5735]',
+    },
+    revoked: {
+        label: 'Revogado',
+        plural: 'Revogados',
+        pill: 'bg-[#ffe6e6] text-[#d63c3c]',
+    },
+};

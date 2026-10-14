@@ -26,7 +26,7 @@ defineExpose({ root });
         :class="[
             size === 'lg'
                 ? 'h-[58px] text-[17px] tracking-[-0.01em]'
-                : 'h-[54px] text-base',
+                : 'h-[54px] text-[16px]',
             dimmed ? 'bg-brand-disabled' : 'bg-brand',
         ]"
     >

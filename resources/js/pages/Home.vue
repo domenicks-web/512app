@@ -77,6 +77,13 @@ const ring = ref<HTMLElement | null>(null);
 const ringLabel = ref<HTMLElement | null>(null);
 const activeTile = ref(0);
 
+/**
+ * Abaixo de 640px o trilho vira mosaico (pack largo em cima, os outros em
+ * 2×2) pra caber tudo na tela; aí não tem deslize nem rótulo flutuante.
+ */
+const isCompact = ref(false);
+let compactQuery: MediaQueryList | null = null;
+
 const collectionPercent = computed(() =>
     props.collection.totalSpecies > 0
         ? Math.round(
@@ -109,13 +116,15 @@ function placeRing(animated: boolean) {
     const paddingLeft =
         parseFloat(getComputedStyle(wrap.value).paddingLeft) || 0;
     const visible = wrap.value.clientWidth - paddingLeft;
-    const shift = Math.max(
-        0,
-        Math.min(
-            tile.offsetLeft - 8,
-            tile.offsetLeft + tile.offsetWidth - visible + 70,
-        ),
-    );
+    const shift = isCompact.value
+        ? 0
+        : Math.max(
+              0,
+              Math.min(
+                  tile.offsetLeft - 8,
+                  tile.offsetLeft + tile.offsetWidth - visible + 70,
+              ),
+          );
     const elements = [track.value, ring.value, ringLabel.value];
     const transitions = elements.map((element) => element.style.transition);
 
@@ -223,7 +232,16 @@ function onKeydown(event: KeyboardEvent) {
 
 const onResize = () => placeRing(false);
 
+async function onCompactChange() {
+    isCompact.value = compactQuery?.matches ?? false;
+    await nextTick();
+    placeRing(false);
+}
+
 onMounted(async () => {
+    compactQuery = window.matchMedia('(max-width: 639.98px)');
+    isCompact.value = compactQuery.matches;
+    compactQuery.addEventListener('change', onCompactChange);
     await waitForIntro();
     field.hide();
     await nextTick();
@@ -304,17 +322,24 @@ onMounted(async () => {
 onBeforeUnmount(() => {
     window.removeEventListener('keydown', onKeydown);
     window.removeEventListener('resize', onResize);
+    compactQuery?.removeEventListener('change', onCompactChange);
 });
 
 const tileBase =
-    'relative aspect-square w-[clamp(200px,23vw,300px)] shrink-0 cursor-pointer overflow-hidden rounded-[22px] text-left outline-none';
+    'relative min-h-0 w-full cursor-pointer overflow-hidden rounded-[22px] text-left outline-none sm:aspect-square sm:w-[clamp(200px,23vw,300px)] sm:shrink-0';
+
+/** Título dentro do tile, só no mosaico do celular. */
+const compactLabel =
+    'absolute top-3.5 left-4 text-[12px] font-black tracking-[0.02em] sm:hidden';
 </script>
 
 <template>
     <Head title="Início" />
 
     <div ref="root" class="absolute inset-0 z-[3] flex flex-col">
-        <header class="flex items-center justify-between gap-4 px-7 pt-[22px]">
+        <header
+            class="flex items-center justify-between gap-4 px-5 pt-[18px] sm:px-7 sm:pt-[22px]"
+        >
             <div data-enter="pop" class="flex items-center gap-3">
                 <div
                     class="flex size-12 items-center justify-center overflow-hidden rounded-full bg-white shadow-[0_0_0_3px_#fff,0_0_0_5px_#f24d4d,0_6px_14px_rgba(28,32,38,0.12)]"
@@ -341,18 +366,18 @@ const tileBase =
 
         <div
             ref="wrap"
-            class="flex min-h-0 flex-1 flex-col justify-center overflow-hidden pl-[clamp(24px,7vw,96px)]"
+            class="flex min-h-0 flex-1 flex-col justify-center overflow-hidden px-4 py-4 sm:py-0 sm:pr-0 sm:pl-[clamp(24px,7vw,96px)]"
         >
             <div
                 ref="track"
                 role="listbox"
                 aria-label="Atalhos"
                 :aria-activedescendant="`home-tile-${activeTile}`"
-                class="relative flex gap-[22px] pt-10 transition-transform duration-700 ease-[cubic-bezier(.34,1.3,.64,1)]"
+                class="relative grid h-full max-h-[640px] grid-cols-2 grid-rows-[1.3fr_1fr_1fr] gap-3 transition-transform duration-700 ease-[cubic-bezier(.34,1.3,.64,1)] sm:flex sm:h-auto sm:max-h-none sm:gap-[22px] sm:pt-10"
             >
                 <div
                     ref="ringLabel"
-                    class="absolute top-0 left-0 flex items-center gap-2 whitespace-nowrap transition-[left] duration-[550ms] ease-[cubic-bezier(.34,1.4,.64,1)]"
+                    class="absolute top-0 left-0 hidden items-center gap-2 whitespace-nowrap transition-[left] duration-[550ms] ease-[cubic-bezier(.34,1.4,.64,1)] sm:flex"
                     aria-hidden="true"
                 >
                     <div class="bg-brand size-3.5 rounded" />
@@ -383,13 +408,16 @@ const tileBase =
                     data-enter="slide"
                     data-delay="0"
                     :class="tileBase"
-                    class="bg-brand shadow-[0_2px_4px_rgba(28,32,38,0.06),0_14px_30px_rgba(242,77,77,0.25)]"
+                    class="bg-brand col-span-2 shadow-[0_2px_4px_rgba(28,32,38,0.06),0_14px_30px_rgba(242,77,77,0.25)]"
                     @pointerenter="activeTile = 0"
                     @focus="activeTile = 0"
                     @click="selectTile(0)"
                 >
+                    <span :class="compactLabel" class="text-white"
+                        >Pack de hoje</span
+                    >
                     <span
-                        class="absolute top-4 right-4 text-[12.5px] font-black tracking-[0.08em] text-white uppercase"
+                        class="absolute top-3.5 right-4 text-[12.5px] font-black tracking-[0.08em] text-white uppercase sm:top-4"
                     >
                         {{ packDate }}
                     </span>
@@ -421,7 +449,7 @@ const tileBase =
                         </span>
                     </span>
                     <span
-                        class="text-brand-ink absolute bottom-4 left-4 rounded-full bg-white px-3 py-1.5 text-[12.5px] font-black"
+                        class="text-brand-ink absolute bottom-3.5 left-4 rounded-full bg-white px-3 py-1.5 text-[12.5px] font-black sm:bottom-4"
                     >
                         1 em 512
                     </span>
@@ -436,17 +464,19 @@ const tileBase =
                     data-enter="slide"
                     data-delay="70"
                     :class="tileBase"
-                    class="flex flex-col justify-end gap-3 bg-white p-5 shadow-[0_2px_4px_rgba(28,32,38,0.06),0_14px_30px_rgba(28,32,38,0.08)]"
+                    class="flex flex-col justify-end gap-2.5 bg-white p-4 shadow-[0_2px_4px_rgba(28,32,38,0.06),0_14px_30px_rgba(28,32,38,0.08)] sm:gap-3 sm:p-5"
                     @pointerenter="activeTile = 1"
                     @focus="activeTile = 1"
                     @click="selectTile(1)"
                 >
+                    <span :class="compactLabel" class="text-soft">Coleção</span>
                     <span class="flex items-baseline gap-1">
                         <span
-                            class="text-ink text-[64px] leading-[0.9] font-black tracking-[-0.03em]"
+                            class="text-ink text-[40px] leading-[0.9] font-black tracking-[-0.03em] sm:text-[64px]"
                             >{{ collection.ownedSpecies }}</span
                         >
-                        <span class="text-faint-2 text-[22px] font-black"
+                        <span
+                            class="text-faint-2 text-[16px] font-black sm:text-[22px]"
                             >/{{ collection.totalSpecies }}</span
                         >
                     </span>
@@ -469,24 +499,30 @@ const tileBase =
                     data-enter="slide"
                     data-delay="140"
                     :class="tileBase"
-                    class="bg-ink flex flex-col justify-end gap-1 p-5 shadow-[0_2px_4px_rgba(28,32,38,0.06),0_14px_30px_rgba(28,32,38,0.08)]"
+                    class="bg-ink flex flex-col justify-end gap-1 p-4 shadow-[0_2px_4px_rgba(28,32,38,0.06),0_14px_30px_rgba(28,32,38,0.08)] sm:p-5"
                     @pointerenter="activeTile = 2"
                     @focus="activeTile = 2"
                     @click="selectTile(2)"
                 >
+                    <span :class="compactLabel" class="text-[#c3cad4]"
+                        >Ranking</span
+                    >
                     <span
-                        class="text-[72px] leading-[0.9] font-black tracking-[-0.03em] text-white"
+                        class="text-[44px] leading-[0.9] font-black tracking-[-0.03em] text-white sm:text-[72px]"
                         >{{
                             rankingPosition === null
                                 ? '—'
                                 : `${rankingPosition}º`
                         }}</span
                     >
-                    <span class="text-sm font-extrabold text-[#c3cad4]">{{
-                        rankingPosition === null
-                            ? 'abra um pack pra entrar'
-                            : 'em espécies no grupo'
-                    }}</span>
+                    <span
+                        class="text-xs leading-tight font-extrabold text-[#c3cad4] sm:text-sm"
+                        >{{
+                            rankingPosition === null
+                                ? 'abra um pack pra entrar'
+                                : 'em espécies no grupo'
+                        }}</span
+                    >
                 </button>
 
                 <button
@@ -498,20 +534,24 @@ const tileBase =
                     data-enter="slide"
                     data-delay="210"
                     :class="tileBase"
-                    class="flex flex-col justify-end gap-1 bg-white p-5 shadow-[0_2px_4px_rgba(28,32,38,0.06),0_14px_30px_rgba(28,32,38,0.08)]"
+                    class="flex flex-col justify-end gap-1 bg-white p-4 shadow-[0_2px_4px_rgba(28,32,38,0.06),0_14px_30px_rgba(28,32,38,0.08)] sm:p-5"
                     @pointerenter="activeTile = 3"
                     @focus="activeTile = 3"
                     @click="selectTile(3)"
                 >
+                    <span :class="compactLabel" class="text-soft">Trocas</span>
                     <span
-                        class="text-ink text-[72px] leading-[0.9] font-black tracking-[-0.03em]"
+                        class="text-ink text-[44px] leading-[0.9] font-black tracking-[-0.03em] sm:text-[72px]"
                         >{{ pendingTrades }}</span
                     >
-                    <span class="text-soft text-sm font-extrabold">{{
-                        pendingTrades === 1
-                            ? 'proposta de troca'
-                            : 'propostas de troca'
-                    }}</span>
+                    <span
+                        class="text-soft text-xs leading-tight font-extrabold sm:text-sm"
+                        >{{
+                            pendingTrades === 1
+                                ? 'proposta de troca'
+                                : 'propostas de troca'
+                        }}</span
+                    >
                 </button>
 
                 <button
@@ -523,22 +563,25 @@ const tileBase =
                     data-enter="slide"
                     data-delay="280"
                     :class="tileBase"
-                    class="bg-screen-dark flex flex-col justify-end gap-1.5 p-5 shadow-[0_2px_4px_rgba(28,32,38,0.06),0_14px_30px_rgba(28,32,38,0.16)]"
+                    class="bg-screen-dark flex flex-col justify-end gap-1 p-4 shadow-[0_2px_4px_rgba(28,32,38,0.06),0_14px_30px_rgba(28,32,38,0.16)] sm:gap-1.5 sm:p-5"
                     @pointerenter="activeTile = 4"
                     @focus="activeTile = 4"
                     @click="selectTile(4)"
                 >
+                    <span :class="compactLabel" class="z-[1] text-[#7d8794]"
+                        >Feed</span
+                    >
                     <span
                         class="absolute inset-0 bg-[radial-gradient(70%_45%_at_50%_46%,rgba(77,217,232,0.16),rgba(77,217,232,0))]"
                     />
                     <span
                         v-if="feedHighlight?.isShiny"
-                        class="text-shiny relative flex h-[26px] items-center self-start rounded-full bg-[rgba(77,217,232,0.14)] px-2.5 text-xs font-extrabold tracking-[0.06em] uppercase"
+                        class="text-shiny relative flex h-[22px] items-center self-start rounded-full bg-[rgba(77,217,232,0.14)] px-2.5 text-xs font-extrabold tracking-[0.06em] uppercase sm:h-[26px]"
                     >
                         Shiny
                     </span>
                     <span
-                        class="relative text-[30px] leading-[1.05] font-black tracking-[-0.025em] text-balance text-white"
+                        class="relative line-clamp-3 text-[15px] leading-[1.1] font-black tracking-[-0.02em] text-balance text-white sm:line-clamp-none sm:text-[30px] sm:leading-[1.05] sm:tracking-[-0.025em]"
                     >
                         {{
                             feedHighlight
@@ -547,7 +590,7 @@ const tileBase =
                         }}
                     </span>
                     <span
-                        class="relative text-sm font-semibold text-[#7d8794]"
+                        class="relative text-[11px] leading-tight font-semibold text-[#7d8794] sm:text-sm"
                         >{{
                             feedHighlight
                                 ? `${feedHighlight.caughtAgo} · ${formatMint(feedHighlight.mintNumber)}`

@@ -161,26 +161,26 @@ onBeforeUnmount(() => clearInterval(timer));
                 >Novo código</span
             >
             <div
-                class="flex flex-wrap justify-center gap-[3px] font-mono text-[30px] font-extrabold"
+                class="flex flex-wrap justify-center gap-[3px] font-mono text-[22px] font-extrabold sm:text-[30px]"
                 aria-live="polite"
                 :aria-label="isRolling ? 'Sorteando o código' : code"
             >
                 <span
                     v-for="(char, index) in prefix || form.defaultPrefix"
                     :key="`p${index}`"
-                    class="flex h-[50px] min-w-[26px] items-center justify-center rounded-lg text-white"
+                    class="flex h-10 min-w-[18px] items-center justify-center rounded-lg text-white sm:h-[50px] sm:min-w-[26px]"
                     aria-hidden="true"
                     >{{ char }}</span
                 >
                 <span
-                    class="flex h-[50px] min-w-[26px] items-center justify-center text-[#7d8794]"
+                    class="flex h-10 min-w-[18px] items-center justify-center text-[#7d8794] sm:h-[50px] sm:min-w-[26px]"
                     aria-hidden="true"
                     >-</span
                 >
                 <span
                     v-for="(tile, index) in suffixTiles"
                     :key="`s${index}`"
-                    class="flex h-[50px] min-w-[34px] items-center justify-center rounded-lg transition-colors duration-150"
+                    class="flex h-10 min-w-[26px] items-center justify-center rounded-lg transition-colors duration-150 sm:h-[50px] sm:min-w-[34px]"
                     :class="
                         tile.locked
                             ? 'bg-[rgba(242,77,77,0.18)] text-[#ff8a8a]'
@@ -214,7 +214,7 @@ onBeforeUnmount(() => clearInterval(timer));
                     autocomplete="off"
                     spellcheck="false"
                     :maxlength="form.prefixMaxLength"
-                    class="bg-field text-ink h-12 rounded-full px-5 font-mono text-base font-extrabold uppercase outline-none focus:bg-white focus:shadow-[inset_0_0_0_2px_#f24d4d]"
+                    class="bg-field text-ink h-12 rounded-full px-5 font-mono text-[16px] font-extrabold uppercase outline-none focus:bg-white focus:shadow-[inset_0_0_0_2px_#f24d4d]"
                     @input="onPrefixInput"
                 />
                 <span
