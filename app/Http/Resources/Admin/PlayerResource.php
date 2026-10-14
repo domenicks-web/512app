@@ -11,7 +11,7 @@ use Illuminate\Http\Resources\Json\JsonResource;
 /**
  * @mixin User
  */
-class UserResource extends JsonResource
+class PlayerResource extends JsonResource
 {
     /**
      * @return array<string, mixed>
@@ -22,11 +22,16 @@ class UserResource extends JsonResource
             'id' => $this->id,
             'nickname' => $this->nickname,
             'tag' => $this->tag,
+            'handle' => $this->nicknameWithTag() ?? $this->email,
             'email' => $this->email,
+            'avatar_sprite_path' => $this->avatarSpecies?->sprite_path,
             'is_admin' => $this->is_admin,
-            'has_completed_profile' => $this->hasCompletedProfile(),
+            'invite_quota' => $this->invite_quota,
+            'is_email_verified' => $this->hasVerifiedEmail(),
             'is_birthdate_locked' => $this->birthdate_corrected_at !== null,
             'invite_code' => $this->invitedBy?->code,
+            'invited_by' => $this->invitedBy?->createdBy?->nickname,
+            'specimens_count' => (int) $this->specimens_count,
             'created_at' => $this->created_at?->toIso8601String(),
         ];
     }

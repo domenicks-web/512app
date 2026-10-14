@@ -27,6 +27,7 @@ use Illuminate\Support\Carbon;
  * @property Carbon|null $birthdate_corrected_at
  * @property int|null $avatar_species_id
  * @property bool $is_admin
+ * @property int $invite_quota
  * @property int|null $invited_by
  * @property string $password
  * @property string|null $remember_token
@@ -121,6 +122,31 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->nickname !== null;
     }
 
+    /** "Lin#4821", ou null enquanto o jogador não passou pelo onboarding. */
+    public function nicknameWithTag(): ?string
+    {
+        return $this->hasCompletedProfile() ? "{$this->nickname}#{$this->tag}" : null;
+    }
+
+    /**
+     * Acha o jogador por email ou por "Nick#1234" (o nickname sozinho se
+     * repete, a tag desempata). Usado pelos comandos de admin.
+     */
+    public static function findByEmailOrNicknameWithTag(string $identifier): ?self
+    {
+        if (str_contains($identifier, '@')) {
+            return self::where('email', $identifier)->first();
+        }
+
+        [$nickname, $tag] = array_pad(explode('#', $identifier, 2), 2, null);
+
+        if ($tag === null || $tag === '') {
+            return null;
+        }
+
+        return self::where('nickname', $nickname)->where('tag', $tag)->first();
+    }
+
     /**
      * Get the attributes that should be cast.
      *
@@ -134,6 +160,7 @@ class User extends Authenticatable implements MustVerifyEmail
             'birthdate_corrected_at' => 'datetime',
             'nickname_changed_at' => 'datetime',
             'is_admin' => 'boolean',
+            'invite_quota' => 'integer',
             'password' => 'hashed',
             'nonce' => 'integer',
             'next_pack_at' => 'datetime',

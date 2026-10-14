@@ -8,13 +8,16 @@ use App\Actions\Admin\UnlockBirthdateCorrection;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
+use Inertia\Inertia;
 
-class BirthdateUnlockController extends Controller
+class PlayerBirthdateController extends Controller
 {
     public function store(User $user, UnlockBirthdateCorrection $action): RedirectResponse
     {
         $action->handle($user);
 
-        return redirect()->route('admin.users.index');
+        Inertia::flash('toast', 'Correção da data liberada pra '.($user->nickname ?? $user->email));
+
+        return back();
     }
 }

@@ -69,12 +69,15 @@ it('rejeita convite revogado', function () {
     (new RegisterUser)->handle(registerUserData());
 })->throws(InviteNotRedeemableException::class);
 
-it('aceita convite sem limite de usos mesmo depois de vários resgates', function () {
+it('aceita o último uso de um convite e recusa o próximo', function () {
     Notification::fake();
 
-    $invite = Invite::factory()->unlimited()->create(['code' => 'RAMON-7X2K', 'uses_count' => 50]);
+    $invite = Invite::factory()->create(['code' => 'RAMON-7X2K', 'max_uses' => 3, 'uses_count' => 2]);
 
     $user = (new RegisterUser)->handle(registerUserData());
 
-    expect($user->invited_by)->toBe($invite->id);
-});
+    expect($user->invited_by)->toBe($invite->id)
+        ->and($invite->fresh()->uses_count)->toBe(3);
+
+    (new RegisterUser)->handle(registerUserData(['email' => 'outra@512app.com']));
+})->throws(InviteNotRedeemableException::class);

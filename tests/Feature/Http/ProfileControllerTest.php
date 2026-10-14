@@ -161,8 +161,8 @@ describe('data de nascimento', function () {
     it('admin libera outra correção; jogador comum não', function () {
         $user = User::factory()->create(['birthdate_corrected_at' => now()]);
 
-        $this->actingAs(User::factory()->create())->post("/admin/usuarios/{$user->id}/liberar-nascimento")->assertForbidden();
-        $this->actingAs(User::factory()->admin()->create())->post("/admin/usuarios/{$user->id}/liberar-nascimento")->assertRedirect();
+        $this->actingAs(User::factory()->create())->post("/admin/jogadores/{$user->id}/liberar-nascimento")->assertForbidden();
+        $this->actingAs(User::factory()->admin()->create())->post("/admin/jogadores/{$user->id}/liberar-nascimento")->assertRedirect();
 
         expect($user->refresh()->birthdate_corrected_at)->toBeNull();
     });

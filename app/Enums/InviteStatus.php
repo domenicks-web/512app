@@ -10,4 +10,25 @@ enum InviteStatus: string
     case Exhausted = 'exhausted';
     case Expired = 'expired';
     case Revoked = 'revoked';
+
+    public function label(): string
+    {
+        return match ($this) {
+            self::Active => 'ativo',
+            self::Exhausted => 'esgotado',
+            self::Expired => 'expirado',
+            self::Revoked => 'revogado',
+        };
+    }
+
+    public static function fromLabel(string $label): ?self
+    {
+        foreach (self::cases() as $case) {
+            if ($case->label() === mb_strtolower($label)) {
+                return $case;
+            }
+        }
+
+        return null;
+    }
 }

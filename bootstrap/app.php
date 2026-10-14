@@ -3,7 +3,6 @@
 declare(strict_types=1);
 
 use App\Http\Middleware\EnsureProfileIsComplete;
-use App\Http\Middleware\EnsureUserIsAdmin;
 use App\Http\Middleware\HandleInertiaRequests;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -25,7 +24,6 @@ return Application::configure(basePath: dirname(__DIR__))
 
         $middleware->alias([
             'onboarded' => EnsureProfileIsComplete::class,
-            'admin' => EnsureUserIsAdmin::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

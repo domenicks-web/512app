@@ -5,70 +5,73 @@ declare(strict_types=1);
 namespace App\Console\Commands;
 
 use App\Actions\Admin\CreateInvite;
+use App\Actions\Admin\DefaultInvitePrefix;
 use App\Actions\Data\CreateInviteData;
 use App\Models\User;
 use Illuminate\Console\Command;
 
 class CreateInviteCommand extends Command
 {
-    protected $signature = 'invites:create
-        {--by= : Email do admin que assina o convite (padrão: o primeiro admin)}
-        {--max-uses=1 : Quantas contas o convite pode criar}
-        {--unlimited : Convite sem limite de usos (ignora --max-uses)}
-        {--expires-in-days= : Dias até expirar (vazio = nunca expira)}';
+    protected $signature = 'invite:create
+        {--prefix= : Prefixo do código, só letras e números (padrão: nickname de quem cria)}
+        {--uses=1 : Quantas contas o convite pode criar}
+        {--days=30 : Dias até expirar}
+        {--never : Convite sem validade (ignora --days)}
+        {--by= : Email ou Nick#1234 do admin que assina (padrão: o primeiro admin)}';
 
-    protected $description = 'Cria um código de convite pro cadastro, sem precisar do painel de admin';
+    protected $description = 'Gera um código de convite sem precisar do painel';
 
-    public function handle(CreateInvite $action): int
+    public function handle(CreateInvite $action, DefaultInvitePrefix $defaultPrefix): int
     {
-        $creator = $this->resolveCreator();
+        $creator = $this->option('by') !== null
+            ? User::findByEmailOrNicknameWithTag((string) $this->option('by'))
+            : User::where('is_admin', true)->orderBy('id')->first();
 
-        if ($creator === null) {
-            $this->error('Nenhum admin encontrado. Passe --by=email de um usuário com is_admin.');
+        if ($creator === null || ! $creator->is_admin) {
+            $this->error('Admin não encontrado. Rode admin:promote primeiro ou passe --by de um admin.');
 
             return self::FAILURE;
         }
 
-        $maxUses = $this->option('unlimited') ? null : $this->positiveIntOption('max-uses');
-        $expiresInDays = $this->option('expires-in-days') !== null ? $this->positiveIntOption('expires-in-days') : null;
+        $maxLength = (int) config('game.invites.code_prefix_max_length');
+        $prefix = $this->option('prefix') !== null
+            ? mb_strtoupper((string) $this->option('prefix'))
+            : $defaultPrefix->handle($creator);
 
-        if ($maxUses === 0 || $expiresInDays === 0) {
-            $this->error('--max-uses e --expires-in-days precisam ser inteiros maiores que zero.');
+        if (preg_match("/^[A-Z0-9]{1,{$maxLength}}$/", $prefix) !== 1) {
+            $this->error("--prefix aceita só letras e números, até {$maxLength} caracteres.");
+
+            return self::FAILURE;
+        }
+
+        $uses = filter_var($this->option('uses'), FILTER_VALIDATE_INT, ['options' => [
+            'min_range' => config('game.invites.max_uses.min'),
+            'max_range' => config('game.invites.max_uses.max'),
+        ]]);
+
+        if ($uses === false) {
+            $this->error('--uses vai de '.config('game.invites.max_uses.min').' a '.config('game.invites.max_uses.max').'.');
+
+            return self::FAILURE;
+        }
+
+        $days = $this->option('never') ? null : filter_var($this->option('days'), FILTER_VALIDATE_INT, ['options' => ['min_range' => 1]]);
+
+        if ($days === false) {
+            $this->error('--days precisa ser um inteiro maior que zero (ou use --never).');
 
             return self::FAILURE;
         }
 
         $invite = $action->handle($creator, new CreateInviteData(
-            maxUses: $maxUses,
-            expiresAt: $expiresInDays !== null ? now()->addDays($expiresInDays) : null,
+            prefix: $prefix,
+            suffix: null,
+            maxUses: $uses,
+            expiresAt: $days !== null ? now()->addDays($days) : null,
         ));
 
-        $this->info("Convite criado: {$invite->code}");
-        $this->line('Usos: '.($invite->max_uses ?? 'infinito'));
-        $this->line('Expira: '.($invite->expires_at?->format('d/m/Y H:i') ?? 'nunca'));
+        $this->line($invite->code);
 
         return self::SUCCESS;
-    }
-
-    private function resolveCreator(): ?User
-    {
-        $email = $this->option('by');
-
-        $query = User::where('is_admin', true);
-
-        return $email !== null
-            ? $query->where('email', $email)->first()
-            : $query->orderBy('id')->first();
-    }
-
-    /**
-     * Devolve 0 pra qualquer valor que não seja inteiro positivo, pra o
-     * handle() tratar tudo como erro num lugar só.
-     */
-    private function positiveIntOption(string $name): int
-    {
-        $value = filter_var($this->option($name), FILTER_VALIDATE_INT, ['options' => ['min_range' => 1]]);
-
-        return $value === false ? 0 : $value;
     }
 }

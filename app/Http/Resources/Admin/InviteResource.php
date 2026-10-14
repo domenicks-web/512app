@@ -26,14 +26,12 @@ class InviteResource extends JsonResource
             'max_uses' => $this->max_uses,
             'uses_count' => $this->uses_count,
             'expires_at' => $this->expires_at?->toIso8601String(),
-            'revoked_at' => $this->revoked_at?->toIso8601String(),
             'created_at' => $this->created_at->toIso8601String(),
             'created_by' => $this->createdBy->nickname ?? $this->createdBy->email,
             'redemptions' => $this->redemptions->map(fn (InviteRedemption $redemption): array => [
-                'user' => $redemption->user->nickname !== null
-                    ? "{$redemption->user->nickname}#{$redemption->user->tag}"
-                    : $redemption->user->email,
-                'redeemed_at' => $redemption->created_at->toIso8601String(),
+                'nickname' => $redemption->user->nickname ?? $redemption->user->email,
+                'handle' => $redemption->user->nicknameWithTag() ?? $redemption->user->email,
+                'avatar_sprite_path' => $redemption->user->avatarSpecies?->sprite_path,
             ])->all(),
         ];
     }

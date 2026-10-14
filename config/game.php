@@ -178,20 +178,24 @@ return [
     | Convites
     |--------------------------------------------------------------------------
     |
-    | Formato do código ("RAMON-7X2K"): prefixo com o nickname de quem criou
-    | (cortado em `code_prefix_max_length`) + sufixo aleatório. O alfabeto
-    | do sufixo não tem caracteres ambíguos (0/O, 1/I/L). Os limites
-    | seguram o formulário do admin contra valor absurdo.
+    | Formato do código ("RAMON-7X2K"): prefixo digitado pelo admin (padrão:
+    | o nickname dele) + sufixo sorteado no servidor. O alfabeto do sufixo
+    | não tem caracteres ambíguos (I, O, 0, 1), pra dar pra ditar o código.
+    | `default_quota` é a cota de convites de um jogador comum (admin não
+    | tem cota). Usos, validade e cota são as faixas do painel admin.
     |
     */
 
     'invites' => [
-        'code_alphabet' => 'ABCDEFGHJKMNPQRSTUVWXYZ23456789',
+        'code_alphabet' => 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789',
         'code_suffix_length' => 4,
-        'code_prefix_max_length' => 10,
+        'code_prefix_max_length' => 8,
         'code_fallback_prefix' => 'CONVITE',
-        'max_uses_limit' => 1000,
-        'expires_in_days_limit' => 365,
+        'max_uses' => ['min' => 1, 'max' => 10],
+        'validity_days' => ['7' => 7, '30' => 30, 'never' => null],
+        'default_validity' => '30',
+        'default_quota' => 2,
+        'quota' => ['min' => 0, 'max' => 9],
     ],
 
     /*

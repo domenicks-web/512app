@@ -43,13 +43,6 @@ class InviteFactory extends Factory
         ]);
     }
 
-    public function unlimited(): static
-    {
-        return $this->state(fn (array $attributes): array => [
-            'max_uses' => null,
-        ]);
-    }
-
     public function revoked(): static
     {
         return $this->state(fn (array $attributes): array => [

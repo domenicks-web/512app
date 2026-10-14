@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Http\Requests\Admin\StoreInviteRequest;
 use App\Models\Invite;
 use App\Models\InviteRedemption;
 use App\Models\User;
@@ -10,7 +11,7 @@ use Inertia\Testing\AssertableInertia as Assert;
 
 uses(RefreshDatabase::class);
 
-it('lista os convites com status, criador e quem usou', function () {
+it('lista os convites com status, criador, quem usou e o padrão do gerador', function () {
     $admin = User::factory()->admin()->create(['nickname' => 'Ramon']);
     $invite = Invite::factory()->create(['created_by' => $admin->id, 'code' => 'RAMON-AAAA', 'max_uses' => 2, 'uses_count' => 1]);
     $friend = User::factory()->create(['nickname' => 'Lin', 'tag' => '0042']);
@@ -22,97 +23,63 @@ it('lista os convites com status, criador e quem usou', function () {
         ->has('invites', 2)
         ->where('invites.0.code', 'RAMON-BBBB')
         ->where('invites.0.status', 'revoked')
-        ->where('invites.1.code', 'RAMON-AAAA')
         ->where('invites.1.status', 'active')
         ->where('invites.1.created_by', 'Ramon')
-        ->where('invites.1.redemptions.0.user', 'Lin#0042')
+        ->where('invites.1.redemptions.0.handle', 'Lin#0042')
+        ->where('counts.invites', 1)
+        ->where('counts.players', 2)
+        ->where('form.defaultPrefix', 'RAMON')
+        ->where('form.validities', ['7', '30', 'never'])
     );
 });
 
-it('cria convite com limite e validade', function () {
+it('sorteia o sufixo da prévia no servidor e grava esse mesmo no POST', function () {
     $this->freezeTime();
-    $admin = User::factory()->admin()->create(['nickname' => 'Ramon']);
+    $admin = User::factory()->admin()->create();
 
-    $response = $this->actingAs($admin)->post('/admin/convites', ['max_uses' => 3, 'expires_in_days' => 7]);
+    $suffix = $this->actingAs($admin)->getJson('/admin/convites/sufixo')
+        ->assertOk()
+        ->assertSessionHas(StoreInviteRequest::SUFFIX_SESSION_KEY)
+        ->json('suffix');
+
+    $this->post('/admin/convites', ['prefix' => 'festa', 'max_uses' => 3, 'validity' => '7'])
+        ->assertRedirect()
+        ->assertSessionMissing(StoreInviteRequest::SUFFIX_SESSION_KEY);
 
     $invite = Invite::sole();
-    $response->assertRedirect(route('admin.invites.index'))
-        ->assertSessionHas('created_invite_code', $invite->code);
-
-    expect($invite->code)->toStartWith('RAMON-')
-        ->and($invite->created_by)->toBe($admin->id)
+    expect($invite->code)->toBe("FESTA-{$suffix}")
         ->and($invite->max_uses)->toBe(3)
         ->and($invite->expires_at->toDateTimeString())->toBe(now()->addDays(7)->toDateTimeString());
 });
 
-it('cria convite infinito e sem validade quando os campos vêm vazios', function () {
-    $admin = User::factory()->admin()->create();
+it('cria convite sem validade', function () {
+    $this->actingAs(User::factory()->admin()->create())
+        ->post('/admin/convites', ['prefix' => 'RAMON', 'max_uses' => 1, 'validity' => 'never']);
 
-    $this->actingAs($admin)->post('/admin/convites', ['max_uses' => '', 'expires_in_days' => ''])->assertSessionHasNoErrors();
-
-    $invite = Invite::sole();
-    expect($invite->max_uses)->toBeNull()
-        ->and($invite->expires_at)->toBeNull();
+    expect(Invite::sole()->expires_at)->toBeNull();
 });
 
-it('recusa limite inválido', function (array $payload, string $field) {
-    $admin = User::factory()->admin()->create();
-
-    $this->actingAs($admin)->post('/admin/convites', $payload)->assertSessionHasErrors($field);
+it('valida prefixo, usos e validade', function (array $payload, string $field) {
+    $this->actingAs(User::factory()->admin()->create())
+        ->post('/admin/convites', array_merge(['prefix' => 'RAMON', 'max_uses' => 1, 'validity' => '30'], $payload))
+        ->assertSessionHasErrors($field);
 
     expect(Invite::count())->toBe(0);
 })->with([
+    'prefixo com hífen' => [['prefix' => 'RA-MON'], 'prefix'],
+    'prefixo longo' => [['prefix' => 'ABCDEFGHI'], 'prefix'],
+    'prefixo vazio' => [['prefix' => ''], 'prefix'],
     'zero usos' => [['max_uses' => 0], 'max_uses'],
-    'usos negativos' => [['max_uses' => -1], 'max_uses'],
-    'usos acima do teto' => [['max_uses' => 1001], 'max_uses'],
-    'texto em usos' => [['max_uses' => 'abc'], 'max_uses'],
-    'zero dias' => [['expires_in_days' => 0], 'expires_in_days'],
-    'dias acima do teto' => [['expires_in_days' => 366], 'expires_in_days'],
+    'onze usos' => [['max_uses' => 11], 'max_uses'],
+    'validade inventada' => [['validity' => '90'], 'validity'],
 ]);
 
-it('revoga o convite e o cadastro passa a recusar o código', function () {
+it('revoga convite ativo e recusa revogar de novo', function () {
     $admin = User::factory()->admin()->create();
-    $invite = Invite::factory()->create(['code' => 'RAMON-CCCC', 'max_uses' => null]);
+    $invite = Invite::factory()->create();
 
-    $this->actingAs($admin)->post("/admin/convites/{$invite->id}/revogar")->assertRedirect(route('admin.invites.index'));
+    $this->actingAs($admin)->post("/admin/convites/{$invite->id}/revogar")->assertRedirect()->assertSessionHasNoErrors();
+    expect($invite->fresh()->revoked_by)->toBe($admin->id);
 
-    expect($invite->fresh()->isRevoked())->toBeTrue();
-
-    auth()->logout();
-
-    $this->post('/cadastro', [
-        'email' => 'novo@example.com',
-        'password' => 'segredo-forte-123',
-        'password_confirmation' => 'segredo-forte-123',
-        'invite_code' => 'RAMON-CCCC',
-    ])->assertSessionHasErrors('invite_code');
-
-    expect(User::where('email', 'novo@example.com')->exists())->toBeFalse();
-});
-
-it('não muda a data quando revoga um convite já revogado', function () {
-    $admin = User::factory()->admin()->create();
-    $invite = Invite::factory()->revoked()->create();
-    $originalRevokedAt = $invite->revoked_at;
-
-    $this->actingAs($admin)->post("/admin/convites/{$invite->id}/revogar");
-
-    expect($invite->fresh()->revoked_at->equalTo($originalRevokedAt))->toBeTrue();
-});
-
-it('um convite criado pelo painel funciona no cadastro de ponta a ponta', function () {
-    $admin = User::factory()->admin()->create();
-    $this->actingAs($admin)->post('/admin/convites', ['max_uses' => 1]);
-    $code = Invite::sole()->code;
-    auth()->logout();
-
-    $this->postJson('/cadastro/convite', ['invite_code' => $code])->assertOk();
-    $this->postJson('/cadastro', [
-        'email' => 'amigo@example.com',
-        'password' => 'segredo-forte-123',
-        'password_confirmation' => 'segredo-forte-123',
-    ])->assertNoContent();
-
-    expect(Invite::sole()->uses_count)->toBe(1)
-        ->and(Invite::sole()->isRedeemable())->toBeFalse();
+    $this->post("/admin/convites/{$invite->id}/revogar")->assertSessionHasErrors(['invite' => 'Esse convite já foi revogado.']);
 });

@@ -17,9 +17,9 @@ class RegisterUser
     public function handle(RegisterUserData $data): User
     {
         $user = DB::transaction(function () use ($data): User {
-            $invite = Invite::where('code', $data->inviteCode)->lockForUpdate()->first();
+            $invite = Invite::active()->where('code', $data->inviteCode)->lockForUpdate()->first();
 
-            if ($invite === null || ! $invite->isRedeemable()) {
+            if ($invite === null) {
                 throw InviteNotRedeemableException::code($data->inviteCode);
             }
 

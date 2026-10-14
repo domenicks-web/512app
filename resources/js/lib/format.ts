@@ -11,3 +11,25 @@ export function formatFriendsOnline(count: number): string {
 
     return `${count} ${count === 1 ? 'amigo' : 'amigos'} online`;
 }
+
+const shortMonths = [
+    'jan',
+    'fev',
+    'mar',
+    'abr',
+    'mai',
+    'jun',
+    'jul',
+    'ago',
+    'set',
+    'out',
+    'nov',
+    'dez',
+];
+
+/** "06 nov", no fuso do navegador. */
+export function formatDayMonth(iso: string): string {
+    const date = new Date(iso);
+
+    return `${String(date.getDate()).padStart(2, '0')} ${shortMonths[date.getMonth()]}`;
+}

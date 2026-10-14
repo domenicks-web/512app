@@ -26,6 +26,9 @@ export default defineConfig({
                 bunny('Baloo 2', {
                     weights: [700, 800],
                 }),
+                bunny('JetBrains Mono', {
+                    weights: [800],
+                }),
             ],
         }),
         inertia(),

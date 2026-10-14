@@ -7,25 +7,34 @@ namespace App\Http\Requests\Admin;
 use App\Actions\Data\CreateInviteData;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class StoreInviteRequest extends FormRequest
 {
+    /** Onde fica o sufixo da prévia, sorteado em `GET /admin/convites/sufixo`. */
+    public const SUFFIX_SESSION_KEY = 'admin.invite_suffix';
+
     public function authorize(): bool
     {
         return true;
     }
 
+    protected function prepareForValidation(): void
+    {
+        $this->merge(['prefix' => mb_strtoupper(trim((string) $this->input('prefix')))]);
+    }
+
     /**
-     * Campo vazio = sem limite. `max_uses` vazio é convite infinito,
-     * `expires_in_days` vazio é convite que nunca expira.
-     *
      * @return array<string, ValidationRule|array<mixed>|string>
      */
     public function rules(): array
     {
+        $maxLength = config('game.invites.code_prefix_max_length');
+
         return [
-            'max_uses' => ['nullable', 'integer', 'min:1', 'max:'.config('game.invites.max_uses_limit')],
-            'expires_in_days' => ['nullable', 'integer', 'min:1', 'max:'.config('game.invites.expires_in_days_limit')],
+            'prefix' => ['required', 'string', "regex:/^[A-Z0-9]{1,{$maxLength}}$/"],
+            'max_uses' => ['required', 'integer', 'between:'.config('game.invites.max_uses.min').','.config('game.invites.max_uses.max')],
+            'validity' => ['required', 'string', Rule::in(array_map('strval', array_keys(config('game.invites.validity_days'))))],
         ];
     }
 
@@ -35,20 +44,23 @@ class StoreInviteRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'max_uses.integer' => 'O limite de usos precisa ser um número inteiro.',
-            'max_uses.min' => 'O limite de usos precisa ser pelo menos :min.',
-            'max_uses.max' => 'O limite de usos pode ser no máximo :max.',
-            'expires_in_days.integer' => 'A validade precisa ser um número inteiro de dias.',
-            'expires_in_days.min' => 'A validade precisa ser de pelo menos :min dia.',
-            'expires_in_days.max' => 'A validade pode ser de no máximo :max dias.',
+            'prefix.required' => 'Digite um prefixo.',
+            'prefix.regex' => 'O prefixo aceita só letras e números, até '.config('game.invites.code_prefix_max_length').' caracteres.',
+            'max_uses.between' => 'O convite vale de :min a :max usos.',
+            'validity.in' => 'Escolha 7 dias, 30 dias ou sem validade.',
         ];
     }
 
     public function toCreateInviteData(): CreateInviteData
     {
+        $days = config('game.invites.validity_days')[$this->string('validity')->toString()] ?? null;
+        $suffix = $this->session()->pull(self::SUFFIX_SESSION_KEY);
+
         return new CreateInviteData(
-            maxUses: $this->filled('max_uses') ? $this->integer('max_uses') : null,
-            expiresAt: $this->filled('expires_in_days') ? now()->addDays($this->integer('expires_in_days')) : null,
+            prefix: $this->string('prefix')->toString(),
+            suffix: is_string($suffix) ? $suffix : null,
+            maxUses: $this->integer('max_uses'),
+            expiresAt: $days !== null ? now()->addDays($days) : null,
         );
     }
 }

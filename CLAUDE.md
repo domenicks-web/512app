@@ -302,11 +302,24 @@ pushado pro `main`.
        (a) se trocar/perder o espécime, o avatar continua (sugestão do
        Claude) ou volta pro padrão? (b) tudo bem a seção "Da sua Pokédex"
        ficar vazia até existir abertura de pack?
-    2. **Admin de verdade**: o usuário vai mandar um layout pra aplicar no
-       admin (hoje é `AdminShell` provisório). Funções novas: reenviar o
-       email de confirmação de um usuário e trocar a senha de outro
-       usuário.
+    2. ~~Admin de verdade~~ — feito em 14/10 (ver abaixo).
     3. **Subprojeto C — abertura de pack** (detalhe abaixo).
+
+- **Admin de verdade (14/10, branch `admin` a partir do `perfil`)**: design
+  em `docs/superpowers/specs/2026-10-14-admin-design.md`, handoff em
+  `design_handoff_512_onboarding/ADMIN.md`. `/admin/convites` (gerador
+  caça-níquel com sufixo sorteado no servidor via `GET convites/sufixo` e
+  guardado na sessão; usos 1–10; validade 7/30/sem) e `/admin/jogadores`
+  (busca, cota de convites 0–9, papel com confirmação digitada `Nick#1234`,
+  menu "⋯" com liberar data, reenviar confirmação e trocar senha de outro
+  jogador). Gate `admin` no lugar do middleware. Status do convite agora
+  na ordem revogado → esgotado → expirado; convite infinito deixou de
+  existir. Comandos `admin:promote|demote`, `invite:create|revoke|list`
+  (o `invites:create` morreu). `invite_quota` só armazenada.
+- **Dev na rede local (14/10)**: `SERVER_HOST=0.0.0.0` + `DEV_LAN_HOST` no
+  `.env` (IP do PC, hoje 192.168.1.26) e `APP_URL` com esse IP → celular no
+  mesmo Wi-Fi abre `http://192.168.1.26:8000`. Copiar texto no app usa
+  fallback (`execCommand`) porque http por IP não é contexto seguro.
 
 - **Próximo subprojeto** (com brainstorm antes de codar):
     - **C — Tela de abertura de pack** (fundo escuro): a maior. Envolve criar a

@@ -7,6 +7,8 @@ namespace App\Models;
 use App\Enums\InviteStatus;
 use Database\Factories\InviteFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Attributes\Scope;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -17,10 +19,11 @@ use Illuminate\Support\Carbon;
  * @property int $id
  * @property string $code
  * @property int $created_by
- * @property int|null $max_uses
+ * @property int $max_uses
  * @property int $uses_count
  * @property Carbon|null $expires_at
  * @property Carbon|null $revoked_at
+ * @property int|null $revoked_by
  * @property Carbon $created_at
  */
 #[Fillable(['code', 'created_by', 'max_uses', 'expires_at'])]
@@ -40,6 +43,14 @@ class Invite extends Model
     }
 
     /**
+     * @return BelongsTo<User, $this>
+     */
+    public function revokedBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'revoked_by');
+    }
+
+    /**
      * @return HasMany<InviteRedemption, $this>
      */
     public function redemptions(): HasMany
@@ -49,7 +60,7 @@ class Invite extends Model
 
     public function hasUsesLeft(): bool
     {
-        return $this->max_uses === null || $this->uses_count < $this->max_uses;
+        return $this->uses_count < $this->max_uses;
     }
 
     public function isExpired(): bool
@@ -68,17 +79,30 @@ class Invite extends Model
     }
 
     /**
-     * Revogado vence expirado, que vence esgotado: mostra o motivo mais
-     * "definitivo" quando mais de um se aplica.
+     * Derivado, nunca gravado. Revogado vence esgotado, que vence expirado
+     * (ordem do handoff do admin).
      */
     public function status(): InviteStatus
     {
         return match (true) {
             $this->isRevoked() => InviteStatus::Revoked,
-            $this->isExpired() => InviteStatus::Expired,
             ! $this->hasUsesLeft() => InviteStatus::Exhausted,
+            $this->isExpired() => InviteStatus::Expired,
             default => InviteStatus::Active,
         };
+    }
+
+    /**
+     * A mesma regra do status() em SQL: só os convites que aceitam resgate.
+     *
+     * @param  Builder<self>  $query
+     */
+    #[Scope]
+    protected function active(Builder $query): void
+    {
+        $query->whereNull('revoked_at')
+            ->whereColumn('uses_count', '<', 'max_uses')
+            ->where(fn (Builder $query) => $query->whereNull('expires_at')->orWhere('expires_at', '>', now()));
     }
 
     /**

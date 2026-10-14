@@ -4,8 +4,11 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Admin;
 
+use App\Actions\Admin\CountAdminTabs;
 use App\Actions\Admin\CreateInvite;
+use App\Actions\Admin\DefaultInvitePrefix;
 use App\Actions\Admin\RevokeInvite;
+use App\Exceptions\InviteNotRevocableException;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\StoreInviteRequest;
 use App\Http\Resources\Admin\InviteResource;
@@ -18,33 +21,52 @@ use Inertia\Response;
 
 class InviteController extends Controller
 {
-    public function index(): Response
+    public function index(CountAdminTabs $countTabs, DefaultInvitePrefix $defaultPrefix): Response
     {
-        $invites = Invite::with(['createdBy', 'redemptions.user'])->latest('id')->get();
+        /** @var User $admin */
+        $admin = Auth::user();
+        $invites = Invite::with(['createdBy:id,nickname,email', 'redemptions.user.avatarSpecies:id,sprite_path'])->latest('id')->get();
 
         return Inertia::render('admin/Invites', [
             'invites' => InviteResource::collection($invites)->resolve(),
-            'limits' => [
-                'max_uses' => config('game.invites.max_uses_limit'),
-                'expires_in_days' => config('game.invites.expires_in_days_limit'),
+            'counts' => $countTabs->handle(),
+            'form' => [
+                'defaultPrefix' => $defaultPrefix->handle($admin),
+                'prefixMaxLength' => config('game.invites.code_prefix_max_length'),
+                'alphabet' => config('game.invites.code_alphabet'),
+                'suffixLength' => config('game.invites.code_suffix_length'),
+                'maxUses' => config('game.invites.max_uses'),
+                'validities' => array_map('strval', array_keys(config('game.invites.validity_days'))),
+                'defaultValidity' => config('game.invites.default_validity'),
             ],
         ]);
     }
 
     public function store(StoreInviteRequest $request, CreateInvite $action): RedirectResponse
     {
-        /** @var User $user */
-        $user = Auth::user();
+        /** @var User $admin */
+        $admin = Auth::user();
 
-        $invite = $action->handle($user, $request->toCreateInviteData());
+        $invite = $action->handle($admin, $request->toCreateInviteData());
 
-        return redirect()->route('admin.invites.index')->with('created_invite_code', $invite->code);
+        Inertia::flash(['toast' => "{$invite->code} criado", 'createdInviteId' => $invite->id]);
+
+        return back();
     }
 
     public function revoke(Invite $invite, RevokeInvite $action): RedirectResponse
     {
-        $action->handle($invite);
+        /** @var User $admin */
+        $admin = Auth::user();
 
-        return redirect()->route('admin.invites.index');
+        try {
+            $action->handle($admin, $invite);
+        } catch (InviteNotRevocableException $exception) {
+            return back()->withErrors(['invite' => $exception->getMessage()]);
+        }
+
+        Inertia::flash('toast', "{$invite->code} revogado");
+
+        return back();
     }
 }

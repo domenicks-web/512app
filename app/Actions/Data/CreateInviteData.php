@@ -9,10 +9,13 @@ use Carbon\CarbonInterface;
 final readonly class CreateInviteData
 {
     /**
-     * @param  int|null  $maxUses  null = usos infinitos
+     * @param  string  $prefix  já validado: `[A-Z0-9]`, até 8 caracteres
+     * @param  string|null  $suffix  o sufixo mostrado na prévia; null sorteia um
      */
     public function __construct(
-        public ?int $maxUses,
+        public string $prefix,
+        public ?string $suffix,
+        public int $maxUses,
         public ?CarbonInterface $expiresAt,
     ) {}
 }
