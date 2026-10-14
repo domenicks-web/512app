@@ -242,13 +242,18 @@ const cardShadow =
                         <template
                             v-if="confirmingRemoval === friend.friendshipId"
                         >
-                            <span class="text-ink flex-1 text-sm font-extrabold"
-                                >Desfazer amizade com
-                                {{ friend.nickname }}?</span
-                            >
+                            <div class="flex min-w-0 flex-1 flex-col gap-px">
+                                <span class="text-soft text-xs font-bold"
+                                    >Desfazer amizade com</span
+                                >
+                                <span
+                                    class="text-ink truncate text-[15.5px] font-black"
+                                    >{{ friend.nickname }}?</span
+                                >
+                            </div>
                             <button
                                 type="button"
-                                class="text-muted h-9 cursor-pointer rounded-full px-3 text-sm font-extrabold"
+                                class="text-muted h-9 shrink-0 cursor-pointer rounded-full px-3 text-sm font-extrabold"
                                 @click="confirmingRemoval = null"
                             >
                                 Não
@@ -261,7 +266,7 @@ const cardShadow =
                                 <button
                                     type="submit"
                                     :disabled="processing"
-                                    class="bg-brand h-9 cursor-pointer rounded-full px-4 text-sm font-extrabold text-white"
+                                    class="bg-brand h-9 shrink-0 cursor-pointer rounded-full px-4 text-sm font-extrabold text-white"
                                 >
                                     Sim
                                 </button>
