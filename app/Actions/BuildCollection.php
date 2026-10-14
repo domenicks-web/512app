@@ -10,14 +10,14 @@ use App\Models\User;
 /**
  * A Pokédex do jogador: as 151 espécies em ordem de dex, cada uma com
  * quantos espécimes ele tem, quantos são shiny, o menor mint e o maior IV
- * (o que a carta destaca). Espécie sem
- * espécime aparece como silhueta no front.
+ * (o que a carta destaca) e se algum espécime atual veio de troca.
+ * Espécie sem espécime aparece como silhueta no front.
  */
 class BuildCollection
 {
     /**
      * @return array{
-     *     species: array<int, array{id: int, name: string, rarityTier: string, spritePath: string, spriteShinyPath: string, specimenCount: int, shinyCount: int, bestMint: int|null, bestIv: int|null}>,
+     *     species: array<int, array{id: int, name: string, rarityTier: string, spritePath: string, spriteShinyPath: string, specimenCount: int, shinyCount: int, bestMint: int|null, bestIv: int|null, fromTrade: bool}>,
      *     ownedSpecies: int,
      *     totalSpecimens: int,
      * }
@@ -29,6 +29,12 @@ class BuildCollection
             ->groupBy('species_id')
             ->get()
             ->keyBy('species_id');
+
+        $fromTrade = $user->specimens()
+            ->whereHas('transfers', fn ($query) => $query->where('to_user_id', $user->id))
+            ->distinct()
+            ->pluck('species_id')
+            ->flip();
 
         $species = Species::query()
             ->orderBy('id')
@@ -43,6 +49,7 @@ class BuildCollection
                 'shinyCount' => (int) $owned->get($species->id)?->getAttribute('shiny_count'),
                 'bestMint' => $owned->has($species->id) ? (int) $owned->get($species->id)->getAttribute('best_mint') : null,
                 'bestIv' => $owned->has($species->id) ? (int) $owned->get($species->id)->getAttribute('best_iv') : null,
+                'fromTrade' => $fromTrade->has($species->id),
             ])
             ->values()
             ->all();

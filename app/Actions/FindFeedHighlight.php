@@ -14,7 +14,7 @@ class FindFeedHighlight
      */
     public function handle(): ?array
     {
-        $entry = $this->feed->handle(1)[0] ?? null;
+        $entry = $this->feed->openings(1)[0] ?? null;
 
         if ($entry === null) {
             return null;
