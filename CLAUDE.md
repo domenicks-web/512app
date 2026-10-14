@@ -389,9 +389,10 @@ pushado pro `main`.
   um pisca no celular.
 - **Cards da Home mais cheios (14/10)**: Coleção mostra o espécime de
   maior valor (`FindBestSpecimen`: shiny > raridade > IV > menor mint)
-  com o fundo da raridade, ou a silhueta do Pikachu se não tem nada;
-  Ranking mostra o top 3 (desktop); Trocas mostra recebidas e enviadas
-  com uma ilustração (desktop).
+  como sprite pixelado grande de fundo, inclinado e cortado pela borda
+  (pedido do usuário), ou a silhueta do Pikachu se não tem nada; Ranking
+  mostra o top 3 (desktop); Trocas mostra recebidas, enviadas e os
+  repetidos pra trocar (desktop; o ícone solto foi rejeitado).
 - **Pendências restantes**: dock apertado no celular (8 botões; usuário
   achou "meio apertado", mexer depois); PWA (por último, pedido do usuário); fases
   2–5 como acima. Conta de teste voltou pro avatar Pikachu e sem dados.

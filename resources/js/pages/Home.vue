@@ -63,6 +63,7 @@ const props = defineProps<{
         isViewer: boolean;
     }[];
     sentTrades: number;
+    duplicates: { count: number; spritePaths: string[] };
     nextPackAt: string | null;
     rankingPosition: number | null;
     pendingTrades: number;
@@ -560,54 +561,62 @@ const compactLabel =
                     @focus="activeTile = 1"
                     @click="selectTile(1)"
                 >
-                    <span :class="compactLabel" class="text-soft">Coleção</span>
-                    <span
-                        class="absolute top-3 right-3 flex flex-col items-center gap-1 sm:inset-x-5 sm:top-5 sm:bottom-[118px]"
+                    <span :class="compactLabel" class="text-soft z-[1]"
+                        >Coleção</span
                     >
-                        <span
-                            class="flex size-14 items-center justify-center rounded-[16px] sm:size-auto sm:min-h-0 sm:w-full sm:flex-1"
-                            :style="
-                                bestLook
-                                    ? { background: bestLook.panel }
-                                    : undefined
+                    <!-- Sprite grande de fundo, inclinado e cortado pela borda do
+                         card (img solta de propósito: aqui ele não é encaixado,
+                         é decoração). O degradê embaixo protege os números. -->
+                    <span
+                        class="pointer-events-none absolute inset-0"
+                        aria-hidden="true"
+                        :style="
+                            bestLook
+                                ? {
+                                      background: `radial-gradient(70% 60% at 85% 18%, ${bestLook.badge}33, transparent 70%)`,
+                                  }
+                                : undefined
+                        "
+                    >
+                        <img
+                            v-if="bestSpecimen || silhouetteSpritePath"
+                            :src="`/storage/${bestSpecimen?.spritePath ?? silhouetteSpritePath}`"
+                            alt=""
+                            class="absolute -top-[10%] -right-[34%] h-[104%] max-w-none rotate-[-12deg] [image-rendering:pixelated]"
+                            :class="
+                                bestSpecimen
+                                    ? 'drop-shadow-[0_10px_18px_rgba(28,32,38,0.18)]'
+                                    : 'opacity-[0.07] brightness-0'
                             "
-                        >
-                            <FittedSprite
-                                v-if="bestSpecimen"
-                                :src="`/storage/${bestSpecimen.spritePath}`"
-                                :size="isCompact ? 56 : 120"
-                                :padding="isCompact ? 6 : 10"
-                            />
-                            <FittedSprite
-                                v-else-if="silhouetteSpritePath"
-                                :src="`/storage/${silhouetteSpritePath}`"
-                                :size="isCompact ? 56 : 120"
-                                :padding="isCompact ? 6 : 10"
-                                class="opacity-[0.09] brightness-0"
-                            />
-                        </span>
+                        />
                         <span
-                            class="hidden items-center gap-1.5 text-[13px] font-black sm:flex"
-                        >
-                            <template v-if="bestSpecimen && bestLook">
-                                <span class="text-ink">{{
-                                    bestSpecimen.speciesName
-                                }}</span>
-                                <span
-                                    class="rounded-full px-2 py-0.5 text-[10px] tracking-[0.06em] uppercase"
-                                    :style="{
-                                        background: bestLook.badge,
-                                        color: bestLook.badgeInk,
-                                    }"
-                                    >{{ bestLook.label }}</span
-                                >
-                            </template>
-                            <span v-else class="text-faint-2"
-                                >??? · abra um pack</span
-                            >
-                        </span>
+                            class="absolute inset-y-0 left-0 w-[62%] bg-gradient-to-r from-white via-white/75 to-white/0"
+                        />
+                        <span
+                            class="absolute inset-x-0 bottom-0 h-[42%] bg-gradient-to-t from-white via-white/80 to-white/0"
+                        />
                     </span>
-                    <span class="flex items-baseline gap-1">
+                    <span
+                        class="relative hidden items-center gap-1.5 text-[13px] font-black sm:flex"
+                    >
+                        <template v-if="bestSpecimen && bestLook">
+                            <span class="text-ink">{{
+                                bestSpecimen.speciesName
+                            }}</span>
+                            <span
+                                class="rounded-full px-2 py-0.5 text-[10px] tracking-[0.06em] uppercase"
+                                :style="{
+                                    background: bestLook.badge,
+                                    color: bestLook.badgeInk,
+                                }"
+                                >{{ bestLook.label }}</span
+                            >
+                        </template>
+                        <span v-else class="text-faint-2"
+                            >??? · abra um pack</span
+                        >
+                    </span>
+                    <span class="relative flex items-baseline gap-1">
                         <span
                             class="text-ink text-[40px] leading-[0.9] font-black tracking-[-0.03em] sm:text-[64px]"
                             >{{ collection.ownedSpecies }}</span
@@ -628,7 +637,7 @@ const compactLabel =
                         >
                     </span>
                     <span
-                        class="bg-base block h-2 overflow-hidden rounded-full"
+                        class="bg-base relative block h-2 overflow-hidden rounded-full"
                     >
                         <span
                             class="bg-brand block h-full rounded-full"
@@ -720,31 +729,32 @@ const compactLabel =
                 >
                     <span :class="compactLabel" class="text-soft">Trocas</span>
                     <span
-                        class="absolute inset-x-5 top-5 bottom-[110px] hidden items-center justify-center sm:flex"
-                        aria-hidden="true"
+                        v-if="duplicates.spritePaths.length > 0"
+                        class="absolute inset-x-5 top-5 hidden flex-col gap-2 sm:flex"
                     >
-                        <span class="relative block h-[92px] w-[130px]">
+                        <span class="text-soft text-[12px] font-black"
+                            >{{ duplicates.count }}
+                            {{
+                                duplicates.count === 1
+                                    ? 'repetido pra trocar'
+                                    : 'repetidos pra trocar'
+                            }}</span
+                        >
+                        <span class="flex">
                             <span
-                                class="absolute top-0 left-0 block h-[84px] w-[62px] -rotate-[8deg] rounded-[12px] border-2 border-dashed border-[#dfe2e6] bg-[#f7f8f9]"
-                            />
-                            <span
-                                class="absolute top-1.5 right-0 block h-[84px] w-[62px] rotate-[8deg] rounded-[12px] border-2 border-dashed border-[#dfe2e6] bg-[#f7f8f9]"
-                            />
-                            <svg
-                                class="absolute top-1/2 left-1/2 -translate-1/2"
-                                width="44"
-                                height="44"
-                                viewBox="0 0 24 24"
-                                fill="#ffffff"
-                                stroke="#f24d4d"
-                                stroke-width="2.2"
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
+                                v-for="(path, index) in duplicates.spritePaths"
+                                :key="path"
+                                class="-ml-3 flex size-[62px] items-center justify-center rounded-[16px] bg-[#f4f5f6] shadow-[0_0_0_3px_#fff] first:ml-0"
+                                :style="{
+                                    transform: `rotate(${(index % 2 ? 1 : -1) * (4 + index)}deg)`,
+                                }"
                             >
-                                <circle cx="12" cy="12" r="10.5" />
-                                <path d="M7 9.5h9.5M14 7l2.5 2.5L14 12" />
-                                <path d="M17 14.5H7.5M10 12l-2.5 2.5L10 17" />
-                            </svg>
+                                <FittedSprite
+                                    :src="`/storage/${path}`"
+                                    :size="62"
+                                    :padding="6"
+                                />
+                            </span>
                         </span>
                     </span>
                     <span

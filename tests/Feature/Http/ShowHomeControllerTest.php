@@ -192,3 +192,19 @@ function ivs(int $value): array
 {
     return array_fill_keys(['iv_hp', 'iv_atk', 'iv_def', 'iv_spa', 'iv_spd', 'iv_spe'], $value);
 }
+
+it('conta os repetidos pra trocar e manda os sprites das espécies mais repetidas', function () {
+    $user = User::factory()->create();
+    $opening = Opening::factory()->for($user)->create();
+    $rattata = Species::factory()->create(['sprite_path' => 'species/19/sprite.png']);
+    $pidgey = Species::factory()->create(['sprite_path' => 'species/16/sprite.png']);
+    $mew = Species::factory()->create();
+    Specimen::factory()->count(3)->for($user)->for($opening)->create(['species_id' => $rattata->id]);
+    Specimen::factory()->count(2)->for($user)->for($opening)->create(['species_id' => $pidgey->id]);
+    Specimen::factory()->for($user)->for($opening)->create(['species_id' => $mew->id]);
+
+    $this->actingAs($user)->get('/')
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('duplicates.count', 3)
+            ->where('duplicates.spritePaths', ['species/19/sprite.png', 'species/16/sprite.png']));
+});

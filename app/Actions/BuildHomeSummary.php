@@ -34,6 +34,7 @@ class BuildHomeSummary
      *     silhouetteSpritePath: string|null,
      *     rankingTop: list<array{nickname: string, avatarSpritePath: string|null, ownedSpecies: int, position: int|null, isViewer: bool}>,
      *     sentTrades: int,
+     *     duplicates: array{count: int, spritePaths: array<int, string>},
      *     nextPackAt: string|null,
      *     rankingPosition: int|null,
      *     pendingTrades: int,
@@ -78,6 +79,7 @@ class BuildHomeSummary
                 ->where('to_user_id', $user->id)
                 ->where('status', TradeStatus::Pending)
                 ->count(),
+            'duplicates' => $this->duplicates($user),
             'sentTrades' => Trade::query()
                 ->where('from_user_id', $user->id)
                 ->where('status', TradeStatus::Pending)
@@ -85,6 +87,36 @@ class BuildHomeSummary
             'feedHighlight' => $this->feed->handle(),
             'friendsOnline' => count(array_intersect($this->presence->onlineUserIds($today), $user->friendIds())),
             'presencePollSeconds' => (int) config('game.group.presence_poll_seconds'),
+        ];
+    }
+
+    /**
+     * Repetidos: espécimes além do primeiro de cada espécie. Os sprites são
+     * das espécies com mais repetidos (até 4), pra ilustrar o card de trocas.
+     *
+     * @return array{count: int, spritePaths: array<int, string>}
+     */
+    private function duplicates(User $user): array
+    {
+        $perSpecies = $user->specimens()
+            ->selectRaw('species_id, count(*) as total')
+            ->groupBy('species_id')
+            ->havingRaw('count(*) > 1')
+            ->orderByDesc('total')
+            ->orderBy('species_id')
+            ->get();
+
+        $spritePaths = Species::query()
+            ->whereIn('id', $perSpecies->take(4)->pluck('species_id'))
+            ->pluck('sprite_path', 'id');
+
+        return [
+            'count' => (int) $perSpecies->sum(fn ($row): int => (int) $row->getAttribute('total') - 1),
+            'spritePaths' => $perSpecies->take(4)
+                ->map(fn ($row): ?string => $spritePaths[$row->getAttribute('species_id')] ?? null)
+                ->filter()
+                ->values()
+                ->all(),
         ];
     }
 }
