@@ -274,6 +274,10 @@ pushado pro `main`.
   usuário criar a conta e a senha de app e preencher o `.env`.
     - `ConfirmDialog` só monta o `Teleport` depois do `onMounted`: o SSR do
       Inertia não injeta teleports no `<body>` e a hidratação quebrava.
+- **Sprites não seguem o mouse (13/10, pedido do usuário)**: tirado da
+  `PartnerGrid` (onboarding e perfil) o "olhar" pro cursor/escolhido
+  (`scaleX(-1)` + inclinação) e, na Home, o avatar virando pro tile ativo —
+  mesmo o handoff pedindo. Não recolocar.
 - **CI (13/10)**: voltou a rodar no `main` (PHP 8.4, SQLite no setup,
   PHPStan com 1G). `composer ci:check` local reproduz o CI inteiro.
   Formatador ignora handoff, `docs/superpowers/` e `CLAUDE.md`.

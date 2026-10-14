@@ -85,9 +85,6 @@ const collectionPercent = computed(() =>
         : 0,
 );
 
-// O parceiro "olha" pro tile ativo: vira pra direita da metade em diante.
-const avatarFacesRight = computed(() => activeTile.value >= 2);
-
 function tiles(): HTMLElement[] {
     return track.value
         ? [...track.value.querySelectorAll<HTMLElement>('[data-tile]')]
@@ -327,10 +324,7 @@ const tileBase =
                         alt=""
                         width="72"
                         height="72"
-                        class="pixelated size-[72px] max-w-none transition-transform duration-[450ms] ease-[cubic-bezier(.34,1.56,.64,1)]"
-                        :style="{
-                            transform: avatarFacesRight ? 'scaleX(-1)' : 'none',
-                        }"
+                        class="pixelated size-[72px] max-w-none"
                     />
                 </div>
                 <div class="flex flex-col gap-px">

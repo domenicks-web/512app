@@ -3,10 +3,10 @@ import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
 import { animate, shake } from '@/lib/motion';
 
 /**
- * Grade 5×3 de parceiros com os sprites reais. Sprites não têm olhos, então
- * (adaptação do handoff) os não escolhidos "viram" com `scaleX(-1)` na
- * direção do cursor ou do escolhido, inclinando até ±7°; um sprite
- * aleatório dá um micro-pulo a cada ~900ms no lugar de piscar.
+ * Grade 5×3 de parceiros com os sprites reais. O escolhido cresce com o
+ * anel girando e os outros pulam em cascata; um sprite aleatório dá um
+ * micro-pulo a cada ~900ms. Os sprites não seguem o cursor (tirado a
+ * pedido do usuário).
  */
 export type PartnerOption = {
     id: number;
@@ -25,54 +25,25 @@ const emit = defineEmits<{
 }>();
 
 const COLUMNS = 5;
-const TILE = 64;
-const GAP = 14;
-const STEP = TILE + GAP;
 
 const grid = ref<HTMLElement | null>(null);
-const look = ref<{ x: number; y: number } | null>(null);
 let idleTimer = 0;
 
 const selectedIndex = computed(() =>
     props.options.findIndex((option) => option.id === selected.value),
 );
 
-const centerX = (i: number) => (i % COLUMNS) * STEP + TILE / 2;
-const centerY = (i: number) => Math.floor(i / COLUMNS) * STEP + TILE / 2;
-
-const tiles = computed(() => {
-    let lookX: number | null = null;
-    let lookY: number | null = null;
-
-    if (look.value) {
-        lookX = look.value.x;
-        lookY = look.value.y;
-    } else if (selectedIndex.value >= 0) {
-        lookX = centerX(selectedIndex.value);
-        lookY = centerY(selectedIndex.value);
-    }
-
-    return props.options.map((option, i) => {
+const tiles = computed(() =>
+    props.options.map((option, i) => {
         const isSelected = i === selectedIndex.value;
-        let tileTransform = 'none';
-        let facesRight = false;
 
-        if (isSelected) {
-            tileTransform = 'scale(1.12)';
-        } else if (lookX !== null && lookY !== null) {
-            const vx = lookX - centerX(i);
-            const vy = lookY - centerY(i);
-            const length = Math.hypot(vx, vy) || 1;
-            facesRight = vx > 0;
-
-            if (selectedIndex.value >= 0 && !look.value) {
-                tileTransform = `rotate(${((vx / length) * 7).toFixed(1)}deg)`;
-            }
-        }
-
-        return { option, isSelected, tileTransform, facesRight };
-    });
-});
+        return {
+            option,
+            isSelected,
+            tileTransform: isSelected ? 'scale(1.12)' : 'none',
+        };
+    }),
+);
 
 function tileElements(): HTMLElement[] {
     return grid.value
@@ -132,19 +103,6 @@ function nudge() {
     shake(grid.value);
 }
 
-function onPointerMove(event: PointerEvent) {
-    if (!grid.value) {
-        return;
-    }
-
-    const rect = grid.value.getBoundingClientRect();
-    const gridWidth = COLUMNS * TILE + (COLUMNS - 1) * GAP;
-    look.value = {
-        x: event.clientX - rect.left - (rect.width - gridWidth) / 2,
-        y: event.clientY - rect.top - 6,
-    };
-}
-
 onMounted(() => {
     idleTimer = window.setInterval(() => {
         const elements = tileElements();
@@ -178,8 +136,6 @@ defineExpose({ nudge });
         role="radiogroup"
         aria-label="Parceiro"
         class="grid grid-cols-[repeat(5,64px)] justify-center gap-[14px] py-1.5 max-[460px]:[zoom:0.74]"
-        @pointermove="onPointerMove"
-        @pointerleave="look = null"
     >
         <button
             v-for="(tile, index) in tiles"
@@ -207,8 +163,7 @@ defineExpose({ nudge });
                 alt=""
                 width="96"
                 height="96"
-                class="pixelated pointer-events-none relative h-24 w-24 max-w-none transition-transform duration-[400ms] ease-[cubic-bezier(.34,1.56,.64,1)]"
-                :style="{ transform: tile.facesRight ? 'scaleX(-1)' : 'none' }"
+                class="pixelated pointer-events-none relative h-24 w-24 max-w-none"
             />
         </button>
     </div>
