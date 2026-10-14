@@ -29,7 +29,7 @@ class ProfileController extends Controller
 {
     public function updateAvatar(UpdateAvatarRequest $request, UpdateAvatar $action): RedirectResponse
     {
-        $action->handle($this->user($request), $request->integer('avatar_species_id'));
+        $action->handle($this->user($request), $request->integer('avatar_species_id'), $request->boolean('avatar_is_shiny'));
 
         return back()->with('profile_status', 'Avatar salvo.');
     }

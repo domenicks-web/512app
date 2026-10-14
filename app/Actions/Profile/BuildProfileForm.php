@@ -4,20 +4,22 @@ declare(strict_types=1);
 
 namespace App\Actions\Profile;
 
-use App\Models\Species;
 use App\Models\User;
 
 /**
  * Estado da tela de perfil: dados atuais, quando o nickname libera, se a
- * data já foi corrigida, troca de email pendente e as opções de avatar na
- * ordem curada do config.
+ * data já foi corrigida, troca de email pendente e as opções de avatar
+ * (parceiros fixos e espécies da coleção).
  */
 class BuildProfileForm
 {
+    public function __construct(private readonly ListAvatarOptions $avatarOptions) {}
+
     /**
      * @return array{
-     *     profile: array{nickname: string, tag: string, avatarSpeciesId: int|null, birthdate: string|null, isBirthdateLocked: bool, email: string, isEmailVerified: bool, pendingEmail: string|null, nicknameChangeableAt: string|null},
-     *     avatarOptions: array<int, array{id: int, name: string, sprite_path: string}>,
+     *     profile: array{nickname: string, tag: string, avatarSpeciesId: int|null, avatarIsShiny: bool, birthdate: string|null, isBirthdateLocked: bool, email: string, isEmailVerified: bool, pendingEmail: string|null, nicknameChangeableAt: string|null},
+     *     avatarOptions: array<int, array{id: int, name: string, sprite_path: string, is_shiny: bool}>,
+     *     collectionAvatarOptions: list<array{id: int, name: string, sprite_path: string, is_shiny: bool}>,
      *     nicknameCooldownDays: int,
      *     nicknameMaxLength: int,
      *     birthYearRange: array{int, int},
@@ -26,7 +28,7 @@ class BuildProfileForm
      */
     public function handle(User $user): array
     {
-        $avatarSpeciesIds = config('game.onboarding.avatar_species_ids');
+        $avatarOptions = $this->avatarOptions->handle($user);
         $changeableAt = ChangeNickname::changeableAt($user);
 
         return [
@@ -34,6 +36,7 @@ class BuildProfileForm
                 'nickname' => (string) $user->nickname,
                 'tag' => (string) $user->tag,
                 'avatarSpeciesId' => $user->avatar_species_id,
+                'avatarIsShiny' => $user->avatar_is_shiny,
                 'birthdate' => $user->birthdate?->toDateString(),
                 'isBirthdateLocked' => $user->birthdate_corrected_at !== null,
                 'email' => $user->email,
@@ -43,13 +46,8 @@ class BuildProfileForm
                     ? $changeableAt->copy()->timezone(config('game.display_timezone'))->toDateString()
                     : null,
             ],
-            'avatarOptions' => Species::query()
-                ->whereIn('id', $avatarSpeciesIds)
-                ->get(['id', 'name', 'sprite_path'])
-                ->sortBy(fn (Species $species): int => (int) array_search($species->id, $avatarSpeciesIds, true))
-                ->map(fn (Species $species): array => ['id' => $species->id, 'name' => $species->name, 'sprite_path' => $species->sprite_path])
-                ->values()
-                ->all(),
+            'avatarOptions' => $avatarOptions['partners'],
+            'collectionAvatarOptions' => $avatarOptions['collection'],
             'nicknameCooldownDays' => (int) config('game.profile.nickname_cooldown_days'),
             'nicknameMaxLength' => (int) config('game.onboarding.nickname_max_length'),
             'birthYearRange' => [(int) config('game.onboarding.birth_year_min'), now()->year],

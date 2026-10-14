@@ -2,10 +2,13 @@
 
 declare(strict_types=1);
 
+use App\Actions\Profile\ResetUnownedAvatar;
 use App\Mail\ConfirmNewEmailMail;
 use App\Mail\EmailChangedMail;
 use App\Mail\PasswordChangedMail;
+use App\Models\Opening;
 use App\Models\Species;
+use App\Models\Specimen;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
@@ -65,6 +68,7 @@ describe('tela', function () {
                 ->where('profile.isBirthdateLocked', true)
                 ->where('profile.pendingEmail', 'novo@512app.com')
                 ->has('avatarOptions', 2)
+                ->where('profile.avatarIsShiny', false)
                 ->where('nicknameCooldownDays', 15));
     });
 });
@@ -87,7 +91,92 @@ describe('avatar', function () {
         $this->actingAs($user)->put('/perfil/avatar', ['avatar_species_id' => $outside->id])
             ->assertSessionHasErrors('avatar_species_id');
     });
+
+    it('oferece da coleção a versão normal e a shiny de quem tem cada uma, sem repetir os fixos', function () {
+        [$pikachu] = seedAvatarSpecies();
+        $user = User::factory()->create();
+        $magikarp = Species::factory()->create(['id' => 129, 'name' => 'Magikarp', 'sprite_shiny_path' => 'species/129/shiny.png']);
+        $gyarados = Species::factory()->create(['id' => 131, 'name' => 'Lapras']);
+        ownSpecimen($user, ['species_id' => $pikachu]);
+        ownSpecimen($user, ['species_id' => $pikachu, 'is_shiny' => true]);
+        ownSpecimen($user, ['species_id' => $magikarp->id, 'is_shiny' => true]);
+        ownSpecimen($user, ['species_id' => $gyarados->id]);
+        ownSpecimen($user, ['species_id' => $gyarados->id]);
+        Specimen::factory()->unrevealed()->for($user)->for(Opening::factory()->for($user))->create(['species_id' => Species::factory()->create(['id' => 150])->id]);
+
+        $this->actingAs($user)->get('/perfil')
+            ->assertInertia(fn (Assert $page) => $page
+                ->has('collectionAvatarOptions', 3)
+                ->where('collectionAvatarOptions.0.id', $pikachu)
+                ->where('collectionAvatarOptions.0.is_shiny', true)
+                ->where('collectionAvatarOptions.1.id', 129)
+                ->where('collectionAvatarOptions.1.is_shiny', true)
+                ->where('collectionAvatarOptions.1.sprite_path', 'species/129/shiny.png')
+                ->where('collectionAvatarOptions.2.id', 131)
+                ->where('collectionAvatarOptions.2.is_shiny', false));
+    });
+
+    it('troca pra uma espécie da coleção, shiny só com espécime shiny', function () {
+        $user = User::factory()->create();
+        $magikarp = Species::factory()->create(['id' => 129]);
+        ownSpecimen($user, ['species_id' => $magikarp->id, 'is_shiny' => true]);
+
+        $this->actingAs($user)->put('/perfil/avatar', ['avatar_species_id' => 129, 'avatar_is_shiny' => false])
+            ->assertSessionHasErrors('avatar_species_id');
+        $this->actingAs($user)->put('/perfil/avatar', ['avatar_species_id' => 129, 'avatar_is_shiny' => true])
+            ->assertSessionHasNoErrors();
+
+        expect($user->refresh())
+            ->avatar_species_id->toBe(129)
+            ->avatar_is_shiny->toBeTrue();
+    });
+
+    it('recusa shiny de parceiro fixo sem ter o espécime shiny', function () {
+        [$pikachu] = seedAvatarSpecies();
+        $user = User::factory()->create();
+
+        $this->actingAs($user)->put('/perfil/avatar', ['avatar_species_id' => $pikachu, 'avatar_is_shiny' => true])
+            ->assertSessionHasErrors('avatar_species_id');
+    });
+
+    it('mostra o sprite shiny do avatar no resto do jogo', function () {
+        $user = User::factory()->create([
+            'avatar_species_id' => Species::factory()->create(['id' => 129, 'sprite_shiny_path' => 'species/129/shiny.png'])->id,
+            'avatar_is_shiny' => true,
+        ]);
+
+        $this->actingAs($user)->get('/')
+            ->assertInertia(fn (Assert $page) => $page->where('trainer.avatarSpritePath', 'species/129/shiny.png'));
+    });
+
+    it('volta pro primeiro parceiro do config quando o espécime do avatar sai da coleção', function () {
+        [$pikachu] = seedAvatarSpecies();
+        $user = User::factory()->create();
+        Species::factory()->create(['id' => 129]);
+        $specimen = ownSpecimen($user, ['species_id' => 129, 'is_shiny' => true]);
+        $user->update(['avatar_species_id' => 129, 'avatar_is_shiny' => true]);
+
+        app(ResetUnownedAvatar::class)->handle($user);
+        expect($user->refresh()->avatar_species_id)->toBe(129);
+
+        $specimen->update(['user_id' => User::factory()->create()->id]);
+        app(ResetUnownedAvatar::class)->handle($user);
+
+        expect($user->refresh())
+            ->avatar_species_id->toBe($pikachu)
+            ->avatar_is_shiny->toBeFalse();
+    });
 });
+
+/**
+ * Espécime numa abertura do próprio dono.
+ *
+ * @param  array<string, mixed>  $attributes
+ */
+function ownSpecimen(User $owner, array $attributes = []): Specimen
+{
+    return Specimen::factory()->for($owner)->for(Opening::factory()->for($owner))->create($attributes);
+}
 
 describe('nickname', function () {
     it('a primeira troca é livre e grava a data', function () {

@@ -7,12 +7,14 @@ import { animate, shake } from '@/lib/motion';
  * Grade 5×3 de parceiros com os sprites reais. O escolhido cresce com o
  * anel girando e os outros pulam em cascata; um sprite aleatório dá um
  * micro-pulo a cada ~900ms. Os sprites não seguem o cursor (tirado a
- * pedido do usuário).
+ * pedido do usuário). A escolha é o par espécie + shiny: a mesma espécie
+ * pode aparecer normal e shiny (avatar da coleção, no perfil).
  */
 export type PartnerOption = {
     id: number;
     name: string;
     sprite_path: string;
+    is_shiny?: boolean;
 };
 
 const props = defineProps<{
@@ -20,6 +22,7 @@ const props = defineProps<{
 }>();
 
 const selected = defineModel<number | null>({ required: true });
+const selectedShiny = defineModel<boolean>('shiny', { default: false });
 
 const emit = defineEmits<{
     picked: [index: number, sprite: HTMLElement];
@@ -31,7 +34,11 @@ const grid = ref<HTMLElement | null>(null);
 let idleTimer = 0;
 
 const selectedIndex = computed(() =>
-    props.options.findIndex((option) => option.id === selected.value),
+    props.options.findIndex(
+        (option) =>
+            option.id === selected.value &&
+            Boolean(option.is_shiny) === selectedShiny.value,
+    ),
 );
 
 const tiles = computed(() =>
@@ -90,6 +97,7 @@ function pick(index: number) {
     }
 
     selected.value = props.options[index].id;
+    selectedShiny.value = Boolean(props.options[index].is_shiny);
     hopAll(index);
     const sprite =
         tileElements()[index]?.querySelector<HTMLElement>('[data-sprite]');
@@ -141,12 +149,16 @@ defineExpose({ nudge });
     >
         <button
             v-for="(tile, index) in tiles"
-            :key="tile.option.id"
+            :key="`${tile.option.id}${tile.option.is_shiny ? '-shiny' : ''}`"
             type="button"
             role="radio"
             data-tile
             :aria-checked="tile.isSelected"
-            :aria-label="tile.option.name"
+            :aria-label="
+                tile.option.is_shiny
+                    ? `${tile.option.name} shiny`
+                    : tile.option.name
+            "
             class="relative flex h-16 w-16 cursor-pointer items-center justify-center rounded-full bg-white shadow-[0_0_0_2px_var(--color-line)] transition-transform duration-500 ease-[cubic-bezier(.34,1.56,.64,1)]"
             :style="{ transform: tile.tileTransform }"
             @click="pick(index)"
@@ -167,6 +179,12 @@ defineExpose({ nudge });
                 :padding="10"
                 class="pointer-events-none relative"
             />
+            <span
+                v-if="tile.option.is_shiny"
+                class="bg-shiny pointer-events-none absolute -top-0.5 -right-0.5 flex size-[18px] items-center justify-center rounded-full text-[10px] leading-none font-black text-white shadow-[0_0_0_2px_#fff]"
+                aria-hidden="true"
+                >✦</span
+            >
         </button>
     </div>
 </template>

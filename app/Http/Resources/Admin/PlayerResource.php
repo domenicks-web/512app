@@ -24,7 +24,7 @@ class PlayerResource extends JsonResource
             'tag' => $this->tag,
             'handle' => $this->nicknameWithTag() ?? $this->email,
             'email' => $this->email,
-            'avatar_sprite_path' => $this->avatarSpecies?->sprite_path,
+            'avatar_sprite_path' => $this->avatarSpritePath(),
             'is_admin' => $this->is_admin,
             'invite_quota' => $this->invite_quota,
             'is_email_verified' => $this->hasVerifiedEmail(),

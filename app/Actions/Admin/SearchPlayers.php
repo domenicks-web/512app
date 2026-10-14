@@ -23,7 +23,7 @@ class SearchPlayers
         $search = trim((string) $search);
 
         return User::query()
-            ->with(['avatarSpecies:id,sprite_path', 'invitedBy.createdBy:id,nickname'])
+            ->with(['avatarSpecies:id,sprite_path,sprite_shiny_path', 'invitedBy.createdBy:id,nickname'])
             ->withCount('specimens')
             ->when($search !== '', function (Builder $query) use ($search): void {
                 $like = '%'.addcslashes($search, '%_\\').'%';

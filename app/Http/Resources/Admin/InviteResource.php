@@ -31,7 +31,7 @@ class InviteResource extends JsonResource
             'redemptions' => $this->redemptions->map(fn (InviteRedemption $redemption): array => [
                 'nickname' => $redemption->user->nickname ?? $redemption->user->email,
                 'handle' => $redemption->user->nicknameWithTag() ?? $redemption->user->email,
-                'avatar_sprite_path' => $redemption->user->avatarSpecies?->sprite_path,
+                'avatar_sprite_path' => $redemption->user->avatarSpritePath(),
             ])->all(),
         ];
     }

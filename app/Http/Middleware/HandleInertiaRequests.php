@@ -41,7 +41,7 @@ class HandleInertiaRequests extends Middleware
             'name' => config('app.name'),
             'auth' => [
                 'user' => $request->user(),
-                'avatarSpritePath' => fn (): ?string => $request->user()?->avatarSpecies?->sprite_path,
+                'avatarSpritePath' => fn (): ?string => $request->user()?->avatarSpritePath(),
             ],
             'pendingFriendRequests' => fn (): int => $request->user() === null
                 ? 0

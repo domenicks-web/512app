@@ -28,7 +28,7 @@ class BuildTradeInbox
         $trades = Trade::query()
             ->where('status', TradeStatus::Pending)
             ->where(fn ($query) => $query->where('from_user_id', $user->id)->orWhere('to_user_id', $user->id))
-            ->with(['fromUser.avatarSpecies:id,sprite_path', 'toUser.avatarSpecies:id,sprite_path', 'items.specimen.species:id,name,sprite_path,sprite_shiny_path'])
+            ->with(['fromUser.avatarSpecies:id,sprite_path,sprite_shiny_path', 'toUser.avatarSpecies:id,sprite_path,sprite_shiny_path', 'items.specimen.species:id,name,sprite_path,sprite_shiny_path'])
             ->latest()
             ->latest('id')
             ->get();
@@ -62,7 +62,7 @@ class BuildTradeInbox
             'id' => $trade->id,
             'otherTrainer' => [
                 'nickname' => (string) $otherTrainer->nickname,
-                'avatarSpritePath' => $otherTrainer->avatarSpecies?->sprite_path,
+                'avatarSpritePath' => $otherTrainer->avatarSpritePath(),
             ],
             'message' => $trade->message,
             'createdAgo' => $trade->created_at?->diffForHumans(['locale' => 'pt_BR', 'options' => Carbon::JUST_NOW]) ?? '',

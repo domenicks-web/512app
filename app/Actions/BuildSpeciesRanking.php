@@ -21,7 +21,7 @@ class BuildSpeciesRanking
     {
         $users = User::query()
             ->whereNotNull('nickname')
-            ->with('avatarSpecies:id,sprite_path')
+            ->with('avatarSpecies:id,sprite_path,sprite_shiny_path')
             ->select('users.*')
             ->addSelect([
                 'owned_species' => Specimen::query()
@@ -53,7 +53,7 @@ class BuildSpeciesRanking
                 'userId' => $user->id,
                 'nickname' => (string) $user->nickname,
                 'tag' => (string) $user->tag,
-                'avatarSpritePath' => $user->avatarSpecies?->sprite_path,
+                'avatarSpritePath' => $user->avatarSpritePath(),
                 'ownedSpecies' => $owned,
                 'shinyCount' => (int) $user->getAttribute('shiny_count'),
                 'position' => $owned > 0 ? $position : null,

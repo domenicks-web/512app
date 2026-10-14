@@ -26,6 +26,7 @@ use Illuminate\Support\Carbon;
  * @property Carbon|null $birthdate
  * @property Carbon|null $birthdate_corrected_at
  * @property int|null $avatar_species_id
+ * @property bool $avatar_is_shiny
  * @property bool $is_admin
  * @property int $invite_quota
  * @property int|null $invited_by
@@ -39,12 +40,17 @@ use Illuminate\Support\Carbon;
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  */
-#[Fillable(['nickname', 'tag', 'email', 'password', 'birthdate', 'avatar_species_id', 'invited_by', 'client_seed'])]
+#[Fillable(['nickname', 'tag', 'email', 'password', 'birthdate', 'avatar_species_id', 'avatar_is_shiny', 'invited_by', 'client_seed'])]
 #[Hidden(['password', 'remember_token', 'next_server_seed'])]
 class User extends Authenticatable implements MustVerifyEmail
 {
     /** @use HasFactory<UserFactory> */
     use HasFactory, Notifiable;
+
+    /** @var array<string, mixed> */
+    protected $attributes = [
+        'avatar_is_shiny' => false,
+    ];
 
     /**
      * @return BelongsTo<Invite, $this>
@@ -84,6 +90,14 @@ class User extends Authenticatable implements MustVerifyEmail
     public function avatarSpecies(): BelongsTo
     {
         return $this->belongsTo(Species::class, 'avatar_species_id');
+    }
+
+    /** Sprite do avatar: o shiny quando o parceiro escolhido é a versão shiny. */
+    public function avatarSpritePath(): ?string
+    {
+        return $this->avatar_is_shiny
+            ? $this->avatarSpecies?->sprite_shiny_path
+            : $this->avatarSpecies?->sprite_path;
     }
 
     /**
@@ -162,6 +176,7 @@ class User extends Authenticatable implements MustVerifyEmail
             'birthdate_corrected_at' => 'datetime',
             'nickname_changed_at' => 'datetime',
             'is_admin' => 'boolean',
+            'avatar_is_shiny' => 'boolean',
             'invite_quota' => 'integer',
             'password' => 'hashed',
             'nonce' => 'integer',

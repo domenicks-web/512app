@@ -25,7 +25,7 @@ class InviteController extends Controller
     {
         /** @var User $admin */
         $admin = Auth::user();
-        $invites = Invite::with(['createdBy:id,nickname,email', 'redemptions.user.avatarSpecies:id,sprite_path'])->latest('id')->get();
+        $invites = Invite::with(['createdBy:id,nickname,email', 'redemptions.user.avatarSpecies:id,sprite_path,sprite_shiny_path'])->latest('id')->get();
 
         return Inertia::render('admin/Invites', [
             'invites' => InviteResource::collection($invites)->resolve(),

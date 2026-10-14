@@ -23,7 +23,7 @@ class BuildGroupFeed
         $tiers = (array) config('game.group.feed_highlight_tiers');
 
         return Specimen::query()
-            ->with(['species:id,name,rarity_tier,sprite_path,sprite_shiny_path', 'opening.user:id,nickname,avatar_species_id', 'opening.user.avatarSpecies:id,sprite_path'])
+            ->with(['species:id,name,rarity_tier,sprite_path,sprite_shiny_path', 'opening.user:id,nickname,avatar_species_id,avatar_is_shiny', 'opening.user.avatarSpecies:id,sprite_path,sprite_shiny_path'])
             ->where(fn (Builder $query) => $query
                 ->where('is_shiny', true)
                 ->orWhereHas('species', fn (Builder $species) => $species->whereIn('rarity_tier', $tiers)))
@@ -35,7 +35,7 @@ class BuildGroupFeed
                 'id' => $specimen->id,
                 'isShiny' => $specimen->is_shiny,
                 'trainerNickname' => (string) $specimen->opening->user->nickname,
-                'trainerAvatarSpritePath' => $specimen->opening->user->avatarSpecies?->sprite_path,
+                'trainerAvatarSpritePath' => $specimen->opening->user->avatarSpritePath(),
                 'speciesName' => $specimen->species->name,
                 'rarityTier' => $specimen->species->rarity_tier->value,
                 'spritePath' => $specimen->is_shiny ? $specimen->species->sprite_shiny_path : $specimen->species->sprite_path,

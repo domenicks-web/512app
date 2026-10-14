@@ -33,6 +33,7 @@ const props = defineProps<{
         nickname: string;
         tag: string;
         avatarSpeciesId: number | null;
+        avatarIsShiny: boolean;
         birthdate: string | null;
         isBirthdateLocked: boolean;
         email: string;
@@ -41,6 +42,7 @@ const props = defineProps<{
         nicknameChangeableAt: string | null;
     };
     avatarOptions: PartnerOption[];
+    collectionAvatarOptions: PartnerOption[];
     nicknameCooldownDays: number;
     nicknameMaxLength: number;
     birthYearRange: [number, number];
@@ -51,15 +53,25 @@ const page = usePage<{ flash: { profile_status: string | null } }>();
 const status = computed(() => page.props.flash.profile_status);
 
 // O avatar do cartão só troca quando o sprite escolhido pousa nele.
+const allAvatarOptions = computed(() => [
+    ...props.avatarOptions,
+    ...props.collectionAvatarOptions,
+]);
 const avatarSprite = ref(
-    props.avatarOptions.find(
-        (option) => option.id === props.profile.avatarSpeciesId,
+    allAvatarOptions.value.find(
+        (option) =>
+            option.id === props.profile.avatarSpeciesId &&
+            Boolean(option.is_shiny) === props.profile.avatarIsShiny,
     )?.sprite_path ?? null,
 );
 const avatarTarget = ref<InstanceType<typeof TrainerAvatar> | null>(null);
 
-function onPartnerPicked(index: number, sprite: HTMLElement) {
-    const option = props.avatarOptions[index];
+function onPartnerPicked(
+    options: PartnerOption[],
+    index: number,
+    sprite: HTMLElement,
+) {
+    const option = options[index];
     const target = avatarTarget.value?.$el as HTMLElement | undefined;
 
     if (!option || !target) {
@@ -84,7 +96,13 @@ const options = { preserveScroll: true };
 // Avatar
 const avatarForm = useForm({
     avatar_species_id: props.profile.avatarSpeciesId,
+    avatar_is_shiny: props.profile.avatarIsShiny,
 });
+const isAvatarUnchanged = computed(
+    () =>
+        avatarForm.avatar_species_id === props.profile.avatarSpeciesId &&
+        avatarForm.avatar_is_shiny === props.profile.avatarIsShiny,
+);
 const saveAvatar = () => avatarForm.submit(updateAvatar(), options);
 
 // Nickname
@@ -204,9 +222,43 @@ const primaryButton =
                 </div>
                 <PartnerGrid
                     v-model="avatarForm.avatar_species_id"
+                    v-model:shiny="avatarForm.avatar_is_shiny"
                     :options="avatarOptions"
-                    @picked="onPartnerPicked"
+                    @picked="
+                        (index, sprite) =>
+                            onPartnerPicked(avatarOptions, index, sprite)
+                    "
                 />
+                <div class="flex flex-col gap-2">
+                    <h3 class="text-ink text-[14px] font-black">
+                        Da sua coleção
+                    </h3>
+                    <p
+                        v-if="collectionAvatarOptions.length === 0"
+                        :class="help"
+                    >
+                        Abra packs: toda espécie que você tiver vira opção de
+                        parceiro, e a versão shiny também, se tirar uma.
+                    </p>
+                    <div
+                        v-else
+                        class="max-h-[284px] overflow-y-auto overscroll-contain rounded-[18px] py-2"
+                    >
+                        <PartnerGrid
+                            v-model="avatarForm.avatar_species_id"
+                            v-model:shiny="avatarForm.avatar_is_shiny"
+                            :options="collectionAvatarOptions"
+                            @picked="
+                                (index, sprite) =>
+                                    onPartnerPicked(
+                                        collectionAvatarOptions,
+                                        index,
+                                        sprite,
+                                    )
+                            "
+                        />
+                    </div>
+                </div>
                 <span
                     v-if="avatarForm.errors.avatar_species_id"
                     :class="errorPill"
@@ -215,10 +267,7 @@ const primaryButton =
                 <button
                     type="button"
                     :class="primaryButton"
-                    :disabled="
-                        avatarForm.processing ||
-                        avatarForm.avatar_species_id === profile.avatarSpeciesId
-                    "
+                    :disabled="avatarForm.processing || isAvatarUnchanged"
                     @click="saveAvatar"
                 >
                     Salvar parceiro

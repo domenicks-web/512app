@@ -44,7 +44,7 @@ class BuildHomeSummary
             'trainer' => [
                 'nickname' => (string) $user->nickname,
                 'tag' => (string) $user->tag,
-                'avatarSpritePath' => $user->avatarSpecies?->sprite_path,
+                'avatarSpritePath' => $user->avatarSpritePath(),
                 'isAdmin' => $user->is_admin,
             ],
             'collection' => [

@@ -32,7 +32,7 @@ class BuildFriendList
     {
         $friendships = Friendship::query()
             ->involving($viewer)
-            ->with(['requester.avatarSpecies:id,sprite_path', 'addressee.avatarSpecies:id,sprite_path'])
+            ->with(['requester.avatarSpecies:id,sprite_path,sprite_shiny_path', 'addressee.avatarSpecies:id,sprite_path,sprite_shiny_path'])
             ->latest()
             ->latest('id')
             ->get();
@@ -54,7 +54,7 @@ class BuildFriendList
                     'userId' => $friend->id,
                     'nickname' => (string) $friend->nickname,
                     'tag' => (string) $friend->tag,
-                    'avatarSpritePath' => $friend->avatarSpecies?->sprite_path,
+                    'avatarSpritePath' => $friend->avatarSpritePath(),
                     'ownedSpecies' => (int) ($ownedSpecies[$friend->id] ?? 0),
                     'isOnline' => in_array($friend->id, $online, true),
                 ];
@@ -68,7 +68,7 @@ class BuildFriendList
             'friendshipId' => $friendship->id,
             'nickname' => (string) $friendship->otherThan($viewer)->nickname,
             'tag' => (string) $friendship->otherThan($viewer)->tag,
-            'avatarSpritePath' => $friendship->otherThan($viewer)->avatarSpecies?->sprite_path,
+            'avatarSpritePath' => $friendship->otherThan($viewer)->avatarSpritePath(),
             'sentAgo' => $friendship->created_at?->diffForHumans(['locale' => 'pt_BR', 'options' => Carbon::JUST_NOW]) ?? '',
         ];
 
