@@ -16,6 +16,7 @@ use App\Http\Controllers\Profile\ProfileController;
 use App\Http\Controllers\Profile\ShowProfileController;
 use App\Http\Controllers\Ranking\ShowRankingController;
 use App\Http\Controllers\Trades\ShowTradesController;
+use App\Http\Controllers\Trades\TradeController;
 use App\Http\Controllers\Trainer\CompareSpecimensController;
 use App\Http\Controllers\Trainer\ShowTrainerController;
 use App\Http\Controllers\Trainer\ShowTrainerSpeciesController;
@@ -28,6 +29,12 @@ Route::middleware(['auth', 'onboarded'])->group(function () {
     Route::get('colecao/{species}', ShowCollectionSpeciesController::class)->name('collection.species');
     Route::get('ranking', ShowRankingController::class)->name('ranking.show');
     Route::get('trocas', ShowTradesController::class)->name('trades.index');
+    Route::post('trocas', [TradeController::class, 'store'])->name('trades.store');
+    Route::post('trocas/{trade}/aceitar', [TradeController::class, 'accept'])->whereNumber('trade')->name('trades.accept');
+    Route::post('trocas/{trade}/recusar', [TradeController::class, 'decline'])->whereNumber('trade')->name('trades.decline');
+    Route::post('trocas/{trade}/cancelar', [TradeController::class, 'cancel'])->whereNumber('trade')->name('trades.cancel');
+    Route::post('trocas/{trade}/contrapropor', [TradeController::class, 'counter'])->whereNumber('trade')->name('trades.counter.store');
+    Route::post('trocas/{trade}/visto', [TradeController::class, 'seen'])->whereNumber('trade')->name('trades.seen');
     Route::get('amigos', ShowFriendsController::class)->name('friends.index');
     Route::get('feed', ShowFeedController::class)->name('feed.show');
 

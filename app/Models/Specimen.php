@@ -13,6 +13,7 @@ use Illuminate\Database\Eloquent\Attributes\ScopedBy;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Carbon;
 
 /**
@@ -89,6 +90,16 @@ class Specimen extends Model
     public function species(): BelongsTo
     {
         return $this->belongsTo(Species::class);
+    }
+
+    /**
+     * Trocas pelas quais o espécime passou, da mais antiga pra mais nova.
+     *
+     * @return HasMany<SpecimenTransfer, $this>
+     */
+    public function transfers(): HasMany
+    {
+        return $this->hasMany(SpecimenTransfer::class)->orderBy('transferred_at')->orderBy('id');
     }
 
     /**

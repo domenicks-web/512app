@@ -26,7 +26,18 @@ class TradeFactory extends Factory
             'to_user_id' => User::factory(),
             'status' => TradeStatus::Pending,
             'message' => null,
+            'expires_at' => now()->addHours((int) config('game.trades.expires_after_hours')),
             'responded_at' => null,
         ];
+    }
+
+    public function accepted(): static
+    {
+        return $this->state(['status' => TradeStatus::Accepted, 'responded_at' => now()]);
+    }
+
+    public function expired(): static
+    {
+        return $this->state(['expires_at' => now()->subMinute()]);
     }
 }

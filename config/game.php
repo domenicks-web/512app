@@ -201,6 +201,25 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Trocas (fase 4A)
+    |--------------------------------------------------------------------------
+    |
+    | Só entre amigos, de 1 a `max_items_per_side` espécimes de cada lado.
+    | A proposta vence em `expires_after_hours`; quem propõe tem no máximo
+    | `max_pending_outgoing` abertas. Encerradas ficam visíveis na tela de
+    | trocas por `closed_visible_days`.
+    |
+    */
+    'trades' => [
+        'max_items_per_side' => 3,
+        'expires_after_hours' => 72,
+        'max_pending_outgoing' => 10,
+        'message_max_length' => 140,
+        'closed_visible_days' => 7,
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
     | Convites
     |--------------------------------------------------------------------------
     |
