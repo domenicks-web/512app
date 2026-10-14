@@ -54,7 +54,9 @@ const dims = computed(
         class="relative shrink-0 cursor-pointer rounded-[16px] p-[2px] text-left transition-transform duration-200 active:scale-[0.96]"
         :class="[
             dims.box,
-            selected ? 'ring-brand ring-[3px] ring-offset-2' : '',
+            selected
+                ? 'outline-brand outline outline-[3px] outline-offset-2'
+                : '',
         ]"
         :style="{
             background: look.frame,
