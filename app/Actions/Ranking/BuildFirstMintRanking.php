@@ -31,13 +31,23 @@ class BuildFirstMintRanking
             ->orderBy('id')
             ->get();
 
-        return $this->positions->assign($users->map(fn (User $user): array => [
-            'userId' => $user->id,
-            'nickname' => (string) $user->nickname,
-            'tag' => (string) $user->tag,
-            'avatarSpritePath' => $user->avatarSpritePath(),
-            'value' => (int) $user->getAttribute('first_mints'),
-            'specimen' => null,
-        ])->values()->all());
+        $values = array_values($users->map(fn (User $user): int => (int) $user->getAttribute('first_mints'))->all());
+        $positions = $this->positions->assign($values);
+
+        $rows = [];
+
+        foreach ($users as $index => $user) {
+            $rows[] = [
+                'userId' => $user->id,
+                'nickname' => (string) $user->nickname,
+                'tag' => (string) $user->tag,
+                'avatarSpritePath' => $user->avatarSpritePath(),
+                'position' => $positions[$index],
+                'value' => $values[$index],
+                'specimen' => null,
+            ];
+        }
+
+        return $rows;
     }
 }

@@ -33,7 +33,7 @@ class BuildIvRanking
             ->unique('user_id')
             ->keyBy('user_id');
 
-        $rows = $users->map(function (User $user) use ($best): array {
+        $sorted = array_values($users->map(function (User $user) use ($best): array {
             $specimen = $best->get($user->id);
 
             return [
@@ -42,7 +42,7 @@ class BuildIvRanking
                 'tag' => (string) $user->tag,
                 'avatarSpritePath' => $user->avatarSpritePath(),
                 'value' => $specimen !== null ? (int) $specimen->iv_total : 0,
-                'mint' => $specimen?->mint_number ?? PHP_INT_MAX,
+                'mint' => $specimen === null ? PHP_INT_MAX : $specimen->mint_number,
                 'specimen' => $specimen === null ? null : [
                     'speciesName' => $specimen->species->name,
                     'spritePath' => $specimen->is_shiny ? $specimen->species->sprite_shiny_path : $specimen->species->sprite_path,
@@ -56,9 +56,16 @@ class BuildIvRanking
 
                 return $row;
             })
-            ->values()
-            ->all();
+            ->all());
 
-        return $this->positions->assign($rows);
+        $positions = $this->positions->assign(array_map(fn (array $row): int => $row['value'], $sorted));
+
+        $rows = [];
+
+        foreach ($sorted as $index => $row) {
+            $rows[] = array_merge($row, ['position' => $positions[$index]]);
+        }
+
+        return $rows;
     }
 }
