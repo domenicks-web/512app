@@ -142,16 +142,11 @@ export function summarySubtitle(specimens: PackSpecimen[]): string {
     return `${specimens.length} espécimes · ${parts.join(' · ')}`;
 }
 
-export function ceremonyMeta(specimen: PackSpecimen): string {
-    return [
-        specimen.mint === 1 ? `Primeiro ${specimen.name} do servidor` : null,
-        `${sizeLabel(specimen)}, ${sizeText(specimen)}`,
-        `IV ${specimen.ivTotal}/${IV_MAX}`,
-        specimen.nature,
-    ]
-        .filter(Boolean)
-        .join(' · ');
-}
+/** "maior que 67%" / "menor que 20%": o percentil curto, sem o nome. */
+export const sizeShort = (specimen: PackSpecimen): string =>
+    specimen.sizePercentile >= 50
+        ? `maior que ${specimen.sizePercentile}%`
+        : `menor que ${100 - specimen.sizePercentile}%`;
 
 /** "06 nov", como o protótipo. */
 export function dayMonth(date: Date): string {

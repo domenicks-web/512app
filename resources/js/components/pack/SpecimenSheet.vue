@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue';
+import { useMediaQuery } from '@/composables/useMediaQuery';
 import {
     holoBackground,
     holoPosition,
@@ -21,6 +22,7 @@ import PackModal from './PackModal.vue';
 
 /** Ficha do espécime: sprite até 4×, régua de tamanho, IVs, natureza, captura e hash. */
 const props = defineProps<{ specimen: PackSpecimen | null }>();
+const isMobile = useMediaQuery('(max-width: 639.98px)');
 const emit = defineEmits<{ close: [] }>();
 
 const caught = computed(() =>
@@ -45,11 +47,15 @@ const caught = computed(() =>
     >
         <div v-if="specimen" class="flex flex-wrap">
             <div
-                class="relative flex min-h-[340px] flex-[1_1_300px] items-center justify-center overflow-hidden"
+                class="relative flex min-h-[190px] flex-[1_1_300px] items-center justify-center overflow-hidden sm:min-h-[340px]"
                 :style="{ background: panelBackground(specimen) }"
             >
                 <img
-                    v-pixel-fit="{ cap: 4, maxH: 260, maxW: 300 }"
+                    v-pixel-fit="{
+                        cap: isMobile ? 3 : 4,
+                        maxH: isMobile ? 160 : 260,
+                        maxW: 300,
+                    }"
                     :src="spriteOf(specimen)"
                     :data-fallback="specimen.sprite"
                     :alt="specimen.name"
@@ -66,12 +72,12 @@ const caught = computed(() =>
                 />
             </div>
             <div
-                class="flex min-w-0 flex-[1_1_360px] flex-col gap-[22px] px-7 pt-[30px] pb-7"
+                class="flex min-w-0 flex-[1_1_360px] flex-col gap-4 px-5 pt-5 pb-5 sm:gap-[22px] sm:px-7 sm:pt-[30px] sm:pb-7"
             >
                 <div class="flex flex-col gap-2.5">
                     <div class="flex items-baseline gap-2.5">
                         <div
-                            class="text-[34px] leading-none font-black tracking-[-0.03em]"
+                            class="text-[28px] leading-none font-black tracking-[-0.03em] sm:text-[34px]"
                         >
                             {{ specimen.name }}
                         </div>
@@ -141,7 +147,7 @@ const caught = computed(() =>
                     </div>
                 </div>
 
-                <div class="flex flex-col gap-[9px]">
+                <div class="flex flex-col gap-1.5 sm:gap-[9px]">
                     <div class="flex justify-between text-xs font-extrabold">
                         <span class="text-[#c3cad4]">IVs</span
                         ><span>{{ specimen.ivTotal }} / {{ IV_MAX }}</span>

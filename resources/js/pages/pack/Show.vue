@@ -16,11 +16,14 @@ import { PackDirector } from '@/lib/pack/director';
 import type { PackApi, PackSceneState } from '@/lib/pack/director';
 import {
     barColor,
-    ceremonyMeta,
     dayMonth,
     isGoldMint,
+    IV_MAX,
+    natureColor,
     pad,
     shortHash,
+    sizeLabel,
+    sizeShort,
     spriteOf,
     TIER_META,
 } from '@/lib/pack/meta';
@@ -48,6 +51,19 @@ const props = defineProps<{
 
 const MUTE_KEY = 'pack:muted';
 const SLOT_COUNT = 5;
+
+/**
+ * Celular: o "5 do dado" (decidido com o usuário). Slots 1–4 nos cantos e
+ * o garantido no centro. Tudo em classes do Tailwind: o CSS de bloco
+ * `<style>` chega pelo JS no dev e já falhou no celular.
+ */
+const SLOT_MOBILE_AREA = [
+    'max-md:[grid-area:1/1]',
+    'max-md:[grid-area:1/3]',
+    'max-md:[grid-area:3/1]',
+    'max-md:[grid-area:3/3]',
+    'max-md:[grid-area:2/2]',
+];
 
 const root = ref<HTMLElement | null>(null);
 const canvas = ref<HTMLCanvasElement | null>(null);
@@ -418,10 +434,12 @@ onBeforeUnmount(() => {
                     <div class="text-[15px] font-extrabold text-[#c3cad4]">
                         Segure a bola para abrir
                     </div>
-                    <div class="flex flex-wrap justify-center gap-2">
+                    <div
+                        class="flex w-full max-w-[min(440px,100%)] flex-col items-stretch gap-2 sm:w-auto sm:max-w-none sm:flex-row sm:items-center sm:justify-center"
+                    >
                         <div
                             title="sha256(server_seed), gravado antes do sorteio"
-                            class="flex h-8 items-center gap-2 rounded-full bg-white/6 px-3 text-xs font-semibold text-[#7d8794]"
+                            class="flex h-8 items-center justify-center gap-2 rounded-full bg-white/6 px-3 text-xs font-semibold whitespace-nowrap text-[#7d8794]"
                         >
                             <svg
                                 width="12"
@@ -450,7 +468,7 @@ onBeforeUnmount(() => {
                         </div>
                         <label
                             title="Você pode trocar sua client seed antes de abrir"
-                            class="flex h-8 cursor-text items-center gap-2 rounded-full bg-white/6 pr-1.5 pl-3 text-xs font-semibold text-[#7d8794]"
+                            class="flex h-8 min-w-0 cursor-text items-center gap-2 rounded-full bg-white/6 pr-1.5 pl-3 text-xs font-semibold whitespace-nowrap text-[#7d8794] sm:max-w-[360px]"
                             @pointerdown.stop
                             @click.stop
                         >
@@ -458,10 +476,15 @@ onBeforeUnmount(() => {
                             <input
                                 :value="clientSeed"
                                 :maxlength="clientSeedMaxLength"
-                                :size="Math.max(6, clientSeed.length + 1)"
+                                :size="
+                                    Math.max(
+                                        6,
+                                        Math.min(clientSeed.length + 1, 25),
+                                    )
+                                "
                                 spellcheck="false"
                                 autocomplete="off"
-                                class="h-[26px] rounded-full border-0 bg-transparent px-1.5 font-mono text-xs font-extrabold text-[#c3cad4] outline-none"
+                                class="h-[26px] min-w-0 flex-1 truncate rounded-full border-0 bg-transparent px-1.5 font-mono text-xs font-extrabold text-[#c3cad4] outline-none"
                                 @input="onClientSeedInput"
                                 @blur="saveClientSeed"
                                 @keydown.enter="
@@ -495,22 +518,26 @@ onBeforeUnmount(() => {
                     scene.phase === 'summary'
                 "
                 data-k="slots"
-                class="pack-slots absolute opacity-0"
+                class="absolute bottom-[10vh] left-1/2 w-[min(880px,94vw)] -translate-x-1/2 opacity-0 max-md:top-[54%] max-md:bottom-auto max-md:w-[min(420px,94vw)] max-md:-translate-y-1/2"
             >
-                <div class="pack-grid">
+                <div
+                    class="grid grid-cols-5 gap-2 max-md:grid-cols-3 max-md:gap-x-2.5 max-md:gap-y-1.5"
+                >
                     <div
                         v-for="(slot, index) in scene.slots"
                         :key="slot.slot"
                         :data-slot="index"
-                        class="pack-slot relative flex min-w-0 flex-col items-center gap-3"
-                        :class="{
-                            'pack-slot--guaranteed':
-                                slot.slot === guaranteedSlot,
-                        }"
+                        class="relative flex min-w-0 flex-col items-center gap-3"
+                        :class="SLOT_MOBILE_AREA[index]"
                     >
                         <div
                             data-k="sbox"
-                            class="pack-sbox relative flex w-full items-end justify-center"
+                            class="relative flex h-[168px] w-full items-end justify-center"
+                            :class="
+                                slot.slot === guaranteedSlot
+                                    ? 'max-md:h-[150px]'
+                                    : 'max-md:h-[120px]'
+                            "
                         >
                             <div
                                 class="absolute right-[24%] -bottom-[5px] left-[24%] h-2.5 rounded-[50%] bg-black/40 blur-[4px]"
@@ -528,7 +555,7 @@ onBeforeUnmount(() => {
                             <button
                                 type="button"
                                 data-ball
-                                class="pack-ball-hit absolute bottom-[-9px] left-1/2 flex -translate-x-1/2 items-end justify-center outline-none focus-visible:rounded-full focus-visible:shadow-[0_0_0_3px_rgba(242,77,77,0.6)]"
+                                class="absolute bottom-[-9px] left-1/2 flex min-h-16 min-w-16 -translate-x-1/2 items-end justify-center outline-none focus-visible:rounded-full focus-visible:shadow-[0_0_0_3px_rgba(242,77,77,0.6)]"
                                 :class="
                                     slot.specimen
                                         ? 'pointer-events-none'
@@ -543,7 +570,7 @@ onBeforeUnmount(() => {
                             >
                                 <div
                                     data-k="mball"
-                                    class="pack-mball relative mb-[9px] opacity-0"
+                                    class="relative mb-[9px] size-14 opacity-0 max-md:size-[52px]"
                                 >
                                     <MiniBall
                                         :keys="{ shake: 'mShake', top: 'mTop' }"
@@ -712,9 +739,82 @@ onBeforeUnmount(() => {
                     <div
                         v-if="cer"
                         data-k="cmeta"
-                        class="max-w-[520px] text-sm leading-normal font-semibold text-pretty text-[#c3cad4] opacity-0"
+                        class="flex w-full max-w-[440px] flex-col items-center gap-2.5 opacity-0"
                     >
-                        {{ ceremonyMeta(cer) }}
+                        <div
+                            v-if="cer.mint === 1"
+                            class="flex h-7 items-center gap-1.5 rounded-full bg-[rgba(255,201,77,0.14)] px-3 text-xs font-extrabold text-[#FFC94D]"
+                        >
+                            <svg
+                                width="11"
+                                height="11"
+                                viewBox="0 0 24 24"
+                                fill="currentColor"
+                                aria-hidden="true"
+                            >
+                                <path
+                                    d="M12 2l2.9 6.6 7.1.6-5.4 4.7 1.6 7L12 17.3 5.8 20.9l1.6-7L2 9.2l7.1-.6z"
+                                />
+                            </svg>
+                            Primeiro {{ cer.name }} do servidor
+                        </div>
+                        <dl class="grid w-full grid-cols-3 gap-2">
+                            <div
+                                class="flex min-w-0 flex-col items-center gap-0.5 rounded-2xl bg-white/6 px-2 py-2.5"
+                            >
+                                <dt
+                                    class="text-[10px] font-extrabold tracking-[0.14em] text-[#7d8794] uppercase"
+                                >
+                                    Tamanho
+                                </dt>
+                                <dd class="text-base font-black">
+                                    {{ sizeLabel(cer) }}
+                                </dd>
+                                <dd
+                                    class="text-[11px] leading-tight font-semibold text-[#7d8794]"
+                                >
+                                    {{ sizeShort(cer) }}
+                                </dd>
+                            </div>
+                            <div
+                                class="flex min-w-0 flex-col items-center gap-0.5 rounded-2xl bg-white/6 px-2 py-2.5"
+                            >
+                                <dt
+                                    class="text-[10px] font-extrabold tracking-[0.14em] text-[#7d8794] uppercase"
+                                >
+                                    IV
+                                </dt>
+                                <dd class="text-base font-black">
+                                    {{ cer.ivTotal }}
+                                </dd>
+                                <dd
+                                    class="text-[11px] leading-tight font-semibold text-[#7d8794]"
+                                >
+                                    de {{ IV_MAX }}
+                                </dd>
+                            </div>
+                            <div
+                                class="flex min-w-0 flex-col items-center gap-0.5 rounded-2xl bg-white/6 px-2 py-2.5"
+                            >
+                                <dt
+                                    class="text-[10px] font-extrabold tracking-[0.14em] text-[#7d8794] uppercase"
+                                >
+                                    Natureza
+                                </dt>
+                                <dd
+                                    class="flex max-w-full items-center gap-1.5 truncate text-base font-black"
+                                >
+                                    <span
+                                        class="size-2 shrink-0 rounded-full"
+                                        :style="{
+                                            background: natureColor(
+                                                cer.natureIndex,
+                                            ),
+                                        }"
+                                    />{{ cer.nature }}
+                                </dd>
+                            </div>
+                        </dl>
                     </div>
                     <div
                         data-k="cnext"
@@ -831,85 +931,3 @@ onBeforeUnmount(() => {
         />
     </div>
 </template>
-
-<style scoped>
-/* Desktop (≥ 768px): 5 colunas, slot de 168px, bola de 56px. */
-.pack-slots {
-    left: 50%;
-    bottom: 10vh;
-    width: min(880px, 94vw);
-    transform: translateX(-50%);
-}
-
-.pack-grid {
-    display: grid;
-    grid-template-columns: repeat(5, minmax(0, 1fr));
-    gap: 8px;
-}
-
-.pack-sbox {
-    height: 168px;
-}
-
-.pack-mball {
-    width: 56px;
-    height: 56px;
-}
-
-.pack-ball-hit {
-    min-width: 64px;
-    min-height: 64px;
-}
-
-/*
- * Celular: o "5 do dado". Slots 1–4 nos cantos (cima esquerda, cima
- * direita, baixo esquerda, baixo direita) e o garantido no centro, maior.
- */
-@media (max-width: 767.98px) {
-    .pack-slots {
-        top: 54%;
-        bottom: auto;
-        width: min(420px, 94vw);
-        transform: translate(-50%, -50%);
-    }
-
-    .pack-grid {
-        grid-template-columns: repeat(3, minmax(0, 1fr));
-        column-gap: 10px;
-        row-gap: 6px;
-    }
-
-    .pack-slot:nth-child(1) {
-        grid-area: 1 / 1;
-    }
-
-    .pack-slot:nth-child(2) {
-        grid-area: 1 / 3;
-    }
-
-    .pack-slot:nth-child(3) {
-        grid-area: 3 / 1;
-    }
-
-    .pack-slot:nth-child(4) {
-        grid-area: 3 / 3;
-    }
-
-    .pack-slot--guaranteed {
-        grid-area: 2 / 2;
-    }
-
-    .pack-sbox {
-        height: 120px;
-    }
-
-    .pack-slot--guaranteed .pack-sbox {
-        height: 150px;
-    }
-
-    .pack-mball {
-        width: 52px;
-        height: 52px;
-    }
-}
-</style>

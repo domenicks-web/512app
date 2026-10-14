@@ -5,6 +5,7 @@ import vue from '@vitejs/plugin-vue';
 import laravel from 'laravel-vite-plugin';
 import { bunny } from 'laravel-vite-plugin/fonts';
 import { defineConfig, lazyPlugins, loadEnv } from 'vite-plus';
+import type { Plugin } from 'vite-plus';
 
 // `DEV_LAN_HOST` no .env (ex: 192.168.1.26) abre o dev server pra rede:
 // celular e outros aparelhos acessam pelo IP do PC. Sem ele, só localhost.
@@ -14,8 +15,33 @@ const lanHost = loadEnv(
     '',
 ).DEV_LAN_HOST;
 
+/**
+ * O SSR do Inertia põe no HTML o CSS dos componentes com a URL "local" do
+ * Vite (`localhost:5173`) e marca o estilo como já carregado. No celular
+ * esse localhost é o próprio celular: o CSS nunca chega. Com
+ * `DEV_LAN_HOST`, a URL local passa a ser a da rede.
+ */
+function lanSsrOrigin(host: string): Plugin {
+    return {
+        name: '512:lan-ssr-origin',
+        configureServer(server) {
+            server.middlewares.use((_request, _response, next) => {
+                const urls = server.resolvedUrls;
+                const origin = `http://${host}:${server.config.server.port ?? 5173}/`;
+
+                if (urls && urls.local[0] !== origin) {
+                    urls.local = [origin];
+                }
+
+                next();
+            });
+        },
+    };
+}
+
 export default defineConfig({
     plugins: lazyPlugins(() => [
+        ...(lanHost ? [lanSsrOrigin(lanHost)] : []),
         laravel({
             input: ['resources/css/app.css', 'resources/js/app.ts'],
             refresh: true,

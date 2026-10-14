@@ -99,7 +99,7 @@ function onCreated() {
         >
             <div
                 role="row"
-                class="invite-grid border-line border-b px-6 py-4 text-[11px] font-extrabold tracking-[0.12em] text-[#8a9099] uppercase"
+                class="border-line grid grid-cols-[minmax(150px,1.4fr)_minmax(120px,1.2fr)_96px_84px_100px_80px] gap-[14px] border-b px-6 py-4 text-[11px] font-extrabold tracking-[0.12em] text-[#8a9099] uppercase"
             >
                 <span role="columnheader">Código</span>
                 <span role="columnheader">Usado por</span>
@@ -113,7 +113,7 @@ function onCreated() {
                 v-for="invite in visibleInvites"
                 :key="invite.id"
                 role="row"
-                class="invite-grid border-line items-center border-b px-6 py-4 transition-colors last:border-b-0 hover:bg-[#fafafb]"
+                class="border-line grid grid-cols-[minmax(150px,1.4fr)_minmax(120px,1.2fr)_96px_84px_100px_80px] items-center gap-[14px] border-b px-6 py-4 transition-colors last:border-b-0 hover:bg-[#fafafb]"
                 :class="[
                     isFaded(invite) ? 'opacity-60' : '',
                     invite.id === freshId ? 'row-in' : '',
@@ -220,14 +220,6 @@ function onCreated() {
 </template>
 
 <style scoped>
-.invite-grid {
-    display: grid;
-    grid-template-columns:
-        minmax(150px, 1.4fr) minmax(120px, 1.2fr)
-        96px 84px 100px 80px;
-    gap: 14px;
-}
-
 .row-in {
     animation: row-in 0.45s cubic-bezier(0.2, 1.4, 0.4, 1);
 }

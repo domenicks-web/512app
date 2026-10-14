@@ -38,7 +38,7 @@ onBeforeUnmount(() => document.removeEventListener('keydown', onKeydown));
 <template>
     <div
         v-if="open"
-        class="absolute inset-0 z-30 box-border flex items-center justify-center overflow-x-hidden overflow-y-auto bg-[rgba(28,31,38,0.62)] p-5"
+        class="absolute inset-0 z-30 box-border flex items-center justify-center overflow-x-hidden overflow-y-auto bg-[rgba(28,31,38,0.62)] p-3 sm:p-5"
         @click.self="emit('close')"
     >
         <div
@@ -46,7 +46,7 @@ onBeforeUnmount(() => document.removeEventListener('keydown', onKeydown));
             role="dialog"
             aria-modal="true"
             :aria-label="label"
-            class="relative m-auto w-full overflow-hidden rounded-[32px] bg-[#1c1f26] text-white shadow-[0_40px_90px_rgba(0,0,0,0.45)]"
+            class="relative m-auto w-full overflow-hidden rounded-[26px] bg-[#1c1f26] text-white shadow-[0_40px_90px_rgba(0,0,0,0.45)] sm:rounded-[32px]"
             :style="{ maxWidth }"
         >
             <button

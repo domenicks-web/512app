@@ -124,7 +124,7 @@ function joinedAt(player: Player): string {
         >
             <div
                 role="row"
-                class="player-grid border-line items-end border-b px-6 py-4 text-[11px] font-extrabold tracking-[0.12em] text-[#8a9099] uppercase"
+                class="border-line grid grid-cols-[minmax(190px,1.6fr)_minmax(110px,1fr)_64px_72px_116px_140px_36px] items-end gap-[14px] border-b px-6 py-4 text-[11px] font-extrabold tracking-[0.12em] text-[#8a9099] uppercase"
             >
                 <span role="columnheader">Jogador</span>
                 <span role="columnheader">Entrou com</span>
@@ -139,7 +139,7 @@ function joinedAt(player: Player): string {
                 v-for="player in visiblePlayers"
                 :key="player.id"
                 role="row"
-                class="player-grid border-line items-center border-b px-6 py-4 transition-colors last:border-b-0 hover:bg-[#fafafb]"
+                class="border-line grid grid-cols-[minmax(190px,1.6fr)_minmax(110px,1fr)_64px_72px_116px_140px_36px] items-center gap-[14px] border-b px-6 py-4 transition-colors last:border-b-0 hover:bg-[#fafafb]"
             >
                 <PlayerIdentity
                     role="cell"
@@ -277,13 +277,3 @@ function joinedAt(player: Player): string {
         />
     </AdminShell>
 </template>
-
-<style scoped>
-.player-grid {
-    display: grid;
-    grid-template-columns:
-        minmax(190px, 1.6fr) minmax(110px, 1fr)
-        64px 72px 116px 140px 36px;
-    gap: 14px;
-}
-</style>

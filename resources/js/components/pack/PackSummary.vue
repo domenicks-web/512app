@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { Link } from '@inertiajs/vue3';
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
+import { useMediaQuery } from '@/composables/useMediaQuery';
 import PokeballMark from '@/components/entry/PokeballMark.vue';
 import {
     holoBackground,
@@ -28,6 +29,7 @@ const props = defineProps<{
 }>();
 const emit = defineEmits<{ sheet: [index: number]; receipt: [] }>();
 
+const isMobile = useMediaQuery('(max-width: 639.98px)');
 const now = ref(Date.now());
 let clock = 0;
 onMounted(
@@ -80,7 +82,7 @@ function untilt(event: MouseEvent, specimen: PackSpecimen) {
 
 <template>
     <div
-        class="mx-auto box-border flex max-w-[1120px] flex-col gap-[30px] px-6 pt-[92px] pb-14"
+        class="mx-auto box-border flex max-w-[1120px] flex-col gap-6 px-4 pt-[84px] pb-10 sm:gap-[30px] sm:px-6 sm:pt-[92px] sm:pb-14"
     >
         <div data-k="sumHead" class="flex flex-col gap-2">
             <div
@@ -98,20 +100,22 @@ function untilt(event: MouseEvent, specimen: PackSpecimen) {
             </div>
         </div>
 
-        <div class="grid grid-cols-[repeat(auto-fit,minmax(176px,1fr))] gap-4">
+        <div
+            class="grid grid-cols-2 gap-3 sm:grid-cols-[repeat(auto-fit,minmax(176px,1fr))] sm:gap-4"
+        >
             <button
                 v-for="(specimen, index) in specimens"
                 :key="specimen.id"
                 type="button"
                 data-card
-                class="flex cursor-pointer flex-col gap-3 rounded-[28px] bg-white p-2.5 text-left opacity-0 shadow-[0_2px_3px_rgba(28,32,38,0.05),0_22px_48px_rgba(43,47,54,0.14)] transition-transform duration-[180ms] ease-out"
+                class="flex min-w-0 cursor-pointer flex-col gap-2.5 rounded-[22px] bg-white p-2 text-left opacity-0 shadow-[0_2px_3px_rgba(28,32,38,0.05),0_22px_48px_rgba(43,47,54,0.14)] transition-transform duration-[180ms] ease-out sm:gap-3 sm:rounded-[28px] sm:p-2.5"
                 :aria-label="`Ver ficha de ${specimen.name}`"
                 @mousemove="tilt"
                 @mouseleave="untilt($event, specimen)"
                 @click="emit('sheet', index)"
             >
                 <div
-                    class="relative flex h-[178px] items-center justify-center overflow-hidden rounded-[20px]"
+                    class="relative flex h-[124px] items-center justify-center overflow-hidden rounded-[16px] sm:h-[178px] sm:rounded-[20px]"
                     :style="{
                         background: panelBackground(specimen),
                         boxShadow: specimen.isShiny
@@ -120,7 +124,10 @@ function untilt(event: MouseEvent, specimen: PackSpecimen) {
                     }"
                 >
                     <img
-                        v-pixel-fit="{ cap: 3, maxH: 140 }"
+                        v-pixel-fit="{
+                            cap: isMobile ? 2 : 3,
+                            maxH: isMobile ? 100 : 140,
+                        }"
                         :src="spriteOf(specimen)"
                         :data-fallback="specimen.sprite"
                         :alt="specimen.name"
@@ -161,10 +168,12 @@ function untilt(event: MouseEvent, specimen: PackSpecimen) {
                         Nº {{ pad(specimen.mint, 4) }}
                     </div>
                 </div>
-                <div class="flex flex-col gap-2.5 px-1.5 pb-1.5">
+                <div
+                    class="flex min-w-0 flex-col gap-2 px-1 pb-1 sm:gap-2.5 sm:px-1.5 sm:pb-1.5"
+                >
                     <div class="flex items-baseline justify-between gap-2">
                         <div
-                            class="truncate text-lg font-black tracking-[-0.02em]"
+                            class="truncate text-[15px] font-black tracking-[-0.02em] sm:text-lg"
                         >
                             {{ specimen.name }}
                         </div>
@@ -174,7 +183,7 @@ function untilt(event: MouseEvent, specimen: PackSpecimen) {
                     </div>
                     <div class="flex flex-wrap gap-1.5">
                         <span
-                            class="flex h-6 items-center rounded-full px-[9px] text-[11px] font-extrabold"
+                            class="flex h-[22px] items-center rounded-full px-2 text-[10px] font-extrabold sm:h-6 sm:px-[9px] sm:text-[11px]"
                             :style="{
                                 background: TIER_META[specimen.tier].color,
                                 color: TIER_META[specimen.tier].fg,
@@ -182,11 +191,11 @@ function untilt(event: MouseEvent, specimen: PackSpecimen) {
                             >{{ TIER_META[specimen.tier].label }}</span
                         >
                         <span
-                            class="flex h-6 items-center rounded-full bg-[#eff0f2] px-[9px] text-[11px] font-extrabold"
+                            class="flex h-[22px] items-center rounded-full bg-[#eff0f2] px-2 text-[10px] font-extrabold sm:h-6 sm:px-[9px] sm:text-[11px]"
                             >{{ sizeLabel(specimen) }}</span
                         >
                         <span
-                            class="flex h-6 items-center gap-1.5 rounded-full bg-[#eff0f2] px-[9px] text-[11px] font-extrabold"
+                            class="flex h-[22px] items-center gap-1.5 rounded-full bg-[#eff0f2] px-2 text-[10px] font-extrabold sm:h-6 sm:px-[9px] sm:text-[11px]"
                             ><span
                                 class="size-[7px] rounded-full"
                                 :style="{
@@ -235,10 +244,10 @@ function untilt(event: MouseEvent, specimen: PackSpecimen) {
                     {{ countdown }}
                 </div>
             </div>
-            <div class="flex flex-wrap gap-2.5">
+            <div class="flex w-full flex-wrap gap-2.5 sm:w-auto">
                 <button
                     type="button"
-                    class="flex h-[52px] cursor-pointer items-center gap-2 rounded-full bg-white px-5 text-[15px] font-extrabold shadow-[inset_0_0_0_2px_#e4e6ea] hover:shadow-[inset_0_0_0_2px_#c9ccd2]"
+                    class="flex h-[52px] flex-1 cursor-pointer items-center justify-center gap-2 rounded-full bg-white px-5 text-[15px] font-extrabold shadow-[inset_0_0_0_2px_#e4e6ea] hover:shadow-[inset_0_0_0_2px_#c9ccd2] sm:flex-none"
                     @click="emit('receipt')"
                 >
                     <svg
@@ -261,7 +270,7 @@ function untilt(event: MouseEvent, specimen: PackSpecimen) {
                 </button>
                 <Link
                     :href="collectionShow.url()"
-                    class="flex h-[52px] items-center gap-2.5 rounded-full bg-[#f24d4d] pr-[22px] pl-[18px] text-[15px] font-extrabold text-white shadow-[0_10px_22px_rgba(242,77,77,0.42)] active:scale-[0.97]"
+                    class="flex h-[52px] flex-1 items-center justify-center gap-2.5 rounded-full bg-[#f24d4d] pr-[22px] pl-[18px] text-[15px] font-extrabold whitespace-nowrap text-white shadow-[0_10px_22px_rgba(242,77,77,0.42)] active:scale-[0.97] sm:flex-none"
                 >
                     <PokeballMark />
                     Ver coleção
