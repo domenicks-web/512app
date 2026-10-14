@@ -1,5 +1,6 @@
-/** Itens do dock da Home; as telas do grupo marcam o seu como ativo. */
+/** Itens do dock; cada tela do grupo marca o seu como ativo. */
 export type DockKey =
+    | 'home'
     | 'collection'
     | 'packs'
     | 'ranking'

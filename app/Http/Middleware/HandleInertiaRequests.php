@@ -43,6 +43,12 @@ class HandleInertiaRequests extends Middleware
                 'user' => $request->user(),
                 'avatarSpritePath' => fn (): ?string => $request->user()?->avatarSpritePath(),
             ],
+            'packStatus' => fn (): ?array => $request->user() === null ? null : [
+                'nextPackAt' => $request->user()->next_pack_at?->isFuture()
+                    ? $request->user()->next_pack_at->toIso8601String()
+                    : null,
+                'cooldownHours' => (int) config('game.pack.cooldown_hours'),
+            ],
             'pendingFriendRequests' => fn (): int => $request->user() === null
                 ? 0
                 : Friendship::query()->pending()->where('addressee_id', $request->user()->id)->count(),

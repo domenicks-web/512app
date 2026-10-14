@@ -3,16 +3,18 @@ import FittedSprite from '@/components/FittedSprite.vue';
 import { Head, Link, router, usePoll } from '@inertiajs/vue3';
 import {
     computed,
+    inject,
     nextTick,
     onBeforeUnmount,
     onMounted,
     ref,
     watch,
 } from 'vue';
-import HomeDock from '@/components/entry/HomeDock.vue';
 import { useDotField } from '@/composables/useDotField';
 import { waitForIntro } from '@/composables/useIntro';
 import EntryLayout from '@/layouts/EntryLayout.vue';
+import GroupLayout from '@/layouts/GroupLayout.vue';
+import { groupNavigationKey } from '@/layouts/groupNavigation';
 import { formatCountdown, formatFriendsOnline, formatMint } from '@/lib/format';
 import { animate, spring } from '@/lib/motion';
 import { edit as profileEdit } from '@/routes/profile';
@@ -22,7 +24,7 @@ import { show as packShow } from '@/routes/pack';
 import { show as rankingShow } from '@/routes/ranking';
 import { index as tradesIndex } from '@/routes/trades';
 
-defineOptions({ layout: EntryLayout });
+defineOptions({ layout: [EntryLayout, GroupLayout] });
 
 /**
  * Home: trilho de tiles com um anel colorido que desliza até o ativo
@@ -74,6 +76,7 @@ const TILE_LABELS = [
     'Feed do grupo',
 ];
 
+const groupNavigation = inject(groupNavigationKey, null);
 const field = useDotField();
 const root = ref<HTMLElement | null>(null);
 const wrap = ref<HTMLElement | null>(null);
@@ -267,6 +270,16 @@ onMounted(async () => {
     await nextTick();
     placeRing(false);
 
+    // Chegou deslizando de outra aba: sem a entrada em cascata.
+    if (!groupNavigation?.isSlideNavigation()) {
+        playEntrance();
+    }
+
+    window.addEventListener('keydown', onKeydown);
+    window.addEventListener('resize', onResize);
+});
+
+function playEntrance() {
     const keyframes: Record<string, Keyframe[]> = {
         pop: [
             { transform: 'scale(.3)', opacity: 0 },
@@ -334,10 +347,7 @@ onMounted(async () => {
             delay: 1200,
         },
     );
-
-    window.addEventListener('keydown', onKeydown);
-    window.addEventListener('resize', onResize);
-});
+}
 
 onMounted(() => {
     clock = window.setInterval(() => (now.value = Date.now()), 1000);
@@ -361,7 +371,7 @@ const compactLabel =
 <template>
     <Head title="Início" />
 
-    <div ref="root" class="absolute inset-0 z-[3] flex flex-col">
+    <div ref="root" class="absolute inset-0 flex flex-col">
         <header
             class="flex items-center justify-between gap-4 px-5 pt-[18px] sm:px-7 sm:pt-[22px]"
         >
@@ -392,6 +402,25 @@ const compactLabel =
                     </div>
                 </div>
             </Link>
+            <div
+                data-enter="rise"
+                data-delay="120"
+                class="flex items-center gap-[9px] sm:pl-[150px]"
+            >
+                <div class="relative size-[9px]" aria-hidden="true">
+                    <div
+                        v-if="friendsOnline > 0"
+                        class="bg-online animate-online-pulse absolute inset-0 rounded-full"
+                    />
+                    <div
+                        class="absolute inset-0 rounded-full"
+                        :class="friendsOnline > 0 ? 'bg-online' : 'bg-faint-2'"
+                    />
+                </div>
+                <div class="text-muted text-[12.5px] font-extrabold">
+                    {{ formatFriendsOnline(friendsOnline) }}
+                </div>
+            </div>
         </header>
 
         <div
@@ -630,33 +659,5 @@ const compactLabel =
                 </button>
             </div>
         </div>
-
-        <div class="flex justify-center px-4 pb-[18px]">
-            <div data-enter="rise">
-                <HomeDock :is-admin="trainer.isAdmin" />
-            </div>
-        </div>
-
-        <footer class="flex items-center px-7 pb-[22px]">
-            <div
-                data-enter="rise"
-                data-delay="120"
-                class="flex items-center gap-[9px] sm:pl-[150px]"
-            >
-                <div class="relative size-[9px]" aria-hidden="true">
-                    <div
-                        v-if="friendsOnline > 0"
-                        class="bg-online animate-online-pulse absolute inset-0 rounded-full"
-                    />
-                    <div
-                        class="absolute inset-0 rounded-full"
-                        :class="friendsOnline > 0 ? 'bg-online' : 'bg-faint-2'"
-                    />
-                </div>
-                <div class="text-muted text-[12.5px] font-extrabold">
-                    {{ formatFriendsOnline(friendsOnline) }}
-                </div>
-            </div>
-        </footer>
     </div>
 </template>

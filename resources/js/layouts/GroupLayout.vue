@@ -8,14 +8,16 @@ import { animate, finished, spring } from '@/lib/motion';
 import { groupNavigationKey } from '@/layouts/groupNavigation';
 
 /**
- * Layout persistente das telas do grupo (dentro do `EntryLayout`): o dock
+ * Layout persistente da Home e das telas do grupo (dentro do `EntryLayout`): o dock
  * fica parado entre as visitas e só o conteúdo troca, deslizando na ordem
  * do dock (pra frente vai pra esquerda, pra trás vai pra direita). A
  * entrada em cascata da tela só toca na primeira vez, vindo da Home ou de
  * um carregamento; entre abas, o deslize basta.
  */
 const SCREENS: Record<string, { order: number; dock?: DockKey }> = {
+    Home: { order: -1, dock: 'home' },
     'collection/Show': { order: 0, dock: 'collection' },
+    'packs/Index': { order: 1, dock: 'packs' },
     'ranking/Show': { order: 2, dock: 'ranking' },
     'trades/Index': { order: 3, dock: 'trades' },
     'friends/Index': { order: 4, dock: 'friends' },

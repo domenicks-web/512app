@@ -366,5 +366,15 @@ pushado pro `main`.
       fase 4 precisa chamar pros dois lados.
     - Confirmação de desfazer amizade em 2 linhas fixas (nick cortado).
     - Grade de parceiros abaixo de 460px conferida a 360/390/412: cabe.
+- **Dock e abas (14/10, tarde)**: Home e telas do grupo moram no layout
+  persistente `GroupLayout` (dentro do `EntryLayout`): o dock não é
+  recriado e o conteúdo desliza na ordem do dock (Home → Coleção → Packs
+  → Ranking → Trocas → Amigos → Feed → Perfil). Cascata de entrada só na
+  primeira tela (`groupNavigationKey`). Dock: casa (Home), pokébola
+  vermelha = abrir o pack (`/pack`), que enche de baixo pra cima conforme
+  o cooldown (`packStatus` compartilhado no `HandleInertiaRequests`), e o
+  ícone Packs vai pra `/packs` ("Conteúdo futuro", pedido do usuário).
+  Rótulo do dock só com mouse/teclado (no toque ficava preso). Abaixo de
+  400px o dock encolhe pra caber os 8 botões.
 - **Pendências restantes**: PWA (por último, pedido do usuário); fases
   2–5 como acima. Conta de teste voltou pro avatar Pikachu e sem dados.

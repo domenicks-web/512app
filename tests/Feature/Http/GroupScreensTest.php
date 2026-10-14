@@ -35,7 +35,7 @@ function specimenOf(User $owner, array $attributes = []): Specimen
 it('exige login e perfil completo nas telas do grupo', function (string $url) {
     $this->get($url)->assertRedirect('/login');
     $this->actingAs(User::factory()->withoutProfile()->create())->get($url)->assertRedirect('/completar-perfil');
-})->with(['/colecao', '/ranking', '/trocas', '/amigos', '/feed']);
+})->with(['/colecao', '/ranking', '/trocas', '/amigos', '/feed', '/packs']);
 
 it('lista todas as espécies na coleção com contagem de espécimes e shinies', function () {
     $user = User::factory()->create(['avatar_species_id' => null]);
@@ -186,4 +186,18 @@ it('limita o feed ao tamanho do config', function () {
 
     $this->actingAs(User::factory()->create())->get('/feed')
         ->assertInertia(fn (Assert $page) => $page->has('entries', 2));
+});
+
+it('conta pro dock quando sai o próximo pack e de quantas horas é o cooldown', function () {
+    $this->travelTo(now()->startOfSecond());
+    $waiting = User::factory()->create(['next_pack_at' => now()->addHours(6)]);
+
+    $this->actingAs($waiting)->get('/packs')
+        ->assertInertia(fn (Assert $page) => $page
+            ->component('packs/Index')
+            ->where('packStatus.nextPackAt', now()->addHours(6)->toIso8601String())
+            ->where('packStatus.cooldownHours', 24));
+
+    $this->actingAs(User::factory()->create(['next_pack_at' => now()->subMinute()]))->get('/packs')
+        ->assertInertia(fn (Assert $page) => $page->where('packStatus.nextPackAt', null));
 });
