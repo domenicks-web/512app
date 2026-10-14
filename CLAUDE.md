@@ -505,3 +505,13 @@ pushado pro `main`.
   donos, `ResetUnownedAvatar` no `AcceptTrade`, banimento), Fase 5
   (giroscópio, apelido no espécime), PWA por último. Selo Nº 1 talvez
   repensar. Comparar e "esqueci a senha" já conferidos pelo usuário.
+- **Ideias futuras aprovadas pelo usuário (14/10, noite)** — nenhuma
+  entra sem atualizar o `SPEC.md` antes (moeda está fora de escopo hoje):
+    - **Dust só dentro do jogo**: repetido vira dust, dust compra pack.
+      Repetido precisa valer mais trocado do que moído.
+    - **Loja de cosméticos não aleatórios** (moldura de perfil, verso de
+      carta, selo de apoiador). Nada de pack pago nem caixa aleatória.
+    - **Dinheiro real**: não na versão com Pokémon (marca da Nintendo/TPC;
+      pack pago aleatório + trocas ≈ caixa de recompensa, ECA Digital).
+      Se for monetizar de verdade, versão com criaturas próprias, com
+      advogado antes. Trend no Instagram só depois dessa decisão.
