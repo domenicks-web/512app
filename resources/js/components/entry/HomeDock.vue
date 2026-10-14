@@ -3,11 +3,10 @@ import { Link, usePage } from '@inertiajs/vue3';
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
 import type { DockKey } from '@/components/entry/dock';
 import { animate } from '@/lib/motion';
-import { home, logout } from '@/routes';
-import { index as adminIndex } from '@/routes/admin';
-import { edit as profileEdit } from '@/routes/profile';
+import { home } from '@/routes';
 import { show as packShow } from '@/routes/pack';
 import { index as packsIndex } from '@/routes/packs';
+import { show as settingsShow } from '@/routes/settings';
 import { show as collectionShow } from '@/routes/collection';
 import { index as friendsIndex } from '@/routes/friends';
 import { show as rankingShow } from '@/routes/ranking';
@@ -19,19 +18,19 @@ import type { RouteDefinition } from '@/wayfinder';
  * (cartas em leque, cápsula abre, barras sobem, setas trocam, mão acena,
  * sliders correm). A casa volta pra Home; a pokébola vermelha abre o pack
  * do dia e se enche de vermelho conforme ele fica disponível; Coleção,
- * Packs, Ranking, Trocas e Amigos navegam; "Ajustes" abre o menu.
+ * Packs, Ranking, Trocas, Amigos e Ajustes navegam (o painel de admin
+ * não tem atalho: quem é admin entra por `/admin`).
  * `active` marca o item da tela atual. Amigos mostra um contador vermelho
  * com os pedidos de amizade recebidos.
  */
 defineProps<{
-    isAdmin: boolean;
     active?: DockKey;
 }>();
 
 type DockItem = {
     key: DockKey;
     label: string;
-    href?: () => RouteDefinition<'get'>;
+    href: () => RouteDefinition<'get'>;
 };
 
 const items: DockItem[] = [
@@ -40,7 +39,7 @@ const items: DockItem[] = [
     { key: 'ranking', label: 'Ranking', href: rankingShow },
     { key: 'trades', label: 'Trocas', href: tradesIndex },
     { key: 'friends', label: 'Amigos', href: friendsIndex },
-    { key: 'settings', label: 'Ajustes' },
+    { key: 'settings', label: 'Ajustes', href: settingsShow },
 ];
 
 const MICRO: Record<string, string[]> = {
@@ -89,7 +88,6 @@ const pendingFriendRequests = computed(
 );
 
 const hovered = ref<string | null>(null);
-const isMenuOpen = ref(false);
 
 function onEnter(key: string, event: PointerEvent) {
     // O rótulo é dica de mouse: no toque ele ficaria preso, porque o dock
@@ -127,30 +125,12 @@ function onEnter(key: string, event: PointerEvent) {
     });
 }
 
-const root = ref<HTMLElement | null>(null);
-
-function closeMenuOnOutside(event: PointerEvent) {
-    if (isMenuOpen.value && !root.value?.contains(event.target as Node)) {
-        isMenuOpen.value = false;
-    }
-}
-
-function closeMenuOnEscape(event: KeyboardEvent) {
-    if (event.key === 'Escape') {
-        isMenuOpen.value = false;
-    }
-}
-
 onMounted(() => {
     clock = window.setInterval(() => (now.value = Date.now()), 30_000);
-    document.addEventListener('pointerdown', closeMenuOnOutside);
-    document.addEventListener('keydown', closeMenuOnEscape);
 });
 
 onBeforeUnmount(() => {
     clearInterval(clock);
-    document.removeEventListener('pointerdown', closeMenuOnOutside);
-    document.removeEventListener('keydown', closeMenuOnEscape);
 });
 
 /** Foco por teclado mostra o rótulo; o foco que sobra de um toque, não. */
@@ -159,19 +139,10 @@ function onFocus(key: string, event: FocusEvent) {
         hovered.value = key;
     }
 }
-
-function onActivate(key: string) {
-    hovered.value = null;
-
-    if (key === 'settings') {
-        isMenuOpen.value = !isMenuOpen.value;
-    }
-}
 </script>
 
 <template>
     <nav
-        ref="root"
         aria-label="Navegação principal"
         class="relative flex items-center gap-1.5 rounded-full bg-white/70 p-[7px] shadow-[0_0_0_1px_rgba(28,32,38,0.05),0_10px_26px_rgba(28,32,38,0.08)] backdrop-blur-[12px] max-[400px]:gap-[3px] max-[400px]:p-[5px] sm:gap-2.5 sm:p-[9px]"
     >
@@ -259,18 +230,14 @@ function onActivate(key: string) {
             </svg>
         </Link>
 
-        <component
-            :is="item.href ? Link : 'button'"
+        <Link
             v-for="item in items"
             :key="item.key"
-            :href="item.href?.()"
-            :prefetch="item.href ? ['hover', 'click'] : undefined"
-            :cache-for="item.href ? '10s' : undefined"
-            :type="item.href ? undefined : 'button'"
+            :href="item.href()"
+            :prefetch="['hover', 'click']"
+            cache-for="10s"
             :aria-label="item.label"
             :aria-current="active === item.key ? 'page' : undefined"
-            :aria-haspopup="item.key === 'settings' ? 'menu' : undefined"
-            :aria-expanded="item.key === 'settings' ? isMenuOpen : undefined"
             class="relative flex size-11 shrink-0 cursor-pointer items-center justify-center rounded-full bg-white max-[400px]:size-[38px] sm:size-14"
             :class="
                 active === item.key
@@ -281,7 +248,7 @@ function onActivate(key: string) {
             @pointerleave="hovered = null"
             @focus="onFocus(item.key, $event)"
             @blur="hovered = null"
-            @click="onActivate(item.key)"
+            @click="hovered = null"
         >
             <svg
                 v-if="item.key === 'collection'"
@@ -422,44 +389,11 @@ function onActivate(key: string) {
                 >{{ pendingFriendRequests }}</span
             >
             <span
-                v-if="
-                    hovered === item.key &&
-                    !(item.key === 'settings' && isMenuOpen)
-                "
+                v-if="hovered === item.key"
                 class="bg-ink pointer-events-none absolute bottom-[68px] left-1/2 -translate-x-1/2 rounded-full px-3 py-1.5 text-[12.5px] font-extrabold whitespace-nowrap text-white"
             >
                 {{ item.label }}
             </span>
-        </component>
-
-        <div
-            v-if="isMenuOpen"
-            role="menu"
-            class="absolute right-0 bottom-[calc(100%+12px)] flex min-w-44 flex-col gap-1 rounded-[22px] bg-white p-2 shadow-[0_2px_4px_rgba(28,32,38,0.06),0_14px_30px_rgba(28,32,38,0.12)]"
-        >
-            <Link
-                :href="profileEdit()"
-                role="menuitem"
-                class="text-ink hover:bg-field rounded-full px-4 py-2.5 text-sm font-extrabold"
-            >
-                Editar perfil
-            </Link>
-            <Link
-                v-if="isAdmin"
-                :href="adminIndex()"
-                role="menuitem"
-                class="text-ink hover:bg-field rounded-full px-4 py-2.5 text-sm font-extrabold"
-            >
-                Painel de admin
-            </Link>
-            <Link
-                :href="logout()"
-                as="button"
-                role="menuitem"
-                class="text-brand-ink hover:bg-field cursor-pointer rounded-full px-4 py-2.5 text-left text-sm font-extrabold"
-            >
-                Sair
-            </Link>
-        </div>
+        </Link>
     </nav>
 </template>

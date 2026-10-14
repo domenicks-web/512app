@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { isSoundMuted, setSoundMuted } from '@/lib/soundPreference';
 import { Head, Link } from '@inertiajs/vue3';
 import {
     computed,
@@ -49,7 +50,6 @@ const props = defineProps<{
     opening: PackOpening | null;
 }>();
 
-const MUTE_KEY = 'pack:muted';
 const SLOT_COUNT = 5;
 
 /**
@@ -247,11 +247,7 @@ function toggleMute(event: Event) {
         sfx.rumble(0);
     }
 
-    try {
-        localStorage.setItem(MUTE_KEY, muted.value ? '1' : '0');
-    } catch {
-        // sem localStorage: vale só nesta visita
-    }
+    setSoundMuted(muted.value);
 }
 
 function reload() {
@@ -259,11 +255,7 @@ function reload() {
 }
 
 onMounted(async () => {
-    try {
-        muted.value = localStorage.getItem(MUTE_KEY) === '1';
-    } catch {
-        muted.value = false;
-    }
+    muted.value = isSoundMuted();
 
     sfx.on = !muted.value;
     mobileQuery = window.matchMedia('(max-width: 767.98px)');

@@ -13,6 +13,7 @@ import { flySpriteTo } from '@/composables/useSpriteFlight';
 import EntryLayout from '@/layouts/EntryLayout.vue';
 import GroupLayout from '@/layouts/GroupLayout.vue';
 import { update as updateAvatar } from '@/routes/profile/avatar';
+import { show as settingsShow } from '@/routes/settings';
 import { update as updateBirthdate } from '@/routes/profile/birthdate';
 import {
     destroy as cancelEmailChange,
@@ -197,7 +198,7 @@ const primaryButton =
 </script>
 
 <template>
-    <GroupScreen title="Editar perfil">
+    <GroupScreen title="Editar perfil" :back="settingsShow()">
         <div class="mx-auto flex w-full max-w-[560px] flex-col gap-5">
             <p
                 v-if="status"

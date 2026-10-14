@@ -35,7 +35,7 @@ function specimenOf(User $owner, array $attributes = []): Specimen
 it('exige login e perfil completo nas telas do grupo', function (string $url) {
     $this->get($url)->assertRedirect('/login');
     $this->actingAs(User::factory()->withoutProfile()->create())->get($url)->assertRedirect('/completar-perfil');
-})->with(['/colecao', '/ranking', '/trocas', '/amigos', '/feed', '/packs']);
+})->with(['/colecao', '/ranking', '/trocas', '/amigos', '/feed', '/packs', '/ajustes']);
 
 it('lista todas as espécies na coleção com contagem de espécimes e shinies', function () {
     $user = User::factory()->create(['avatar_species_id' => null]);

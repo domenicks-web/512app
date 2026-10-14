@@ -6,6 +6,7 @@ import { waitForIntro } from '@/composables/useIntro';
 import { groupNavigationKey } from '@/layouts/groupNavigation';
 import { animate, spring } from '@/lib/motion';
 import { home } from '@/routes';
+import type { RouteDefinition } from '@/wayfinder';
 
 /**
  * Moldura das telas do grupo (Coleção, Ranking, Trocas, Amigos, Feed,
@@ -17,6 +18,8 @@ import { home } from '@/routes';
 const props = defineProps<{
     title: string;
     subtitle?: string;
+    /** Pra onde a seta volta; padrão é a Home. */
+    back?: RouteDefinition<'get'>;
 }>();
 
 const groupNavigation = inject(groupNavigationKey, null);
@@ -60,8 +63,8 @@ onMounted(async () => {
             class="mx-auto flex w-full max-w-[calc(880px+2*clamp(16px,5vw,56px))] items-center gap-4 px-[clamp(16px,5vw,56px)] pt-[22px] pb-4"
         >
             <Link
-                :href="home()"
-                aria-label="Voltar pro início"
+                :href="back ?? home()"
+                :aria-label="back ? 'Voltar' : 'Voltar pro início'"
                 class="text-ink flex size-11 shrink-0 items-center justify-center rounded-full bg-white shadow-[0_1px_2px_rgba(28,32,38,0.06),0_6px_14px_rgba(28,32,38,0.08)] transition-transform hover:-translate-x-0.5 active:scale-95"
             >
                 <svg

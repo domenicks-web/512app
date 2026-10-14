@@ -22,11 +22,11 @@ const SCREENS: Record<string, { order: number; dock?: DockKey }> = {
     'trades/Index': { order: 3, dock: 'trades' },
     'friends/Index': { order: 4, dock: 'friends' },
     'feed/Show': { order: 5 },
-    'profile/Edit': { order: 6, dock: 'settings' },
+    'settings/Show': { order: 6, dock: 'settings' },
+    'profile/Edit': { order: 7, dock: 'settings' },
 };
 
-const page = usePage<{ auth: { user: { is_admin: boolean } | null } }>();
-const isAdmin = computed(() => Boolean(page.props.auth.user?.is_admin));
+const page = usePage();
 const active = computed(() => SCREENS[page.component]?.dock);
 
 const direction = ref(1);
@@ -64,21 +64,35 @@ onMounted(async () => {
     hasMounted.value = true;
 });
 
+/**
+ * A tela nova pode travar a thread ao montar (ex.: o perfil mede vários
+ * sprites); se o deslize começasse junto, ele terminaria antes do primeiro
+ * quadro desenhado e a troca pareceria um pisca. Por isso ela fica
+ * invisível até o navegador desenhar, e só então desliza.
+ */
 function onEnter(element: Element, done: () => void) {
-    void finished(
-        animate(
-            element,
-            [
-                {
-                    transform: `translateX(${direction.value * 28}%)`,
-                    opacity: 0,
-                },
-                { transform: 'none', opacity: 1 },
-            ],
-            520,
-            { delay: 110, easing: spring(200, 24) },
-        ),
-    ).then(done);
+    const target = element as HTMLElement;
+    target.style.opacity = '0';
+
+    requestAnimationFrame(() =>
+        requestAnimationFrame(() => {
+            target.style.opacity = '';
+            void finished(
+                animate(
+                    target,
+                    [
+                        {
+                            transform: `translateX(${direction.value * 28}%)`,
+                            opacity: 0,
+                        },
+                        { transform: 'none', opacity: 1 },
+                    ],
+                    520,
+                    { delay: 40, easing: spring(200, 24) },
+                ),
+            ).then(done);
+        }),
+    );
 }
 
 function onLeave(element: Element, done: () => void) {
@@ -111,7 +125,7 @@ function onLeave(element: Element, done: () => void) {
 
         <div class="flex justify-center px-4 pt-2 pb-[18px]">
             <div ref="dock">
-                <HomeDock :is-admin="isAdmin" :active="active" />
+                <HomeDock :active="active" />
             </div>
         </div>
     </div>

@@ -376,5 +376,16 @@ pushado pro `main`.
   ícone Packs vai pra `/packs` ("Conteúdo futuro", pedido do usuário).
   Rótulo do dock só com mouse/teclado (no toque ficava preso). Abaixo de
   400px o dock encolhe pra caber os 8 botões.
+- **Ajustes vira tela (14/10)**: `/ajustes` (`settings/Show`, no
+  `GroupLayout`): cartão do perfil → `/perfil` (a seta do perfil volta
+  pra Ajustes), Sons (localStorage `pack:muted`, `lib/soundPreference.ts`,
+  o mesmo do pack) e Sair. O menu do dock morreu; **admin não tem atalho
+  na UI** (decidido com o usuário: quem é admin digita `/admin`). Tema
+  escuro **não existe** nas telas novas (tudo força `.entry-light` e usa
+  cores fixas), por isso não tem toggle.
+- **Pisca na entrada de telas pesadas**: o `GroupLayout` só começa o
+  deslize depois de 2 `requestAnimationFrame`, senão a animação rodava
+  enquanto a tela nova travava a thread (perfil mede sprites) e parecia
+  um pisca no celular.
 - **Pendências restantes**: PWA (por último, pedido do usuário); fases
   2–5 como acima. Conta de teste voltou pro avatar Pikachu e sem dados.

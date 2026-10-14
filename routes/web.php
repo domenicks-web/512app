@@ -40,6 +40,7 @@ Route::middleware(['auth', 'onboarded'])->group(function () {
         ->can('delete', 'friendship')
         ->name('friends.destroy');
 
+    Route::inertia('ajustes', 'settings/Show')->name('settings.show');
     Route::get('perfil', ShowProfileController::class)->name('profile.edit');
     Route::put('perfil/avatar', [ProfileController::class, 'updateAvatar'])->name('profile.avatar.update');
     Route::put('perfil/nickname', [ProfileController::class, 'updateNickname'])->name('profile.nickname.update');
