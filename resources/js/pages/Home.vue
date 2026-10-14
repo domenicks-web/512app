@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Head, router } from '@inertiajs/vue3';
+import { Head, router, usePoll } from '@inertiajs/vue3';
 import {
     computed,
     nextTick,
@@ -45,7 +45,10 @@ const props = defineProps<{
         caughtAgo: string;
     } | null;
     friendsOnline: number;
+    presencePollSeconds: number;
 }>();
+
+usePoll(props.presencePollSeconds * 1000, { only: ['friendsOnline'] });
 
 /** Tile → tela que ele abre depois de apertado. */
 const TILE_DESTINATIONS: Partial<Record<number, () => { url: string }>> = {

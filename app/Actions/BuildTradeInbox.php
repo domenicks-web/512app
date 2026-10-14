@@ -9,6 +9,7 @@ use App\Enums\TradeStatus;
 use App\Models\Trade;
 use App\Models\TradeItem;
 use App\Models\User;
+use Carbon\Carbon;
 
 /**
  * Propostas de troca pendentes do jogador, separadas entre recebidas e
@@ -64,7 +65,7 @@ class BuildTradeInbox
                 'avatarSpritePath' => $otherTrainer->avatarSpecies?->sprite_path,
             ],
             'message' => $trade->message,
-            'createdAgo' => $trade->created_at?->locale('pt_BR')->diffForHumans() ?? '',
+            'createdAgo' => $trade->created_at?->locale('pt_BR')->diffForHumans(['options' => Carbon::JUST_NOW]) ?? '',
             'offered' => $items(TradeItemSide::Offered),
             'requested' => $items(TradeItemSide::Requested),
         ];

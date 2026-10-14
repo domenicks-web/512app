@@ -146,3 +146,12 @@ it('lista só os amigos, online primeiro, e separa os pedidos', function () {
             ->where('outgoing.0.nickname', 'Caio')
             ->where('presencePollSeconds', config('game.group.presence_poll_seconds')));
 });
+
+it('mostra "agora" em vez de "há 0 segundo" pra pedido recém-enviado', function () {
+    $this->travelTo(now()->startOfSecond());
+    $user = User::factory()->create();
+    Friendship::factory()->create(['requester_id' => $user->id]);
+
+    $this->actingAs($user)->get('/amigos')
+        ->assertInertia(fn (Assert $page) => $page->where('outgoing.0.sentAgo', 'agora'));
+});

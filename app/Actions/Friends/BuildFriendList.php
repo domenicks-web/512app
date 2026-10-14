@@ -9,6 +9,7 @@ use App\Models\Friendship;
 use App\Models\Specimen;
 use App\Models\User;
 use App\Services\GroupPresence;
+use Carbon\Carbon;
 use Carbon\CarbonInterface;
 
 /**
@@ -68,7 +69,7 @@ class BuildFriendList
             'nickname' => (string) $friendship->otherThan($viewer)->nickname,
             'tag' => (string) $friendship->otherThan($viewer)->tag,
             'avatarSpritePath' => $friendship->otherThan($viewer)->avatarSpecies?->sprite_path,
-            'sentAgo' => $friendship->created_at?->locale('pt_BR')->diffForHumans() ?? '',
+            'sentAgo' => $friendship->created_at?->locale('pt_BR')->diffForHumans(['options' => Carbon::JUST_NOW]) ?? '',
         ];
 
         return [
