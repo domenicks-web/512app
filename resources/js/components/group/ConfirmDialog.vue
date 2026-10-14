@@ -15,8 +15,15 @@ const props = withDefaults(
         cancelLabel?: string;
         processing?: boolean;
         danger?: boolean;
+        /** Aviso de um botão só (ex.: "Senha trocada"): sem "Cancelar". */
+        hideCancel?: boolean;
     }>(),
-    { cancelLabel: 'Cancelar', processing: false, danger: false },
+    {
+        cancelLabel: 'Cancelar',
+        processing: false,
+        danger: false,
+        hideCancel: false,
+    },
 );
 
 const emit = defineEmits<{ confirm: []; cancel: [] }>();
@@ -119,6 +126,7 @@ onBeforeUnmount(() => document.removeEventListener('keydown', onKeydown));
                     class="mt-1 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end"
                 >
                     <button
+                        v-if="!hideCancel"
                         type="button"
                         :disabled="processing"
                         class="text-muted border-line-strong h-12 cursor-pointer rounded-full border-2 bg-white px-5 text-[15px] font-extrabold"

@@ -10,8 +10,10 @@ import { useCaptureSubmit } from '@/composables/useCaptureSubmit';
 import { useDotField } from '@/composables/useDotField';
 import { waitForIntro } from '@/composables/useIntro';
 import EntryLayout from '@/layouts/EntryLayout.vue';
-import { animate, shake, spring } from '@/lib/motion';
+import { enterCard } from '@/lib/cardEntrance';
+import { shake } from '@/lib/motion';
 import { home, register } from '@/routes';
+import { request as passwordRequest } from '@/routes/password';
 
 defineOptions({ layout: EntryLayout });
 
@@ -34,78 +36,28 @@ const clientError = ref<{
     message: string;
 } | null>(null);
 
-const http = useHttp({ email: '', password: '' });
-
-/** O card se abre a partir do retângulo do logo; os filhos entram a cada 70ms. */
-function enterCard(delay: number, popLogo: boolean) {
-    if (!card.value || !logo.value) {
-        return;
-    }
-
-    const cardRect = card.value.getBoundingClientRect();
-    const logoRect = logo.value.getBoundingClientRect();
-    const inset = `inset(${logoRect.top - cardRect.top}px ${cardRect.right - logoRect.right}px ${cardRect.bottom - logoRect.bottom}px ${logoRect.left - cardRect.left}px round 20px)`;
-
-    animate(
-        card.value,
-        [
-            { clipPath: inset, opacity: 0 },
-            { opacity: 1, offset: 0.06 },
-            { clipPath: 'inset(0px 0px 0px 0px round 28px)', opacity: 1 },
-        ],
-        780,
-        { delay, easing: spring(170, 19) },
-    );
-
-    if (popLogo) {
-        animate(
-            logo.value,
-            [{ transform: 'scale(0) rotate(-20deg)' }, { transform: 'none' }],
-            700,
-            {
-                delay,
-                easing: spring(280, 14),
-            },
-        );
-    } else {
-        animate(logo.value, [{ opacity: 0 }, { opacity: 1 }], 1, {
-            delay: delay + 30,
-        });
-        animate(
-            logo.value,
-            [
-                { transform: 'none' },
-                { transform: 'scale(1.08,.9)', offset: 0.25 },
-                { transform: 'scale(.97,1.03)', offset: 0.6 },
-                { transform: 'none' },
-            ],
-            480,
-            { delay: delay + 40, fill: 'none' },
-        );
-    }
-
-    card.value.querySelectorAll('[data-enter]').forEach((element, index) =>
-        animate(
-            element,
-            [
-                { opacity: 0, transform: 'translateY(16px)' },
-                { opacity: 1, transform: 'none' },
-            ],
-            700,
-            {
-                delay: delay + 200 + index * 70,
-                easing: spring(200, 17),
-            },
-        ),
-    );
-}
+/** O popup da senha nova manda pra cá com `?email=` pra já vir preenchido. */
+const http = useHttp({ email: '', password: '', remember: false });
 
 onMounted(async () => {
     // Com a abertura tocando, o logo dela voa até este logo e o card abre
     // junto; sem abertura (visita do Inertia), o logo só dá um pop.
+    const prefilledEmail = new URLSearchParams(window.location.search).get(
+        'email',
+    );
+
+    if (prefilledEmail) {
+        http.email = prefilledEmail;
+    }
+
     const { played } = await waitForIntro(logo.value);
     field.ambient();
-    enterCard(played ? FLIGHT_DURATION - 40 : 0, !played);
+    enterCard(
+        card.value,
+        logo.value,
+        played ? FLIGHT_DURATION - 40 : 0,
+        !played,
+    );
 });
 
 function fail(target: 'email' | 'password', message: string) {
@@ -237,6 +189,42 @@ async function submit() {
                     :error="errorFor('password')"
                     @update:model-value="clearErrors"
                 />
+            </div>
+
+            <div
+                data-enter
+                class="-mt-1.5 flex items-center justify-between gap-3"
+            >
+                <label
+                    class="text-soft flex cursor-pointer items-center gap-2 text-[13px] font-bold select-none"
+                >
+                    <span
+                        class="relative inline-flex h-[22px] w-[38px] shrink-0 items-center rounded-full transition-colors has-[:focus-visible]:shadow-[0_0_0_3px_rgba(242,77,77,0.35)]"
+                        :class="http.remember ? 'bg-brand' : 'bg-[#dfe2e6]'"
+                    >
+                        <input
+                            v-model="http.remember"
+                            type="checkbox"
+                            name="remember"
+                            class="absolute inset-0 size-full cursor-pointer opacity-0"
+                        />
+                        <span
+                            class="pointer-events-none block size-[16px] rounded-full bg-white shadow-[0_1px_3px_rgba(28,32,38,0.25)] transition-transform"
+                            :class="
+                                http.remember
+                                    ? 'translate-x-[19px]'
+                                    : 'translate-x-[3px]'
+                            "
+                        />
+                    </span>
+                    Manter conectado
+                </label>
+                <Link
+                    :href="passwordRequest()"
+                    class="text-brand text-[13px] font-extrabold hover:underline"
+                >
+                    Esqueci a senha
+                </Link>
             </div>
 
             <div data-enter class="flex justify-center pt-1">

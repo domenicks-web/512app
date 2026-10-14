@@ -2,9 +2,11 @@
 
 declare(strict_types=1);
 
+use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\LoginUserController;
 use App\Http\Controllers\Auth\LogoutUserController;
 use App\Http\Controllers\Auth\RegisterUserController;
+use App\Http\Controllers\Auth\ResetPasswordController;
 use App\Http\Controllers\Auth\ShowRegisterController;
 use App\Http\Controllers\Auth\ValidateInviteController;
 use App\Http\Controllers\Auth\VerifyEmailController;
@@ -20,6 +22,16 @@ Route::middleware('guest')->group(function () {
     Route::post('cadastro/convite', [ValidateInviteController::class, 'store'])->name('register.invite.store');
     Route::delete('cadastro/convite', [ValidateInviteController::class, 'destroy'])->name('register.invite.destroy');
     Route::post('cadastro', [RegisterUserController::class, 'store'])->name('register.store');
+
+    Route::get('esqueci-a-senha', [ForgotPasswordController::class, 'show'])->name('password.request');
+    Route::post('esqueci-a-senha', [ForgotPasswordController::class, 'store'])
+        ->middleware('throttle:6,1')
+        ->name('password.email');
+    Route::get('nova-senha/{token}', [ResetPasswordController::class, 'capture'])->name('password.reset.link');
+    Route::get('nova-senha', [ResetPasswordController::class, 'show'])->name('password.reset');
+    Route::post('nova-senha', [ResetPasswordController::class, 'store'])
+        ->middleware('throttle:6,1')
+        ->name('password.update');
 });
 
 Route::middleware('auth')->group(function () {

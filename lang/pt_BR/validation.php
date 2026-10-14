@@ -170,7 +170,12 @@ return [
     'ulid' => 'O campo :attribute precisa ser um ULID válido.',
     'uuid' => 'O campo :attribute precisa ser um UUID válido.',
 
-    'custom' => [],
+    'custom' => [
+        'password' => [
+            'min' => 'A senha precisa ter pelo menos :min caracteres.',
+            'confirmed' => 'As duas senhas não batem.',
+        ],
+    ],
 
     /*
     |--------------------------------------------------------------------------
