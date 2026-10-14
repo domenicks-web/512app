@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import FittedSprite from '@/components/FittedSprite.vue';
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
 import { animate, shake } from '@/lib/motion';
 
@@ -21,7 +22,7 @@ const props = defineProps<{
 const selected = defineModel<number | null>({ required: true });
 
 const emit = defineEmits<{
-    picked: [index: number, sprite: HTMLImageElement];
+    picked: [index: number, sprite: HTMLElement];
 }>();
 
 const COLUMNS = 5;
@@ -90,7 +91,8 @@ function pick(index: number) {
 
     selected.value = props.options[index].id;
     hopAll(index);
-    const sprite = tileElements()[index]?.querySelector('img');
+    const sprite =
+        tileElements()[index]?.querySelector<HTMLElement>('[data-sprite]');
 
     if (sprite) {
         emit('picked', index, sprite);
@@ -158,12 +160,12 @@ defineExpose({ nudge });
                     class="animate-spin-ring absolute -inset-1/2 bg-[conic-gradient(#f24d4d,#ffffff,#f24d4d)]"
                 />
             </span>
-            <img
+            <FittedSprite
+                data-sprite
                 :src="`/storage/${tile.option.sprite_path}`"
-                alt=""
-                width="96"
-                height="96"
-                class="pixelated pointer-events-none relative h-24 w-24 max-w-none"
+                :size="64"
+                :padding="10"
+                class="pointer-events-none relative"
             />
         </button>
     </div>

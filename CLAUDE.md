@@ -278,6 +278,12 @@ pushado pro `main`.
   `PartnerGrid` (onboarding e perfil) o "olhar" pro cursor/escolhido
   (`scaleX(-1)` + inclinação) e, na Home, o avatar virando pro tile ativo —
   mesmo o handoff pedindo. Não recolocar.
+- **Sprites com tamanho uniforme (13/10)**: todo sprite de espécie passa
+  por `components/FittedSprite.vue`, que mede no navegador a área desenhada
+  do PNG (`lib/spriteBounds.ts`, cache por URL) e encaixa com a mesma margem.
+  Sprite novo na UI: usar o `FittedSprite`, não `<img>` solto. O voo do
+  parceiro até o avatar (handoff) mora em `composables/useSpriteFlight.ts`
+  e é usado no onboarding e no editar perfil.
 - **CI (13/10)**: voltou a rodar no `main` (PHP 8.4, SQLite no setup,
   PHPStan com 1G). `composer ci:check` local reproduz o CI inteiro.
   Formatador ignora handoff, `docs/superpowers/` e `CLAUDE.md`.

@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import FittedSprite from '@/components/FittedSprite.vue';
 import { Head, router, usePoll } from '@inertiajs/vue3';
 import {
     computed,
@@ -318,13 +319,11 @@ const tileBase =
                 <div
                     class="flex size-12 items-center justify-center overflow-hidden rounded-full bg-white shadow-[0_0_0_3px_#fff,0_0_0_5px_#f24d4d,0_6px_14px_rgba(28,32,38,0.12)]"
                 >
-                    <img
+                    <FittedSprite
                         v-if="trainer.avatarSpritePath"
                         :src="`/storage/${trainer.avatarSpritePath}`"
-                        alt=""
-                        width="72"
-                        height="72"
-                        class="pixelated size-[72px] max-w-none"
+                        :size="48"
+                        :padding="7"
                     />
                 </div>
                 <div class="flex flex-col gap-px">

@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import FittedSprite from '@/components/FittedSprite.vue';
 import { computed, ref } from 'vue';
 import GroupScreen from '@/components/group/GroupScreen.vue';
 import EntryLayout from '@/layouts/EntryLayout.vue';
@@ -138,13 +139,12 @@ const dexNumber = (id: number) => `#${String(id).padStart(3, '0')}`;
                         :title="`${entry.shinyCount} shiny`"
                         >Shiny</span
                     >
-                    <img
+                    <FittedSprite
                         :src="`/storage/${entry.shinyCount > 0 ? entry.spriteShinyPath : entry.spritePath}`"
                         :alt="entry.specimenCount > 0 ? entry.name : ''"
-                        width="72"
-                        height="72"
-                        loading="lazy"
-                        class="pixelated mt-3 size-[72px]"
+                        :size="72"
+                        :padding="6"
+                        class="mt-3"
                         :class="
                             entry.specimenCount > 0
                                 ? ''

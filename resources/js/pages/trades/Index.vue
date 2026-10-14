@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import FittedSprite from '@/components/FittedSprite.vue';
 import { computed } from 'vue';
 import GroupScreen from '@/components/group/GroupScreen.vue';
 import TrainerAvatar from '@/components/group/TrainerAvatar.vue';
@@ -152,13 +153,11 @@ const sections = computed(() => [
                                             : ''
                                     "
                                 >
-                                    <img
+                                    <FittedSprite
                                         :src="`/storage/${specimen.spritePath}`"
                                         :alt="specimen.speciesName"
-                                        width="56"
-                                        height="56"
-                                        loading="lazy"
-                                        class="pixelated size-14"
+                                        :size="56"
+                                        :padding="5"
                                     />
                                     <span
                                         class="text-ink text-[11.5px] font-extrabold"

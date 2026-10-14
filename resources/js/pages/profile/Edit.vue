@@ -9,6 +9,7 @@ import PasswordField from '@/components/entry/PasswordField.vue';
 import ConfirmDialog from '@/components/group/ConfirmDialog.vue';
 import GroupScreen from '@/components/group/GroupScreen.vue';
 import TrainerAvatar from '@/components/group/TrainerAvatar.vue';
+import { flySpriteTo } from '@/composables/useSpriteFlight';
 import EntryLayout from '@/layouts/EntryLayout.vue';
 import { update as updateAvatar } from '@/routes/profile/avatar';
 import { update as updateBirthdate } from '@/routes/profile/birthdate';
@@ -49,12 +50,28 @@ const props = defineProps<{
 const page = usePage<{ flash: { profile_status: string | null } }>();
 const status = computed(() => page.props.flash.profile_status);
 
-const avatarSprite = computed(
-    () =>
-        props.avatarOptions.find(
-            (option) => option.id === avatarForm.avatar_species_id,
-        )?.sprite_path ?? null,
+// O avatar do cartão só troca quando o sprite escolhido pousa nele.
+const avatarSprite = ref(
+    props.avatarOptions.find(
+        (option) => option.id === props.profile.avatarSpeciesId,
+    )?.sprite_path ?? null,
 );
+const avatarTarget = ref<InstanceType<typeof TrainerAvatar> | null>(null);
+
+function onPartnerPicked(index: number, sprite: HTMLElement) {
+    const option = props.avatarOptions[index];
+    const target = avatarTarget.value?.$el as HTMLElement | undefined;
+
+    if (!option || !target) {
+        avatarSprite.value = option?.sprite_path ?? null;
+
+        return;
+    }
+
+    flySpriteTo(sprite, target, () => {
+        avatarSprite.value = option.sprite_path;
+    });
+}
 
 const formatDayMonth = (isoDate: string) => {
     const [, month, day] = isoDate.split('-');
@@ -173,7 +190,11 @@ const primaryButton =
 
             <section data-enter :class="card" aria-labelledby="avatar-title">
                 <div class="flex items-center gap-4">
-                    <TrainerAvatar :sprite-path="avatarSprite" highlighted />
+                    <TrainerAvatar
+                        ref="avatarTarget"
+                        :sprite-path="avatarSprite"
+                        highlighted
+                    />
                     <div class="flex flex-col">
                         <h2 id="avatar-title" :class="sectionTitle">
                             Parceiro
@@ -184,6 +205,7 @@ const primaryButton =
                 <PartnerGrid
                     v-model="avatarForm.avatar_species_id"
                     :options="avatarOptions"
+                    @picked="onPartnerPicked"
                 />
                 <span
                     v-if="avatarForm.errors.avatar_species_id"

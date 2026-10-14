@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import FittedSprite from '@/components/FittedSprite.vue';
 import { computed, ref } from 'vue';
 
 /**
@@ -37,13 +38,11 @@ defineExpose({ root, avatar });
             ref="avatar"
             class="flex h-[38px] w-[38px] shrink-0 items-center justify-center overflow-hidden rounded-full bg-white shadow-[0_0_0_2px_var(--color-line)]"
         >
-            <img
+            <FittedSprite
                 v-if="avatarSpritePath"
                 :src="`/storage/${avatarSpritePath}`"
-                alt=""
-                width="48"
-                height="48"
-                class="pixelated h-12 w-12 max-w-none"
+                :size="38"
+                :padding="5"
             />
             <div
                 v-else

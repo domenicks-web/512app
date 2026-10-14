@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import FittedSprite from '@/components/FittedSprite.vue';
 /** Avatar redondo do treinador com o sprite do parceiro (ou vazio). */
 withDefaults(
     defineProps<{
@@ -20,15 +21,11 @@ withDefaults(
                 : 'shadow-[0_0_0_1px_rgba(28,32,38,0.06),0_4px_10px_rgba(28,32,38,0.08)]',
         ]"
     >
-        <img
+        <FittedSprite
             v-if="spritePath"
             :src="`/storage/${spritePath}`"
-            alt=""
-            width="72"
-            height="72"
-            loading="lazy"
-            class="pixelated max-w-none"
-            :class="size === 'sm' ? 'size-[60px]' : 'size-[72px]'"
+            :size="size === 'sm' ? 40 : 48"
+            :padding="size === 'sm' ? 6 : 7"
         />
     </div>
 </template>

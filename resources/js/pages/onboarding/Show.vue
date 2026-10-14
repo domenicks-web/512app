@@ -12,6 +12,7 @@ import SecondaryButton from '@/components/entry/SecondaryButton.vue';
 import StepPills from '@/components/entry/StepPills.vue';
 import TrainerChip from '@/components/entry/TrainerChip.vue';
 import { useDotField } from '@/composables/useDotField';
+import { flySpriteTo } from '@/composables/useSpriteFlight';
 import { waitForIntro } from '@/composables/useIntro';
 import { usePillMorph } from '@/composables/usePillMorph';
 import EntryLayout from '@/layouts/EntryLayout.vue';
@@ -169,7 +170,7 @@ function nextFromNickname() {
 }
 
 /** O sprite escolhido voa em arco até o avatar do chip, que dá um pop. */
-function onPicked(index: number, sprite: HTMLImageElement) {
+function onPicked(index: number, sprite: HTMLElement) {
     const target = chip.value?.avatar;
     const option = props.avatarOptions[index];
 
@@ -179,59 +180,9 @@ function onPicked(index: number, sprite: HTMLImageElement) {
         return;
     }
 
-    const from = sprite.getBoundingClientRect();
-    const to = target.getBoundingClientRect();
-    const ghost = sprite.cloneNode() as HTMLImageElement;
-    Object.assign(ghost.style, {
-        position: 'fixed',
-        left: `${from.left}px`,
-        top: `${from.top}px`,
-        width: `${from.width}px`,
-        height: `${from.height}px`,
-        zIndex: '60',
-        pointerEvents: 'none',
-        transform: 'none',
-    });
-    document.body.appendChild(ghost);
-
-    const dx = to.left + to.width / 2 - (from.left + from.width / 2);
-    const dy = to.top + to.height / 2 - (from.top + from.height / 2);
-    const scale = 48 / from.width;
-    const flight = animate(
-        ghost,
-        [
-            { transform: 'none' },
-            {
-                transform: `translate(${dx * 0.45}px, ${dy * 0.5 - 70}px) scale(1.15) rotate(-24deg)`,
-                offset: 0.45,
-            },
-            {
-                transform: `translate(${dx}px, ${dy}px) scale(${scale}) rotate(0deg)`,
-            },
-        ],
-        620,
-        { easing: 'cubic-bezier(.45,0,.3,1)', fill: 'forwards' },
-    );
-
-    const land = () => {
-        ghost.remove();
+    flySpriteTo(sprite, target, () => {
         chipAvatarPath.value = option.sprite_path;
-        animate(
-            target,
-            [{ transform: 'scale(1.35)' }, { transform: 'none' }],
-            520,
-            {
-                easing: spring(320, 12),
-                fill: 'none',
-            },
-        );
-    };
-
-    if (flight) {
-        flight.onfinish = land;
-    } else {
-        land();
-    }
+    });
 }
 
 async function finish() {
