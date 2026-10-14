@@ -140,7 +140,7 @@ function onFocus(key: string, event: FocusEvent) {
 <template>
     <nav
         aria-label="Navegação principal"
-        class="relative flex items-center gap-1.5 rounded-full bg-white/70 p-[7px] shadow-[0_0_0_1px_rgba(28,32,38,0.05),0_10px_26px_rgba(28,32,38,0.08)] backdrop-blur-[12px] max-[400px]:gap-[3px] max-[400px]:p-[5px] sm:gap-2.5 sm:p-[9px]"
+        class="relative flex items-center gap-1.5 rounded-full bg-white/70 p-[7px] shadow-[0_0_0_1px_rgba(28,32,38,0.05),0_10px_26px_rgba(28,32,38,0.08)] backdrop-blur-[12px] max-[400px]:gap-[3px] max-[400px]:p-[5px] max-sm:w-full max-sm:justify-between sm:gap-2.5 sm:p-[9px]"
     >
         <Link
             :href="home()"
@@ -148,7 +148,7 @@ function onFocus(key: string, event: FocusEvent) {
             cache-for="10s"
             aria-label="Início"
             :aria-current="active === 'home' ? 'page' : undefined"
-            class="relative flex size-11 shrink-0 cursor-pointer items-center justify-center rounded-full bg-white max-[400px]:size-[38px] sm:size-14"
+            class="relative flex size-12 shrink-0 cursor-pointer items-center justify-center rounded-full bg-white max-[400px]:size-10 sm:size-14"
             :class="
                 active === 'home'
                     ? 'shadow-[0_0_0_2.5px_#f24d4d,0_6px_14px_rgba(242,77,77,0.22)]'
@@ -189,7 +189,7 @@ function onFocus(key: string, event: FocusEvent) {
             :aria-label="
                 isPackReady ? 'Abrir o pack do dia' : 'Pack do dia carregando'
             "
-            class="relative flex size-11 shrink-0 cursor-pointer items-center justify-center overflow-hidden rounded-full bg-[#fbd5d5] transition-transform active:scale-95 max-[400px]:size-[38px] sm:size-14"
+            class="relative flex size-12 shrink-0 cursor-pointer items-center justify-center overflow-hidden rounded-full bg-[#fbd5d5] transition-transform active:scale-95 max-[400px]:size-10 sm:size-14"
             :class="
                 isPackReady
                     ? 'shadow-[0_6px_14px_rgba(242,77,77,0.3)]'
@@ -234,7 +234,7 @@ function onFocus(key: string, event: FocusEvent) {
             cache-for="10s"
             :aria-label="item.label"
             :aria-current="active === item.key ? 'page' : undefined"
-            class="relative flex size-11 shrink-0 cursor-pointer items-center justify-center rounded-full bg-white max-[400px]:size-[38px] sm:size-14"
+            class="relative flex size-12 shrink-0 cursor-pointer items-center justify-center rounded-full bg-white max-[400px]:size-10 sm:size-14"
             :class="
                 active === item.key
                     ? 'shadow-[0_0_0_2.5px_#f24d4d,0_6px_14px_rgba(242,77,77,0.22)]'

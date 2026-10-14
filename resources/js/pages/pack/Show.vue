@@ -752,14 +752,14 @@ onBeforeUnmount(() => {
                         </div>
                         <dl class="grid w-full grid-cols-3 gap-2">
                             <div
-                                class="flex min-w-0 flex-col items-center gap-0.5 rounded-2xl bg-white/6 px-2 py-2.5"
+                                class="flex min-w-0 flex-col items-center gap-0.5 rounded-2xl bg-[#262a33] px-2 py-2.5 shadow-[0_0_0_1px_rgba(255,255,255,0.06)]"
                             >
                                 <dt
                                     class="text-[10px] font-extrabold tracking-[0.14em] text-[#7d8794] uppercase"
                                 >
                                     Tamanho
                                 </dt>
-                                <dd class="text-base font-black">
+                                <dd class="text-base font-black text-white">
                                     {{ sizeLabel(cer) }}
                                 </dd>
                                 <dd
@@ -769,14 +769,14 @@ onBeforeUnmount(() => {
                                 </dd>
                             </div>
                             <div
-                                class="flex min-w-0 flex-col items-center gap-0.5 rounded-2xl bg-white/6 px-2 py-2.5"
+                                class="flex min-w-0 flex-col items-center gap-0.5 rounded-2xl bg-[#262a33] px-2 py-2.5 shadow-[0_0_0_1px_rgba(255,255,255,0.06)]"
                             >
                                 <dt
                                     class="text-[10px] font-extrabold tracking-[0.14em] text-[#7d8794] uppercase"
                                 >
                                     IV
                                 </dt>
-                                <dd class="text-base font-black">
+                                <dd class="text-base font-black text-white">
                                     {{ cer.ivTotal }}
                                 </dd>
                                 <dd
@@ -786,7 +786,7 @@ onBeforeUnmount(() => {
                                 </dd>
                             </div>
                             <div
-                                class="flex min-w-0 flex-col items-center gap-0.5 rounded-2xl bg-white/6 px-2 py-2.5"
+                                class="flex min-w-0 flex-col items-center gap-0.5 rounded-2xl bg-[#262a33] px-2 py-2.5 shadow-[0_0_0_1px_rgba(255,255,255,0.06)]"
                             >
                                 <dt
                                     class="text-[10px] font-extrabold tracking-[0.14em] text-[#7d8794] uppercase"
@@ -794,7 +794,7 @@ onBeforeUnmount(() => {
                                     Natureza
                                 </dt>
                                 <dd
-                                    class="flex max-w-full items-center gap-1.5 truncate text-base font-black"
+                                    class="flex max-w-full items-center gap-1.5 truncate text-base font-black text-white"
                                 >
                                     <span
                                         class="size-2 shrink-0 rounded-full"

@@ -126,7 +126,9 @@ function onLeave(element: Element, done: () => void) {
             </Transition>
         </div>
 
-        <div class="relative flex justify-center px-4 pt-2 pb-[18px]">
+        <div
+            class="relative flex justify-center px-[clamp(16px,5vw,56px)] pt-2 pb-[18px]"
+        >
             <!-- Na Home, os amigos online ficam na linha do dock, no canto
                  esquerdo (no celular não cabe: a Home mostra acima do dock). -->
             <Transition
@@ -141,7 +143,8 @@ function onLeave(element: Element, done: () => void) {
                     class="absolute bottom-[42px] left-[clamp(24px,7vw,96px)] max-sm:hidden"
                 />
             </Transition>
-            <div ref="dock">
+            <!-- No celular o dock ocupa a largura do conteúdo. -->
+            <div ref="dock" class="max-sm:w-full">
                 <HomeDock :active="active" />
             </div>
         </div>

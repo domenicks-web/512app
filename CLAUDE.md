@@ -461,3 +461,11 @@ pushado pro `main`.
   e o CI e relatou as decisões. Plano com código pronto funciona bem pra
   ele. Tipo genérico de PHPStan com interseção (`T&array{...}`) não
   resolve: não pôr isso em plano.
+- **Ajustes do teste do usuário (14/10, 17h40)**: cerimônia do pack com os
+  valores de Tamanho/IV/Natureza em branco e blocos sólidos (herdavam a
+  cor escura do `.entry-light` e eram transparentes). Filtro da coleção
+  no cartão de outro: "Tem / Não tem" (`PokedexGrid` `ofOther`). Recusar
+  e cancelar pedido de amizade pedem Sim/Não, com a linha inteira virando
+  a pergunta. Dock ocupa a largura do conteúdo no celular, botões de 48px
+  (desktop igual, por causa dos amigos online na mesma linha). "Shinies"
+  fica (plural usado pela comunidade).

@@ -19,21 +19,26 @@ export type SpeciesEntry = {
     bestIv: number | null;
 };
 
-const props = defineProps<{
-    species: SpeciesEntry[];
-    loadingId: number | null;
-    emptyOwned: string;
-    emptyMissing: string;
-}>();
+const props = withDefaults(
+    defineProps<{
+        species: SpeciesEntry[];
+        loadingId: number | null;
+        emptyOwned: string;
+        emptyMissing: string;
+        /** Coleção de outro jogador: o filtro fala dele ("Tem"), não de mim. */
+        ofOther?: boolean;
+    }>(),
+    { ofOther: false },
+);
 const emit = defineEmits<{ open: [speciesId: number] }>();
 
 type Filter = 'all' | 'owned' | 'missing';
 
-const FILTERS: { key: Filter; label: string }[] = [
+const FILTERS = computed<{ key: Filter; label: string }[]>(() => [
     { key: 'all', label: 'Todas' },
-    { key: 'owned', label: 'Tenho' },
-    { key: 'missing', label: 'Faltam' },
-];
+    { key: 'owned', label: props.ofOther ? 'Tem' : 'Tenho' },
+    { key: 'missing', label: props.ofOther ? 'Não tem' : 'Faltam' },
+]);
 
 const filter = ref<Filter>('all');
 

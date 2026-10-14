@@ -48,6 +48,8 @@ usePoll(props.presencePollSeconds * 1000, {
 });
 
 const confirmingRemoval = ref<number | null>(null);
+// Recusar ou cancelar pedido pede um Sim/Não antes, contra clique errado.
+const confirmingRequest = ref<number | null>(null);
 
 const friendsOnline = computed(
     () => props.friends.filter((friend) => friend.isOnline).length,
@@ -125,7 +127,10 @@ const cardShadow =
                         :sprite-path="request.avatarSpritePath"
                         size="sm"
                     />
-                    <div class="flex min-w-0 flex-1 flex-col">
+                    <div
+                        v-if="confirmingRequest !== request.friendshipId"
+                        class="flex min-w-0 flex-1 flex-col"
+                    >
                         <span class="text-ink truncate text-[15px] font-black"
                             >{{ request.nickname
                             }}<span class="text-faint-2"
@@ -136,19 +141,48 @@ const cardShadow =
                             request.sentAgo
                         }}</span>
                     </div>
-                    <div class="flex gap-2">
+                    <div
+                        v-if="confirmingRequest === request.friendshipId"
+                        class="flex min-w-0 flex-1 items-center gap-2"
+                    >
+                        <div class="flex min-w-0 flex-1 flex-col gap-px">
+                            <span class="text-soft text-xs font-bold"
+                                >Recusar o pedido de</span
+                            >
+                            <span
+                                class="text-ink truncate text-[15px] font-black"
+                                >{{ request.nickname }}?</span
+                            >
+                        </div>
+                        <button
+                            type="button"
+                            class="text-muted h-10 cursor-pointer rounded-full px-3 text-sm font-extrabold"
+                            @click="confirmingRequest = null"
+                        >
+                            Não
+                        </button>
                         <Form
                             :action="destroy(request.friendshipId)"
                             #default="{ processing }"
+                            @success="confirmingRequest = null"
                         >
                             <button
                                 type="submit"
                                 :disabled="processing"
-                                class="text-muted border-line-strong h-10 cursor-pointer rounded-full border-2 bg-white px-4 text-sm font-extrabold"
+                                class="bg-brand h-10 cursor-pointer rounded-full px-4 text-sm font-extrabold text-white"
                             >
-                                Recusar
+                                Sim
                             </button>
                         </Form>
+                    </div>
+                    <div v-else class="flex gap-2">
+                        <button
+                            type="button"
+                            class="text-muted border-line-strong h-10 cursor-pointer rounded-full border-2 bg-white px-4 text-sm font-extrabold"
+                            @click="confirmingRequest = request.friendshipId"
+                        >
+                            Recusar
+                        </button>
                         <Form
                             :action="accept(request.friendshipId)"
                             #default="{ processing }"
@@ -186,7 +220,10 @@ const cardShadow =
                         :sprite-path="request.avatarSpritePath"
                         size="sm"
                     />
-                    <div class="flex min-w-0 flex-1 flex-col">
+                    <div
+                        v-if="confirmingRequest !== request.friendshipId"
+                        class="flex min-w-0 flex-1 flex-col"
+                    >
                         <span class="text-ink truncate text-[15px] font-black"
                             >{{ request.nickname
                             }}<span class="text-faint-2"
@@ -197,18 +234,48 @@ const cardShadow =
                             >enviado {{ request.sentAgo }}</span
                         >
                     </div>
-                    <Form
-                        :action="destroy(request.friendshipId)"
-                        #default="{ processing }"
+                    <div
+                        v-if="confirmingRequest === request.friendshipId"
+                        class="flex min-w-0 flex-1 items-center gap-2"
                     >
+                        <div class="flex min-w-0 flex-1 flex-col gap-px">
+                            <span class="text-soft text-xs font-bold"
+                                >Cancelar o pedido pra</span
+                            >
+                            <span
+                                class="text-ink truncate text-[15px] font-black"
+                                >{{ request.nickname }}?</span
+                            >
+                        </div>
                         <button
-                            type="submit"
-                            :disabled="processing"
-                            class="text-muted hover:text-ink h-10 cursor-pointer rounded-full px-3 text-sm font-extrabold"
+                            type="button"
+                            class="text-muted h-10 cursor-pointer rounded-full px-3 text-sm font-extrabold"
+                            @click="confirmingRequest = null"
                         >
-                            Cancelar
+                            Não
                         </button>
-                    </Form>
+                        <Form
+                            :action="destroy(request.friendshipId)"
+                            #default="{ processing }"
+                            @success="confirmingRequest = null"
+                        >
+                            <button
+                                type="submit"
+                                :disabled="processing"
+                                class="bg-brand h-10 cursor-pointer rounded-full px-4 text-sm font-extrabold text-white"
+                            >
+                                Sim
+                            </button>
+                        </Form>
+                    </div>
+                    <button
+                        v-else
+                        type="button"
+                        class="text-muted hover:text-ink h-10 cursor-pointer rounded-full px-3 text-sm font-extrabold"
+                        @click="confirmingRequest = request.friendshipId"
+                    >
+                        Cancelar
+                    </button>
                 </article>
             </section>
 

@@ -324,6 +324,7 @@ const pill =
                 <PokedexGrid
                     :species="collection.species"
                     :loading-id="sheet.loadingId.value"
+                    :of-other="!trainer.isViewer"
                     :empty-owned="
                         trainer.isViewer
                             ? 'Nenhuma espécie ainda. O pack de hoje te espera.'
