@@ -10,11 +10,11 @@ it('mostra o nome dos jogos, em inglês', function () {
 });
 
 it('diz o efeito que a natureza tem nos jogos, ou que é neutra', function () {
-    expect(Nature::Impish->effect())->toBe('+Def −SpA')
-        ->and(Nature::Mild->effect())->toBe('+SpA −Def')
-        ->and(Nature::Adamant->effect())->toBe('+Atk −SpA')
-        ->and(Nature::Timid->effect())->toBe('+Spe −Atk')
-        ->and(Nature::Sassy->effect())->toBe('+SpD −Spe');
+    expect(Nature::Impish->effect())->toBe('+Def −AtqE')
+        ->and(Nature::Mild->effect())->toBe('+AtqE −Def')
+        ->and(Nature::Adamant->effect())->toBe('+Atq −AtqE')
+        ->and(Nature::Timid->effect())->toBe('+Vel −Atq')
+        ->and(Nature::Sassy->effect())->toBe('+DefE −Vel');
 
     $neutral = array_filter(Nature::cases(), fn (Nature $nature): bool => $nature->effect() === 'Neutra');
 

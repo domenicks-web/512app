@@ -7,7 +7,8 @@ import type { PackSpecimen, Tier } from './types';
  */
 export const CYAN = '#4DD9E8';
 export const GOLD = '#FFC94D';
-export const STATS = ['HP', 'Atk', 'Def', 'SpA', 'SpD', 'Spe'];
+/** Siglas em português: Vida, Ataque, Defesa, Ataque e Defesa Especial, Velocidade. */
+export const STATS = ['HP', 'Atq', 'Def', 'AtqE', 'DefE', 'Vel'];
 export const IV_MAX = 186;
 
 export const TIER_META: Record<

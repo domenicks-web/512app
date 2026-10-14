@@ -49,7 +49,7 @@ enum Nature: string
      */
     public function effect(): string
     {
-        $stats = ['Atk', 'Def', 'Spe', 'SpA', 'SpD'];
+        $stats = ['Atq', 'Def', 'Vel', 'AtqE', 'DefE'];
         $index = (int) array_search($this, self::cases(), true);
         $up = intdiv($index, 5);
         $down = $index % 5;

@@ -17,7 +17,7 @@ export type PackSpecimen = {
     sizePercentile: number;
     heightM: number;
     nature: string;
-    /** Efeito nos jogos ("+Def −SpA" ou "Neutra"), só curiosidade. */
+    /** Efeito nos jogos ("+Def −AtqE" ou "Neutra"), só curiosidade. */
     natureEffect: string;
     natureIndex: number;
     ivs: number[];
