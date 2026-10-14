@@ -6,6 +6,7 @@ import { animate } from '@/lib/motion';
 import { logout } from '@/routes';
 import { index as adminIndex } from '@/routes/admin';
 import { edit as profileEdit } from '@/routes/profile';
+import { show as packShow } from '@/routes/pack';
 import { show as collectionShow } from '@/routes/collection';
 import { index as friendsIndex } from '@/routes/friends';
 import { show as rankingShow } from '@/routes/ranking';
@@ -15,8 +16,8 @@ import type { RouteDefinition } from '@/wayfinder';
 /**
  * Dock de vidro da home. Cada ícone tem uma micro-animação no hover
  * (cartas em leque, cápsula abre, barras sobem, setas trocam, mão acena,
- * sliders correm). Coleção, Ranking, Trocas e Amigos navegam; "Ajustes"
- * abre o menu (sair/admin). Packs espera a tela de abertura (subprojeto C).
+ * sliders correm). Coleção, Packs, Ranking, Trocas e Amigos navegam; "Ajustes"
+ * abre o menu (sair/admin).
  * `active` marca o item da tela atual. Amigos mostra um contador vermelho
  * com os pedidos de amizade recebidos.
  */
@@ -33,7 +34,7 @@ type DockItem = {
 
 const items: DockItem[] = [
     { key: 'collection', label: 'Coleção', href: collectionShow },
-    { key: 'packs', label: 'Packs' },
+    { key: 'packs', label: 'Packs', href: packShow },
     { key: 'ranking', label: 'Ranking', href: rankingShow },
     { key: 'trades', label: 'Trocas', href: tradesIndex },
     { key: 'friends', label: 'Amigos', href: friendsIndex },

@@ -111,6 +111,16 @@ function pokemonFixture(int $dexId): array
                     'front_default' => "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/{$dexId}.png",
                 ],
             ],
+            'versions' => [
+                'generation-v' => [
+                    'black-white' => [
+                        'animated' => [
+                            'front_default' => "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/{$dexId}.gif",
+                            'front_shiny' => null,
+                        ],
+                    ],
+                ],
+            ],
         ],
         'species' => ['url' => "https://pokeapi.co/api/v2/pokemon-species/{$dexId}/"],
     ];
@@ -167,6 +177,9 @@ it('sincroniza as 151 espécies com raridade, estágio evolutivo e sprites', fun
     Storage::disk('public')->assertExists($bulbasaur->sprite_path);
     Storage::disk('public')->assertExists($bulbasaur->sprite_shiny_path);
     Storage::disk('public')->assertExists($bulbasaur->artwork_path);
+    Storage::disk('public')->assertExists($bulbasaur->sprite_animated_path);
+    expect($bulbasaur->sprite_animated_path)->toEndWith('.gif')
+        ->and($bulbasaur->sprite_animated_shiny_path)->toBeNull();
 });
 
 it('é idempotente ao rodar duas vezes seguidas', function () {

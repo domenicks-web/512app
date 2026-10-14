@@ -82,17 +82,23 @@ mostra "Disponível" ou a contagem até o próximo pack.
 
 - `pages/pack/Show.vue`, tela escura (fundo `#1c1f26`), fora do
   `EntryLayout`.
-- GSAP pras timelines (dependência nova, prevista no SPEC e no
-  CLAUDE.md). Canvas pra poeira e partículas.
-- Componentes: `PackBall` (bola central com carga), `MiniBall`,
-  `SlotSprite` (escala inteira 1×/2×/3×, `pixelated`), `Ceremony`,
-  `PackSummary` (cartas com tilt e holo), `SpecimenSheet` (ficha),
-  `FairnessReceipt` (comprovante) e `useSfx` (o `class SFX` do
-  protótipo, com as mesmas frequências e envelopes).
+- Animação em WAAPI (a mesma do protótipo e do resto do app), **não
+  GSAP**: as curvas do protótipo são `cubic-bezier` em keyframes WAAPI e
+  portar direto mantém os timings 1:1. Canvas pra poeira e partículas.
+- `lib/pack/director.ts` encena tudo sobre o DOM da página (idle, carga,
+  explosão, bolas, pop, cerimônia, resumo); `lib/pack/fx.ts` é o canvas;
+  `lib/pack/sfx.ts` é o `class SFX` do protótipo (mesmas frequências e
+  envelopes); `v-pixel-fit` faz a escala inteira dos sprites.
+  Componentes: `MiniBall`, `PackSummary` (cartas com tilt e holo),
+  `SpecimenSheet` (ficha) e `FairnessReceipt` (comprovante).
 - Mudo no canto superior direito, guardado em localStorage.
 - As três mudanças obrigatórias: clique por bola em qualquer ordem, com
   wobble de espera, hint "Faltam N", Espaço/Enter e "Abrir todas" depois
-  de 1,5s; sprites maiores; e mobile em 4 + 1, com o slot 5 em destaque.
+  de 1,5s; sprites maiores; e mobile com o slot 5 em destaque.
+- **Mobile, decidido com o usuário (substitui o "4 em cima, 1 embaixo"
+  do ABERTURA.md):** formato do "5 do dado". Slots 1–4 nos cantos (cima
+  esquerda, cima direita, baixo esquerda, baixo direita) e o garantido no
+  centro, maior.
 - `prefers-reduced-motion`: sem screen shake, menos partículas e cerimônia
   encurtada.
 

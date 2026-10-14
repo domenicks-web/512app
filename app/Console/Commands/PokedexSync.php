@@ -22,6 +22,9 @@ class PokedexSync extends Command
 
     private const API_BASE_URL = 'https://pokeapi.co/api/v2';
 
+    /** GIFs animados da black-white, usados na abertura do pack. */
+    private const ANIMATED_SPRITES = 'sprites.versions.generation-v.black-white.animated';
+
     public function handle(RarityTable $rarityTable): int
     {
         $this->output->progressStart(self::TOTAL_SPECIES);
@@ -54,6 +57,8 @@ class PokedexSync extends Command
                 'sprite_path' => $this->downloadSprite($pokemon['sprites']['front_default'], $dexNumber, 'sprite'),
                 'sprite_shiny_path' => $this->downloadSprite($pokemon['sprites']['front_shiny'], $dexNumber, 'shiny'),
                 'artwork_path' => $this->downloadSprite($pokemon['sprites']['other']['official-artwork']['front_default'], $dexNumber, 'artwork'),
+                'sprite_animated_path' => $this->downloadOptionalSprite(data_get($pokemon, self::ANIMATED_SPRITES.'.front_default'), $dexNumber, 'animated'),
+                'sprite_animated_shiny_path' => $this->downloadOptionalSprite(data_get($pokemon, self::ANIMATED_SPRITES.'.front_shiny'), $dexNumber, 'animated-shiny'),
                 'flavor_pt' => $flavorPt,
             ];
 
@@ -141,6 +146,12 @@ class PokedexSync extends Command
         }
 
         return null;
+    }
+
+    /** Sprite que a PokeAPI pode não ter: sem URL, fica nulo e a tela usa o PNG. */
+    private function downloadOptionalSprite(mixed $url, int $dexNumber, string $kind): ?string
+    {
+        return is_string($url) && $url !== '' ? $this->downloadSprite($url, $dexNumber, $kind) : null;
     }
 
     private function downloadSprite(string $url, int $dexNumber, string $kind): string

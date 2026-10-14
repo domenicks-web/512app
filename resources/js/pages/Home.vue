@@ -17,6 +17,7 @@ import { formatFriendsOnline, formatMint } from '@/lib/format';
 import { animate, spring } from '@/lib/motion';
 import { edit as profileEdit } from '@/routes/profile';
 import { show as collectionShow } from '@/routes/collection';
+import { show as packShow } from '@/routes/pack';
 import { show as rankingShow } from '@/routes/ranking';
 import { index as tradesIndex } from '@/routes/trades';
 
@@ -25,8 +26,7 @@ defineOptions({ layout: EntryLayout });
 /**
  * Home: trilho de tiles com um anel colorido que desliza até o ativo
  * (setas, hover ou clique; Enter "aperta"). Apertar Coleção, Ranking ou
- * Trocas abre a tela; o Pack de hoje só levanta a tampa até existir a
- * abertura (subprojeto C).
+ * Trocas abre a tela; o Pack de hoje levanta a tampa e vai pra abertura.
  */
 const props = defineProps<{
     trainer: {
@@ -56,6 +56,7 @@ usePoll(props.presencePollSeconds * 1000, {
 
 /** Tile → tela que ele abre depois de apertado. */
 const TILE_DESTINATIONS: Partial<Record<number, () => { url: string }>> = {
+    0: packShow,
     1: collectionShow,
     2: rankingShow,
     3: tradesIndex,
@@ -181,7 +182,7 @@ function pressTile(index: number) {
         { fill: 'none', easing: 'ease-out' },
     );
 
-    // Pack de hoje: a tampa levanta. Abrir pack de verdade ainda não existe.
+    // Pack de hoje: a tampa levanta antes de ir pra abertura.
     if (index === 0) {
         animate(
             tile?.querySelector('[data-k="ptop"]'),

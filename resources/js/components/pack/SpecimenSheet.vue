@@ -1,0 +1,241 @@
+<script setup lang="ts">
+import { computed } from 'vue';
+import {
+    holoBackground,
+    holoPosition,
+    IV_MAX,
+    isGoldMint,
+    natureColor,
+    pad,
+    panelBackground,
+    shortHash,
+    sizeLabel,
+    sizeText,
+    spriteOf,
+    STATS,
+    TIER_META,
+} from '@/lib/pack/meta';
+import { vPixelFit } from '@/lib/pack/pixelFit';
+import type { PackSpecimen } from '@/lib/pack/types';
+import PackModal from './PackModal.vue';
+
+/** Ficha do espécime: sprite até 4×, régua de tamanho, IVs, natureza, captura e hash. */
+const props = defineProps<{ specimen: PackSpecimen | null }>();
+const emit = defineEmits<{ close: [] }>();
+
+const caught = computed(() =>
+    props.specimen
+        ? new Date(props.specimen.caughtAt)
+              .toLocaleDateString('pt-BR', {
+                  day: '2-digit',
+                  month: 'short',
+                  year: 'numeric',
+              })
+              .replace('.', '')
+        : '',
+);
+</script>
+
+<template>
+    <PackModal
+        :open="specimen !== null"
+        :label="specimen ? `Ficha de ${specimen.name}` : 'Ficha'"
+        max-width="780px"
+        @close="emit('close')"
+    >
+        <div v-if="specimen" class="flex flex-wrap">
+            <div
+                class="relative flex min-h-[340px] flex-[1_1_300px] items-center justify-center overflow-hidden"
+                :style="{ background: panelBackground(specimen) }"
+            >
+                <img
+                    v-pixel-fit="{ cap: 4, maxH: 260, maxW: 300 }"
+                    :src="spriteOf(specimen)"
+                    :data-fallback="specimen.sprite"
+                    :alt="specimen.name"
+                    draggable="false"
+                    class="relative block [image-rendering:pixelated]"
+                />
+                <div
+                    class="pointer-events-none absolute inset-0 bg-[length:240%_240%] mix-blend-screen"
+                    :style="{
+                        backgroundImage: holoBackground(specimen),
+                        backgroundPosition: holoPosition(specimen),
+                        opacity: specimen.isShiny ? 0.45 : 0.4,
+                    }"
+                />
+            </div>
+            <div
+                class="flex min-w-0 flex-[1_1_360px] flex-col gap-[22px] px-7 pt-[30px] pb-7"
+            >
+                <div class="flex flex-col gap-2.5">
+                    <div class="flex items-baseline gap-2.5">
+                        <div
+                            class="text-[34px] leading-none font-black tracking-[-0.03em]"
+                        >
+                            {{ specimen.name }}
+                        </div>
+                        <div class="text-sm font-semibold text-[#7d8794]">
+                            #{{ specimen.dex }}
+                        </div>
+                    </div>
+                    <div class="flex flex-wrap gap-1.5">
+                        <span
+                            class="flex h-[26px] items-center rounded-full px-2.5 text-xs font-extrabold"
+                            :style="{
+                                background: TIER_META[specimen.tier].color,
+                                color: TIER_META[specimen.tier].fg,
+                            }"
+                            >{{ TIER_META[specimen.tier].label }}</span
+                        >
+                        <span
+                            v-if="specimen.isShiny"
+                            class="flex h-[26px] items-center rounded-full bg-[#4dd9e8] px-2.5 text-xs font-extrabold text-[#1c1f26]"
+                            >Shiny</span
+                        >
+                        <span
+                            class="flex h-[26px] items-center rounded-full bg-white/8 px-2.5 font-mono text-xs font-extrabold"
+                            :style="{
+                                color: isGoldMint(specimen)
+                                    ? '#FFC94D'
+                                    : '#c3cad4',
+                            }"
+                            >Nº {{ pad(specimen.mint, 4) }}</span
+                        >
+                    </div>
+                </div>
+
+                <div class="flex flex-col gap-2.5">
+                    <div
+                        class="flex justify-between gap-2.5 text-xs font-extrabold"
+                    >
+                        <span class="text-[#c3cad4]"
+                            >Tamanho {{ sizeLabel(specimen) }}</span
+                        >
+                        <span class="font-semibold text-[#7d8794]">{{
+                            sizeText(specimen)
+                        }}</span>
+                    </div>
+                    <div class="relative h-2 rounded-full bg-white/8">
+                        <div
+                            class="absolute top-0 right-[20%] bottom-0 left-[20%] bg-white/6"
+                        />
+                        <div
+                            class="absolute top-1/2 -mt-2 -ml-2 size-4 rounded-full bg-white shadow-[0_0_0_4px_rgba(255,255,255,0.15)]"
+                            :style="{
+                                left: `${(specimen.sizeRoll * 100).toFixed(1)}%`,
+                            }"
+                        />
+                    </div>
+                    <div
+                        class="relative h-3.5 text-[10px] font-extrabold text-[#7d8794]"
+                    >
+                        <span class="absolute left-0">XXS</span
+                        ><span class="absolute left-[11%] -translate-x-1/2"
+                            >XS</span
+                        ><span class="absolute left-1/2 -translate-x-1/2"
+                            >M</span
+                        ><span class="absolute left-[89%] -translate-x-1/2"
+                            >XL</span
+                        ><span class="absolute right-0">XXL</span>
+                    </div>
+                </div>
+
+                <div class="flex flex-col gap-[9px]">
+                    <div class="flex justify-between text-xs font-extrabold">
+                        <span class="text-[#c3cad4]">IVs</span
+                        ><span>{{ specimen.ivTotal }} / {{ IV_MAX }}</span>
+                    </div>
+                    <div
+                        v-for="(value, k) in specimen.ivs"
+                        :key="k"
+                        class="grid grid-cols-[34px_minmax(0,1fr)_22px] items-center gap-2.5"
+                    >
+                        <div class="text-[11px] font-extrabold text-[#7d8794]">
+                            {{ STATS[k] }}
+                        </div>
+                        <div
+                            class="h-1.5 overflow-hidden rounded-full bg-white/8"
+                        >
+                            <div
+                                class="h-full rounded-full"
+                                :style="{
+                                    width: `${Math.round((value / 31) * 100)}%`,
+                                    background: natureColor(
+                                        specimen.natureIndex,
+                                    ),
+                                }"
+                            />
+                        </div>
+                        <div
+                            class="text-right text-xs font-extrabold"
+                            :style="{
+                                color: value === 31 ? '#FFC94D' : '#ffffff',
+                            }"
+                        >
+                            {{ value }}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3.5">
+                    <div class="flex flex-col gap-[5px]">
+                        <div class="text-[11px] font-extrabold text-[#7d8794]">
+                            Natureza
+                        </div>
+                        <div
+                            class="flex items-center gap-2 text-sm font-extrabold"
+                        >
+                            <span
+                                class="size-[9px] rounded-full"
+                                :style="{
+                                    background: natureColor(
+                                        specimen.natureIndex,
+                                    ),
+                                }"
+                            />{{ specimen.nature }}
+                        </div>
+                    </div>
+                    <div class="flex flex-col gap-[5px]">
+                        <div class="text-[11px] font-extrabold text-[#7d8794]">
+                            Capturado
+                        </div>
+                        <div class="text-sm font-extrabold">{{ caught }}</div>
+                    </div>
+                </div>
+
+                <div
+                    class="flex items-center justify-between gap-2.5 rounded-2xl bg-white/5 px-3.5 py-3"
+                >
+                    <div class="flex min-w-0 flex-col gap-[3px]">
+                        <div class="text-[11px] font-extrabold text-[#7d8794]">
+                            Hash do espécime
+                        </div>
+                        <div
+                            class="font-mono text-sm font-extrabold text-[#c3cad4]"
+                        >
+                            {{ shortHash(specimen.hash) }}
+                        </div>
+                    </div>
+                    <span
+                        class="flex h-[26px] items-center gap-1.5 rounded-full bg-[rgba(63,143,107,0.2)] px-2.5 text-xs font-extrabold whitespace-nowrap text-[#6fd0a2]"
+                    >
+                        <svg
+                            width="11"
+                            height="11"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="3.4"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            aria-hidden="true"
+                        >
+                            <path d="M5 12.5l4.5 4.5L19 7.5" /></svg
+                        >Verificado
+                    </span>
+                </div>
+            </div>
+        </div>
+    </PackModal>
+</template>

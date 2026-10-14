@@ -302,7 +302,7 @@ pushado pro `main`.
        ou uma só mostrando o shiny se tiver; e a seção vazia até existir
        abertura de pack.
     2. ~~Admin de verdade~~ — feito em 14/10 (ver abaixo).
-    3. **Subprojeto C — abertura de pack** (detalhe abaixo).
+    3. ~~Subprojeto C — abertura de pack~~ — feito em 14/10 (ver abaixo).
 
 - **Admin de verdade (14/10, branch `admin` a partir do `perfil`)**: design
   em `docs/superpowers/specs/2026-10-14-admin-design.md`, handoff em
@@ -320,10 +320,19 @@ pushado pro `main`.
   mesmo Wi-Fi abre `http://192.168.1.26:8000`. Copiar texto no app usa
   fallback (`execCommand`) porque http por IP não é contexto seguro.
 
-- **Próximo subprojeto** (com brainstorm antes de codar):
-    - **C — Tela de abertura de pack** (fundo escuro): a maior. Envolve criar a
-      action `OpenPack` (transação + lock em `mint_number`, chamando
-      `ResolveSpecimen`), rota, e a animação de revelação em GSAP.
+- **Abertura do pack (14/10, branch `pack`, a partir do `admin`)**: design
+  em `docs/superpowers/specs/2026-10-14-abertura-do-pack-design.md`,
+  handoff em `design_handoff_512_onboarding/ABERTURA.md`. `/pack`:
+  commit da server seed antes (`users.next_server_seed`, criptografada),
+  `DrawPack` (puro, HMAC por slot) + `OpenPack` (cooldown 24h, lock no
+  usuário e nas espécies pro mint) + `RevealSlot` (cada bola só revela o
+  conteúdo quando clicada; seed revelada na 5ª). Espécime de bola fechada
+  some do resto do jogo pelo `RevealedScope` (global no `Specimen`).
+  Front em WAAPI (não GSAP, pra manter as curvas do protótipo 1:1):
+  `lib/pack/director.ts`, `fx.ts`, `sfx.ts`, `v-pixel-fit`. Mobile no
+  formato "5 do dado" (decidido com o usuário, substitui o 4+1 do
+  handoff). `pokedex:sync` agora baixa os GIFs animados (já rodado).
+  A conta de teste abriu 2 packs locais.
 
 ===
 
