@@ -80,6 +80,40 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->belongsTo(Species::class, 'avatar_species_id');
     }
 
+    /**
+     * @return HasMany<Friendship, $this>
+     */
+    public function sentFriendRequests(): HasMany
+    {
+        return $this->hasMany(Friendship::class, 'requester_id');
+    }
+
+    /**
+     * @return HasMany<Friendship, $this>
+     */
+    public function receivedFriendRequests(): HasMany
+    {
+        return $this->hasMany(Friendship::class, 'addressee_id');
+    }
+
+    /**
+     * Ids de quem é amigo (amizade aceita), nas duas direções.
+     *
+     * @return list<int>
+     */
+    public function friendIds(): array
+    {
+        return Friendship::query()
+            ->accepted()
+            ->involving($this)
+            ->get(['requester_id', 'addressee_id'])
+            ->map(fn (Friendship $friendship): int => $friendship->requester_id === $this->id
+                ? $friendship->addressee_id
+                : $friendship->requester_id)
+            ->values()
+            ->all();
+    }
+
     public function hasCompletedProfile(): bool
     {
         return $this->nickname !== null;

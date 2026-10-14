@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Enums\TradeStatus;
+use App\Models\Friendship;
 use App\Models\Opening;
 use App\Models\Species;
 use App\Models\Specimen;
@@ -103,7 +104,7 @@ it('deixa o feed vazio quando ninguém abriu nada bom', function () {
         ->assertInertia(fn (Assert $page) => $page->where('feedHighlight', null));
 });
 
-it('conta outros jogadores com sessão ativa na janela de online', function () {
+it('conta só amigos com sessão ativa na janela de online', function () {
     $user = User::factory()->create();
     $recent = User::factory()->create();
     $stale = User::factory()->create();
@@ -119,7 +120,13 @@ it('conta outros jogadores com sessão ativa na janela de online', function () {
     $session($recent->id, now()->getTimestamp());
     $session($stale->id, now()->subMinutes($window + 1)->getTimestamp());
     $session(null, now()->getTimestamp());
+    $strangerOnline = User::factory()->create();
+    $session($strangerOnline->id, now()->getTimestamp());
+    Friendship::factory()->accepted()->create(['requester_id' => $user->id, 'addressee_id' => $recent->id]);
+    Friendship::factory()->accepted()->create(['requester_id' => $stale->id, 'addressee_id' => $user->id]);
 
     $this->actingAs($user)->get('/')
-        ->assertInertia(fn (Assert $page) => $page->where('friendsOnline', 1));
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('friendsOnline', 1)
+            ->where('presencePollSeconds', config('game.group.presence_poll_seconds')));
 });

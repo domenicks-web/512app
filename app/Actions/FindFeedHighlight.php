@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Actions;
 
 use App\Models\Specimen;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 
 /**
@@ -39,7 +40,7 @@ class FindFeedHighlight
             'trainerNickname' => (string) $specimen->opening->user->nickname,
             'speciesName' => $specimen->species->name,
             'mintNumber' => $specimen->mint_number,
-            'caughtAgo' => $specimen->caught_at->locale('pt_BR')->diffForHumans(),
+            'caughtAgo' => $specimen->caught_at->locale('pt_BR')->diffForHumans(['options' => Carbon::JUST_NOW]),
         ];
     }
 }

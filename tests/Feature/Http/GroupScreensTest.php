@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Enums\TradeItemSide;
 use App\Enums\TradeStatus;
+use App\Models\Friendship;
 use App\Models\Opening;
 use App\Models\Species;
 use App\Models\Specimen;
@@ -113,27 +114,44 @@ it('separa trocas pendentes recebidas e enviadas, com os espécimes de cada lado
             ->where('outgoing.0.otherTrainer.nickname', 'Bia'));
 });
 
-it('lista o grupo com online primeiro e marca o próprio jogador', function () {
-    $user = User::factory()->create(['nickname' => 'Lin']);
+it('lista só os amigos, online primeiro, e separa os pedidos', function () {
+    $user = User::factory()->create();
     $online = User::factory()->create(['nickname' => 'Zé']);
-    User::factory()->create(['nickname' => 'Ana']);
-    User::factory()->withoutProfile()->create();
+    $offline = User::factory()->create(['nickname' => 'Ana']);
+    $stranger = User::factory()->create();
+    $asking = User::factory()->create(['nickname' => 'Bia']);
+    $asked = User::factory()->create(['nickname' => 'Caio']);
+    Friendship::factory()->accepted()->create(['requester_id' => $user->id, 'addressee_id' => $offline->id]);
+    Friendship::factory()->accepted()->create(['requester_id' => $online->id, 'addressee_id' => $user->id]);
+    Friendship::factory()->create(['requester_id' => $asking->id, 'addressee_id' => $user->id]);
+    Friendship::factory()->create(['requester_id' => $user->id, 'addressee_id' => $asked->id]);
+    specimenOf($offline);
     DB::table('sessions')->insert([
-        'id' => Str::random(40),
-        'user_id' => $online->id,
-        'payload' => '',
-        'last_activity' => now()->getTimestamp(),
+        ['id' => Str::random(40), 'user_id' => $online->id, 'payload' => '', 'last_activity' => now()->getTimestamp()],
+        ['id' => Str::random(40), 'user_id' => $stranger->id, 'payload' => '', 'last_activity' => now()->getTimestamp()],
     ]);
 
     $this->actingAs($user)->get('/amigos')
         ->assertInertia(fn (Assert $page) => $page
             ->component('friends/Index')
-            ->has('players', 3)
-            ->where('players.0.nickname', 'Lin')
-            ->where('players.0.isYou', true)
-            ->where('players.0.isOnline', true)
-            ->where('players.1.nickname', 'Zé')
-            ->where('players.1.isOnline', true)
-            ->where('players.2.nickname', 'Ana')
-            ->where('players.2.isOnline', false));
+            ->has('friends', 2)
+            ->where('friends.0.nickname', 'Zé')
+            ->where('friends.0.isOnline', true)
+            ->where('friends.1.nickname', 'Ana')
+            ->where('friends.1.isOnline', false)
+            ->where('friends.1.ownedSpecies', 1)
+            ->has('incoming', 1)
+            ->where('incoming.0.nickname', 'Bia')
+            ->has('outgoing', 1)
+            ->where('outgoing.0.nickname', 'Caio')
+            ->where('presencePollSeconds', config('game.group.presence_poll_seconds')));
+});
+
+it('mostra "agora" em vez de "há 0 segundo" pra pedido recém-enviado', function () {
+    $this->travelTo(now()->startOfSecond());
+    $user = User::factory()->create();
+    Friendship::factory()->create(['requester_id' => $user->id]);
+
+    $this->actingAs($user)->get('/amigos')
+        ->assertInertia(fn (Assert $page) => $page->where('outgoing.0.sentAgo', 'agora'));
 });

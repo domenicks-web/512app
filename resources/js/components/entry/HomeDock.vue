@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { Link } from '@inertiajs/vue3';
-import { onBeforeUnmount, onMounted, ref } from 'vue';
+import { Link, usePage } from '@inertiajs/vue3';
+import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
 import type { DockKey } from '@/components/entry/dock';
 import { animate } from '@/lib/motion';
 import { logout } from '@/routes';
@@ -16,7 +16,8 @@ import type { RouteDefinition } from '@/wayfinder';
  * (cartas em leque, cápsula abre, barras sobem, setas trocam, mão acena,
  * sliders correm). Coleção, Ranking, Trocas e Amigos navegam; "Ajustes"
  * abre o menu (sair/admin). Packs espera a tela de abertura (subprojeto C).
- * `active` marca o item da tela atual.
+ * `active` marca o item da tela atual. Amigos mostra um contador vermelho
+ * com os pedidos de amizade recebidos.
  */
 defineProps<{
     isAdmin: boolean;
@@ -52,6 +53,11 @@ const MICRO: Record<string, string[]> = {
     k1: ['none', 'translateX(6px)', 'none'],
     k2: ['none', 'translateX(-6px)', 'none'],
 };
+
+const page = usePage<{ pendingFriendRequests?: number }>();
+const pendingFriendRequests = computed(
+    () => page.props.pendingFriendRequests ?? 0,
+);
 
 const hovered = ref<string | null>(null);
 const isMenuOpen = ref(false);
@@ -306,6 +312,12 @@ function onActivate(key: string) {
                 <circle data-a="k2" cx="15" cy="16" r="2.5" fill="#ffffff" />
             </svg>
 
+            <span
+                v-if="item.key === 'friends' && pendingFriendRequests > 0"
+                class="bg-brand absolute -top-1 -right-1 flex h-[18px] min-w-[18px] items-center justify-center rounded-full px-1 text-[11px] leading-none font-black text-white shadow-[0_0_0_2px_#fff]"
+                :aria-label="`${pendingFriendRequests} pedidos de amizade`"
+                >{{ pendingFriendRequests }}</span
+            >
             <span
                 v-if="
                     hovered === item.key &&

@@ -136,14 +136,17 @@ return [
     |--------------------------------------------------------------------------
     |
     | `online_window_minutes`: quem teve atividade na sessão dentro dessa
-    | janela conta como online (lido da tabela `sessions`, sem realtime).
+    | janela conta como online (tabela `sessions`, sem realtime).
+    | `presence_poll_seconds`: de quanto em quanto tempo Home e Amigos
+    | recarregam a presença — a própria recarga mantém a sessão ativa.
     | `feed_highlight_tiers`: tiers que entram no feed do grupo além de
     | todo shiny, que entra sempre.
     |
     */
 
     'group' => [
-        'online_window_minutes' => 5,
+        'online_window_minutes' => 2,
+        'presence_poll_seconds' => 60,
         'feed_highlight_tiers' => [
             RarityTier::Rare->value,
             RarityTier::Legendary->value,

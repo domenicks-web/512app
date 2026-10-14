@@ -5,22 +5,31 @@ declare(strict_types=1);
 namespace App\Actions;
 
 use App\Actions\Data\CompleteOnboardingData;
+use App\Actions\Friends\BefriendInviter;
 use App\Models\User;
+use Illuminate\Support\Facades\DB;
 
 class CompleteOnboarding
 {
-    public function __construct(private readonly GenerateUserTag $generateUserTag = new GenerateUserTag) {}
+    public function __construct(
+        private readonly GenerateUserTag $generateUserTag = new GenerateUserTag,
+        private readonly BefriendInviter $befriendInviter = new BefriendInviter,
+    ) {}
 
     public function handle(User $user, CompleteOnboardingData $data): User
     {
-        $user->update([
-            'nickname' => $data->nickname,
-            'tag' => $this->resolveTag($data),
-            'birthdate' => $data->birthdate,
-            'avatar_species_id' => $data->avatarSpeciesId,
-        ]);
+        return DB::transaction(function () use ($user, $data): User {
+            $user->update([
+                'nickname' => $data->nickname,
+                'tag' => $this->resolveTag($data),
+                'birthdate' => $data->birthdate,
+                'avatar_species_id' => $data->avatarSpeciesId,
+            ]);
 
-        return $user->refresh();
+            $this->befriendInviter->handle($user);
+
+            return $user->refresh();
+        });
     }
 
     /**
