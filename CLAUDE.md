@@ -469,3 +469,9 @@ pushado pro `main`.
   a pergunta. Dock ocupa a largura do conteúdo no celular, botões de 48px
   (desktop igual, por causa dos amigos online na mesma linha). "Shinies"
   fica (plural usado pela comunidade).
+- **Onde paramos (14/10, 17h50)**: tudo commitado e enviado no `main`.
+  Usuário testou a fase 3 no navegador (rankings, feed, verificar ok) e
+  pausou. Falta ele testar o Comparar (precisa de uma espécie em comum
+  com o Claude#9805: liberar pack em `/admin/jogadores` → ⋯). Próximo
+  passo combinado: Fase 4 (trocas), com brainstorm antes e dividindo com
+  o Kimi de novo.
