@@ -120,6 +120,16 @@ invite_redemptions
 
   unique (invite_id, user_id)
 
+friendships
+  id
+  requester_id             fk users, quem mandou o pedido
+  addressee_id             fk users, quem recebeu
+  status                   enum: pending | accepted
+  accepted_at              timestamp, nullable
+  created_at, updated_at
+
+  unique (requester_id, addressee_id)   -- e único nas duas direções, pela Action
+
 species                    -- 151 registros, populados pelo comando pokedex:sync
   id                       = dex_number, 1 a 151
   name                     "Bulbasaur"
@@ -223,6 +233,12 @@ mundo que usou). Quem pode criar convite: um admin (`users.is_admin`), pelo pain
 convite (não apaga, só para de aceitar resgate) e promove/rebaixa outros
 admins em `/admin/usuarios` — ninguém rebaixa a si mesmo e o jogo nunca fica
 sem admin. Jogador comum gerar convite próprio ainda não está fechado.
+
+**Amizade por pedido.** O jogador manda pedido pelo `nickname#tag` completo;
+a outra pessoa aceita ou recusa. Se os dois mandarem pedido um pro outro, o
+segundo aceita o primeiro. Recusar, cancelar e desfazer apagam a linha. Quem
+criou o convite vira amigo de quem o usou, ao fim do onboarding. Amizade
+define a tela Amigos e o "amigos online"; ranking e feed são do grupo inteiro.
 
 **Confirmação de email é leve, não bloqueia o uso.** O jogador já pode abrir
 pack e jogar sem confirmar. O link de confirmação chega em paralelo, e só

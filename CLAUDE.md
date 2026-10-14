@@ -161,7 +161,7 @@ pushado pro `main`.
   sem tratamento de design ainda.
 
 - **Conta de teste local (13/10)**: `claudetest@512app.com` / `claude`,
-  `Claude#9805`, perfil completo, sem admin, sem espécimes. Criada a pedido
+  `Claude#9805`, perfil completo, sem admin, sem espécimes, sem amigos. Criada a pedido
   do usuário pro Claude testar no navegador. O MCP do Playwright não acha o
   Chrome; funciona via script Node com o `playwright` do cache do npx
   apontando `executablePath` pro `chromium_headless_shell-1243` em
@@ -194,26 +194,27 @@ pushado pro `main`.
       `BuildHomeSummary`); a `Welcome.vue` provisória morreu. Logout de
       verdade e link do admin ficam no menu "Ajustes" do dock.
 
-- **Subprojeto B pronto (13/10, feito sem o usuário presente — revisar as
-  decisões abaixo)**:
+- **Subprojeto B pronto (13/10; decisões revisadas com o usuário)**:
     - Home sem nenhum dado fictício; `game.home.placeholders` morreu.
       `BuildHomeSummary` agora junta: posição no ranking
       (`BuildSpeciesRanking`), trocas pendentes *recebidas*, destaque do
-      feed (`FindFeedHighlight`) e outros jogadores online
-      (`GroupPresence`).
+      feed (`FindFeedHighlight`) e amigos online
+      (`GroupPresence` + `User::friendIds()`).
     - Telas novas atrás de `auth` + `onboarded`, todas com a moldura
       `components/group/GroupScreen.vue` (voltar, título, dock com o item
       ativo): `/colecao` (151 em ordem de dex, silhueta pra quem falta,
       filtro Todas/Tenho/Faltam), `/ranking`, `/trocas` (só leitura) e
       `/amigos`. Tiles Coleção, Ranking e Trocas da Home abrem as telas.
-    - Decisões tomadas sozinho:
-        - **"Amigos" = todo mundo do grupo** que já fez onboarding. Não
-          existe tabela de amizade no `SPEC.md`; o jogo já é fechado por
-          convite.
+    - Decisões:
+        - **Amizade de verdade** (pedido por `nickname#tag`, amizade
+          automática com quem convidou, contador no dock) — decidido com o
+          usuário depois, ver `docs/superpowers/specs/2026-10-13-amizade-design.md`.
+          Ranking e feed continuam com o grupo inteiro.
         - **Online = sessão com atividade nos últimos
-          `game.group.online_window_minutes` (5)**, lido da tabela
-          `sessions`. Só funciona com `SESSION_DRIVER=database`. Sem
-          Reverb (fase 4).
+          `game.group.online_window_minutes` (2)**, lido da tabela
+          `sessions`, com `usePoll` a cada `game.group.presence_poll_seconds`
+          (60) na Home e em Amigos — a recarga também é o "ping". Só
+          funciona com `SESSION_DRIVER=database`. Sem Reverb (fase 4).
         - **Ranking só por espécies distintas.** Empate divide a posição,
           shinies só desempatam a ordem. Quem tem 0 espécies fica sem
           posição ("—" na Home). Os outros rankings da fase 3 (shinies,
@@ -221,7 +222,10 @@ pushado pro `main`.
         - **Feed = abertura mais recente que é shiny ou de tier em
           `game.group.feed_highlight_tiers`** (raro, lendário). "Quem
           abriu" é o dono da `opening`, não o dono atual.
-        - **Trocas é só leitura**: propor/aceitar/recusar é a fase 4.
+        - **Trocas é só leitura**: propor/aceitar/recusar é a fase 4
+          (confirmado pelo usuário).
+        - **Coleção com silhueta e "???"** pra espécie que falta
+          (aprovado como está).
     - Conferido no navegador (desktop e 390px) com a conta de teste, só nos
       estados vazios — ainda não existe espécime no banco local.
 
