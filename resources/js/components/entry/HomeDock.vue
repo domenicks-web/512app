@@ -55,7 +55,10 @@ const MICRO: Record<string, string[]> = {
     roof: ['none', 'translateY(-2.5px)', 'none'],
 };
 
-const page = usePage<{ pendingFriendRequests?: number }>();
+const page = usePage<{
+    pendingFriendRequests?: number;
+    pendingTrades?: number;
+}>();
 
 /** Relógio do enchimento da pokébola (ver `usePackProgress`). */
 const now = ref(Date.now());
@@ -65,6 +68,7 @@ const { progress: packProgress, isReady: isPackReady } = usePackProgress(now);
 const pendingFriendRequests = computed(
     () => page.props.pendingFriendRequests ?? 0,
 );
+const pendingTrades = computed(() => page.props.pendingTrades ?? 0);
 
 const hovered = ref<string | null>(null);
 
@@ -345,6 +349,12 @@ function onFocus(key: string, event: FocusEvent) {
                 class="bg-brand absolute -top-1 -right-1 flex h-[18px] min-w-[18px] items-center justify-center rounded-full px-1 text-[11px] leading-none font-black text-white shadow-[0_0_0_2px_#fff]"
                 :aria-label="`${pendingFriendRequests} pedidos de amizade`"
                 >{{ pendingFriendRequests }}</span
+            >
+            <span
+                v-if="item.key === 'trades' && pendingTrades > 0"
+                class="bg-brand absolute -top-1 -right-1 flex h-[18px] min-w-[18px] items-center justify-center rounded-full px-1 text-[11px] leading-none font-black text-white shadow-[0_0_0_2px_#fff]"
+                :aria-label="`${pendingTrades} propostas de troca`"
+                >{{ pendingTrades }}</span
             >
             <span
                 v-if="hovered === item.key"
