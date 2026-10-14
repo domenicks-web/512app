@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Models\Friendship;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
 
@@ -41,6 +42,9 @@ class HandleInertiaRequests extends Middleware
             'auth' => [
                 'user' => $request->user(),
             ],
+            'pendingFriendRequests' => fn (): int => $request->user() === null
+                ? 0
+                : Friendship::query()->pending()->where('addressee_id', $request->user()->id)->count(),
             'flash' => [
                 'created_invite_code' => fn () => $request->session()->get('created_invite_code'),
             ],

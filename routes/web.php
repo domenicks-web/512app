@@ -3,6 +3,9 @@
 declare(strict_types=1);
 
 use App\Http\Controllers\Collection\ShowCollectionController;
+use App\Http\Controllers\Friends\AcceptFriendRequestController;
+use App\Http\Controllers\Friends\RemoveFriendshipController;
+use App\Http\Controllers\Friends\SendFriendRequestController;
 use App\Http\Controllers\Friends\ShowFriendsController;
 use App\Http\Controllers\Home\ShowHomeController;
 use App\Http\Controllers\Ranking\ShowRankingController;
@@ -15,6 +18,13 @@ Route::middleware(['auth', 'onboarded'])->group(function () {
     Route::get('ranking', ShowRankingController::class)->name('ranking.show');
     Route::get('trocas', ShowTradesController::class)->name('trades.index');
     Route::get('amigos', ShowFriendsController::class)->name('friends.index');
+    Route::post('amigos/pedidos', SendFriendRequestController::class)->name('friends.requests.store');
+    Route::post('amigos/pedidos/{friendship}/aceitar', AcceptFriendRequestController::class)
+        ->can('accept', 'friendship')
+        ->name('friends.requests.accept');
+    Route::delete('amigos/{friendship}', RemoveFriendshipController::class)
+        ->can('delete', 'friendship')
+        ->name('friends.destroy');
 });
 
 if (! app()->isProduction()) {
