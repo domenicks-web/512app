@@ -47,6 +47,7 @@ class HandleInertiaRequests extends Middleware
                 : Friendship::query()->pending()->where('addressee_id', $request->user()->id)->count(),
             'flash' => [
                 'created_invite_code' => fn () => $request->session()->get('created_invite_code'),
+                'profile_status' => fn () => $request->session()->get('profile_status'),
             ],
         ];
     }

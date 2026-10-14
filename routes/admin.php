@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Http\Controllers\Admin\AdminRoleController;
+use App\Http\Controllers\Admin\BirthdateUnlockController;
 use App\Http\Controllers\Admin\InviteController;
 use App\Http\Controllers\Admin\UserController;
 use Illuminate\Support\Facades\Route;
@@ -17,4 +18,5 @@ Route::middleware(['auth', 'onboarded', 'admin'])->prefix('admin')->name('admin.
     Route::get('usuarios', [UserController::class, 'index'])->name('users.index');
     Route::post('usuarios/{user}/admin', [AdminRoleController::class, 'store'])->name('users.admin.store');
     Route::delete('usuarios/{user}/admin', [AdminRoleController::class, 'destroy'])->name('users.admin.destroy');
+    Route::post('usuarios/{user}/liberar-nascimento', [BirthdateUnlockController::class, 'store'])->name('users.birthdate.unlock');
 });

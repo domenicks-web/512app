@@ -132,6 +132,26 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Perfil
+    |--------------------------------------------------------------------------
+    |
+    | `nickname_cooldown_days`: depois de trocar o nickname, quantos dias até
+    | poder trocar de novo (o nickname do onboarding não conta).
+    | `email_change_link_minutes`: validade do link de confirmação mandado
+    | pro email novo.
+    |
+    */
+
+    'profile' => [
+        'nickname_cooldown_days' => 15,
+        'email_change_link_minutes' => 60,
+    ],
+
+    // Fuso usado em datas e horas mostradas pro jogador (o app roda em UTC).
+    'display_timezone' => 'America/Sao_Paulo',
+
+    /*
+    |--------------------------------------------------------------------------
     | Grupo
     |--------------------------------------------------------------------------
     |

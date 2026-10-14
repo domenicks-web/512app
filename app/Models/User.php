@@ -19,9 +19,12 @@ use Illuminate\Support\Carbon;
  * @property int $id
  * @property string|null $nickname
  * @property string|null $tag
+ * @property Carbon|null $nickname_changed_at
  * @property string $email
+ * @property string|null $pending_email
  * @property Carbon|null $email_verified_at
  * @property Carbon|null $birthdate
+ * @property Carbon|null $birthdate_corrected_at
  * @property int|null $avatar_species_id
  * @property bool $is_admin
  * @property int|null $invited_by
@@ -128,6 +131,8 @@ class User extends Authenticatable implements MustVerifyEmail
         return [
             'email_verified_at' => 'datetime',
             'birthdate' => 'date',
+            'birthdate_corrected_at' => 'datetime',
+            'nickname_changed_at' => 'datetime',
             'is_admin' => 'boolean',
             'password' => 'hashed',
             'nonce' => 'integer',
