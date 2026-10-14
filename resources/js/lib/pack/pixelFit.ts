@@ -1,10 +1,13 @@
 import type { Directive } from 'vue';
+import { spriteBounds } from '@/lib/spriteBounds';
 import { integerScale } from './meta';
 
 /**
  * `v-pixel-fit="{ cap, maxH, maxW?, min? }"`: dimensiona o sprite numa
- * escala inteira (nunca fracionária, `image-rendering: pixelated`). Se o
- * GIF animado falhar, cai no PNG de `data-fallback`.
+ * escala inteira (nunca fracionária, `image-rendering: pixelated`) e
+ * centraliza na horizontal pelo desenho, não pelo quadro: o GIF do Mewtwo,
+ * por exemplo, tem o quadro largo pro rabo esticado e o corpo fica à
+ * esquerda. Se o GIF animado falhar, cai no PNG de `data-fallback`.
  */
 export type PixelFit = {
     cap: number;
@@ -45,6 +48,25 @@ function fit(img: FitElement): void {
 
     img.style.width = `${naturalWidth * k}px`;
     img.style.height = `${naturalHeight * k}px`;
+    center(img, k);
+}
+
+/**
+ * Desloca o sprite até o meio do desenho (medido no primeiro quadro, a
+ * pose parada) cair no meio da caixa.
+ */
+function center(img: FitElement, scale: number): void {
+    const src = img.currentSrc || img.src;
+
+    void spriteBounds(src).then((bounds) => {
+        if (!bounds || (img.currentSrc || img.src) !== src) {
+            return;
+        }
+
+        const offset =
+            (bounds.naturalWidth / 2 - (bounds.x + bounds.width / 2)) * scale;
+        img.style.translate = `${Math.round(offset)}px 0`;
+    });
 }
 
 function onLoad(event: Event): void {
