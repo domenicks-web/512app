@@ -229,37 +229,29 @@ pushado pro `main`.
     - Conferido no navegador (desktop e 390px) com a conta de teste, só nos
       estados vazios — ainda não existe espécime no banco local.
 
-- **Pendências** (por fase do `SPEC.md`):
-    - **Ajustes no que já existe:**
-        - Home: o tile "Pack de hoje" e o item Packs do dock não fazem
-          nada — abrir pack de verdade é o subprojeto C. O "1 em 512" e a
-          data são decorativos.
-        - PWA ainda não existe (sem `vite-plugin-pwa`, sem manifest),
-          apesar de estar no SPEC. É o que faz o jogo parecer app no
-          celular (instalar na tela inicial).
-        - Mobile: a grade de parceiros do onboarding encolhe com `zoom`
-          abaixo de 460px; revisar num aparelho de verdade.
-        - A confirmação "Desfazer amizade com X?" fica apertada no cartão
-          (quebra em 3 linhas).
-        - Tile do Feed na Home não abre tela (feed completo é fase 5).
-        - Configurar o Gmail SMTP no `.env` (conta e senha de app do
-          usuário). Sem isso os emails do perfil vão só pro log.
-        - "Esqueci a senha" (recuperação por email) ainda não existe.
-        - Mensagens da regra de senha forte (produção) saem em inglês — o
-          projeto não tem `lang/pt_BR`.
-    - **Fase 2 — a prova (provably fair):** commit e reveal de seeds
-      (hash mostrado antes, seed revelada depois), página `/verificar`,
-      ficha detalhada do espécime (IVs, natureza, tamanho, hash). Decidir
-      no brainstorm do C se commit/reveal já entra junto.
-    - **Fase 3 — o social:** perfil público de cada jogador; comparar dois
-      espécimes da mesma espécie lado a lado; rankings que faltam (mais
-      shinies, maior IV, menor mint — hoje só existe o de espécies).
-    - **Fase 4 — as trocas:** propor, aceitar e recusar (hoje `/trocas` é
-      só leitura); notificação em tempo real via Reverb (também
-      substituiria o poll de 60s de presença e pedidos de amizade);
-      histórico de donos anteriores de cada espécime.
-    - **Fase 5 — o polimento:** tilt com giroscópio, som de abertura,
-      apelido no espécime e feed completo do grupo.
+- **Pendências** (revisadas com o usuário em 14/10):
+    - **Ajustes pra depois** (combinado: fazer depois do que estiver em
+      andamento):
+        - Tile "Pack de hoje" da Home: mostrar "Disponível" ou a contagem
+          até o próximo pack (hoje a data e o "1 em 512" são decorativos).
+        - Tile do Feed na Home não abre tela.
+        - "Esqueci a senha" (recuperação por email) não existe.
+        - Mensagens da regra de senha forte (produção) em inglês — falta
+          `lang/pt_BR`.
+        - Grade de parceiros do onboarding encolhe com `zoom` abaixo de
+          460px; conferir no S26+ do usuário.
+        - Confirmação "Desfazer amizade com X?" quebra em 3 linhas.
+        - PWA (manifest, instalar na tela inicial), previsto no SPEC.
+    - **Fase 2 — a prova:** commit/reveal, ficha e comprovante já
+      existem (abertura do pack). Falta a página `/verificar` (colar
+      seeds e nonce e refazer a conta).
+    - **Fase 3 — o social:** perfil público; comparar dois espécimes da
+      mesma espécie; rankings de mais shinies, maior IV e menor mint.
+    - **Fase 4 — as trocas:** propor/aceitar/recusar; Reverb (substitui o
+      poll de 60s); histórico de donos. **Banimento entra aqui**
+      (decidido 14/10: temporário ou permanente, email com o motivo).
+    - **Fase 5 — o polimento:** tilt com giroscópio, apelido no espécime,
+      feed completo do grupo.
 - **Editar perfil (13/10)**: `/perfil` (menu Ajustes → "Editar perfil"),
   design em `docs/superpowers/specs/2026-10-13-editar-perfil-design.md`.
   Avatar livre; nickname a cada `game.profile.nickname_cooldown_days` (15),
@@ -297,10 +289,9 @@ pushado pro `main`.
     1. **Avatar da Pokédex no perfil**: além das 15 opções fixas, escolher
        qualquer espécie que o jogador tem na coleção, com sprite shiny se
        tiver shiny dela. **Decidido (14/10):** perdeu/trocou o espécime,
-       o avatar volta pro Pikachu (primeiro do config). Em aberto: shiny e
-       normal da mesma espécie como opções separadas (sugestão do Claude)
-       ou uma só mostrando o shiny se tiver; e a seção vazia até existir
-       abertura de pack.
+       o avatar volta pro Pikachu (primeiro do config); shiny e normal da
+       mesma espécie são opções separadas (cada uma exige ter aquele
+       espécime). Próximo a implementar.
     2. ~~Admin de verdade~~ — feito em 14/10 (ver abaixo).
     3. ~~Subprojeto C — abertura de pack~~ — feito em 14/10 (ver abaixo).
 
@@ -347,11 +338,8 @@ pushado pro `main`.
     - **Dados do jogo zerados** a pedido do usuário (specimens, openings,
       trades, nonce, cooldown e seeds comprometidas). Contas e convites
       mantidos.
-- **Estado do git**: `perfil` → `admin` → `pack` (um em cima do outro),
-  `pack` enviado pro `origin`, **nada mergeado no `main`** — perguntar.
-- **Pendências novas**: banimento (sugestão do Claude: fase 4, junto das
-  trocas — usuário ainda não respondeu); avatar da Pokédex (pergunta do
-  shiny ainda aberta); tile "Pack de hoje" da Home não mostra contagem.
+- **Estado do git (14/10)**: `perfil`, `admin` e `pack` mergeados no
+  `main` (fast-forward) e enviados.
 
 ===
 
