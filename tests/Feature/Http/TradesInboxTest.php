@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 use App\Actions\Trades\AcceptTrade;
 use App\Actions\Trades\MarkTradeSeen;
-use App\Models\Trade;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Inertia\Testing\AssertableInertia as Assert;
 
@@ -76,7 +76,7 @@ it('não mostra a cerimônia de troca alheia', function () {
     $trade = propose($a, $b, [owned($a)->id], [owned($b)->id]);
     app(AcceptTrade::class)->handle($trade, $b);
 
-    $this->actingAs(\App\Models\User::factory()->create())->get("/trocas?troca={$trade->id}")
+    $this->actingAs(User::factory()->create())->get("/trocas?troca={$trade->id}")
         ->assertInertia(fn (Assert $page) => $page->where('ceremony', null));
 });
 

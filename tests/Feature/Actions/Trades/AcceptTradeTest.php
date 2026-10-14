@@ -5,6 +5,8 @@ declare(strict_types=1);
 use App\Actions\Trades\AcceptTrade;
 use App\Enums\TradeCancelReason;
 use App\Enums\TradeStatus;
+use App\Models\Friendship;
+use App\Models\Species;
 use App\Models\SpecimenTransfer;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -38,7 +40,7 @@ it('troca os donos, grava o histórico e marca como aceita', function () {
 it('derruba as outras propostas abertas com os mesmos espécimes', function () {
     [$a, $b] = friends();
     $c = User::factory()->create();
-    \App\Models\Friendship::factory()->accepted()->create(['requester_id' => $a->id, 'addressee_id' => $c->id]);
+    Friendship::factory()->accepted()->create(['requester_id' => $a->id, 'addressee_id' => $c->id]);
     $mine = owned($a);
     $toB = propose($a, $b, [$mine->id], [owned($b)->id]);
     $toC = propose($a, $c, [$mine->id], [owned($c)->id]);
@@ -96,7 +98,7 @@ it('duas propostas pelo mesmo espécime: só a primeira aceita passa', function 
 it('aceita mesmo se a amizade acabou depois da proposta', function () {
     [$a, $b] = friends();
     $trade = propose($a, $b, [owned($a)->id], [owned($b)->id]);
-    \App\Models\Friendship::query()->delete();
+    Friendship::query()->delete();
 
     expect(accept($trade, $b)->status)->toBe(TradeStatus::Accepted);
 });
@@ -104,7 +106,7 @@ it('aceita mesmo se a amizade acabou depois da proposta', function () {
 it('volta o avatar pro Pikachu de quem deu o espécime do avatar', function () {
     [$a, $b] = friends();
     // Espécie fora dos 15 avatares fixos: só vale se o jogador tem o espécime.
-    $mine = owned($a, ['species_id' => \App\Models\Species::factory()->create(['id' => 9000])->id]);
+    $mine = owned($a, ['species_id' => Species::factory()->create(['id' => 9000])->id]);
     $a->forceFill(['avatar_species_id' => $mine->species_id, 'avatar_is_shiny' => false])->save();
     $trade = propose($a, $b, [$mine->id], [owned($b)->id]);
 
