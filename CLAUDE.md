@@ -236,9 +236,13 @@ pushado pro `main`.
     - Tile do Feed não abre tela (não existe feed completo; fase 5).
     - Mobile: a grade de parceiros encolhe com `zoom` abaixo de 460px; vale
       revisar num aparelho de verdade.
-    - `vp check --fix` sem caminho formata também `CLAUDE.md`, `docs/` e o
-      handoff (e quebra no HTML dele). Rodar `vp fmt resources/js` e
-      `vp lint resources/js`.
+    - PWA ainda não existe (sem `vite-plugin-pwa`, sem manifest), apesar
+      de estar no SPEC.
+    - Polimento adiado: a confirmação "Desfazer amizade com X?" fica
+      apertada no cartão (quebra em 3 linhas).
+- **CI (13/10)**: voltou a rodar no `main` (PHP 8.4, SQLite no setup,
+  PHPStan com 1G). `composer ci:check` local reproduz o CI inteiro.
+  Formatador ignora handoff, `docs/superpowers/` e `CLAUDE.md`.
 
 - **Próximo subprojeto** (com brainstorm antes de codar):
     - **C — Tela de abertura de pack** (fundo escuro): a maior. Envolve criar a
