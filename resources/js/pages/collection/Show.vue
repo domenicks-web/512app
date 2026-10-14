@@ -63,6 +63,13 @@ const percent = computed(() =>
         : 0,
 );
 
+/**
+ * O Wayfinder tipa o `{species}` pela coluna do banco: `string` no MySQL
+ * local, `number` no SQLite do CI. O id vai igual pros dois.
+ */
+const speciesKey = (id: number) =>
+    id as unknown as Parameters<typeof speciesRoute.url>[0];
+
 // Ficha: os espécimes da espécie tocada, um de cada vez.
 const sheetSpecimens = ref<PackSpecimen[]>([]);
 const sheetIndex = ref(0);
@@ -79,7 +86,7 @@ async function openSpecies(entry: SpeciesEntry) {
     loadingId.value = entry.id;
 
     try {
-        const response = await fetch(speciesRoute.url(String(entry.id)), {
+        const response = await fetch(speciesRoute.url(speciesKey(entry.id)), {
             headers: {
                 Accept: 'application/json',
                 'X-Requested-With': 'XMLHttpRequest',
