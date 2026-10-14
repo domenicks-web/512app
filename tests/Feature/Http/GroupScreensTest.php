@@ -102,16 +102,16 @@ it('separa trocas pendentes recebidas e enviadas, com os espécimes de cada lado
     $this->actingAs($user)->get('/trocas')
         ->assertInertia(fn (Assert $page) => $page
             ->component('trades/Index')
-            ->has('incoming', 1)
-            ->where('incoming.0.otherTrainer.nickname', 'Bia')
-            ->where('incoming.0.message', 'bora?')
-            ->where('incoming.0.offered.0.speciesName', 'Pikachu')
-            ->where('incoming.0.offered.0.isShiny', true)
-            ->where('incoming.0.offered.0.mintNumber', 7)
-            ->where('incoming.0.offered.0.spritePath', $pikachu->sprite_shiny_path)
-            ->has('incoming.0.requested', 1)
-            ->has('outgoing', 1)
-            ->where('outgoing.0.otherTrainer.nickname', 'Bia'));
+            ->has('received', 1)
+            ->where('received.0.other.nickname', 'Bia')
+            ->where('received.0.message', 'bora?')
+            ->where('received.0.receive.0.name', 'Pikachu')
+            ->where('received.0.receive.0.isShiny', true)
+            ->where('received.0.receive.0.mintNumber', 7)
+            ->where('received.0.receive.0.spritePath', $pikachu->sprite_shiny_path)
+            ->has('received.0.give', 1)
+            ->has('sent', 1)
+            ->where('sent.0.other.nickname', 'Bia'));
 });
 
 it('lista só os amigos, online primeiro, e separa os pedidos', function () {

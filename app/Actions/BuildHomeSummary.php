@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Actions;
 
-use App\Enums\TradeStatus;
 use App\Models\Species;
 use App\Models\Trade;
 use App\Models\User;
@@ -76,13 +75,13 @@ class BuildHomeSummary
                 : null,
             'rankingPosition' => $ownRow['position'] ?? null,
             'pendingTrades' => Trade::query()
+                ->open()
                 ->where('to_user_id', $user->id)
-                ->where('status', TradeStatus::Pending)
                 ->count(),
             'duplicates' => $this->duplicates($user),
             'sentTrades' => Trade::query()
+                ->open()
                 ->where('from_user_id', $user->id)
-                ->where('status', TradeStatus::Pending)
                 ->count(),
             'feedHighlight' => $this->feed->handle(),
             'friendsOnline' => count(array_intersect($this->presence->onlineUserIds($today), $user->friendIds())),

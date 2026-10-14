@@ -3,6 +3,7 @@
 namespace App\Http\Middleware;
 
 use App\Models\Friendship;
+use App\Models\Trade;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
 
@@ -52,6 +53,9 @@ class HandleInertiaRequests extends Middleware
             'pendingFriendRequests' => fn (): int => $request->user() === null
                 ? 0
                 : Friendship::query()->pending()->where('addressee_id', $request->user()->id)->count(),
+            'pendingTrades' => fn (): int => $request->user() === null
+                ? 0
+                : Trade::query()->open()->where('to_user_id', $request->user()->id)->count(),
             'flash' => [
                 'profile_status' => fn () => $request->session()->get('profile_status'),
             ],
