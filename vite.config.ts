@@ -56,6 +56,7 @@ export default defineConfig({
             'resources/js/components/ui/*',
             'resources/js/routes/**',
             'resources/js/wayfinder/**',
+            'design_handoff_512_onboarding/**',
         ],
         options: {
             denyWarnings: true,
@@ -72,6 +73,9 @@ export default defineConfig({
         ignorePatterns: [
             '.github/**',
             'composer.json',
+            'design_handoff_512_onboarding/**',
+            'docs/superpowers/**',
+            'CLAUDE.md',
             'resources/js/components/ui/*',
             'resources/views/mail/*',
         ],
