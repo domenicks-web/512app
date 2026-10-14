@@ -9,14 +9,15 @@ use App\Models\User;
 
 /**
  * A Pokédex do jogador: as 151 espécies em ordem de dex, cada uma com
- * quantos espécimes ele tem e quantos deles são shiny. Espécie sem
+ * quantos espécimes ele tem, quantos são shiny, o menor mint e o maior IV
+ * (o que a carta destaca). Espécie sem
  * espécime aparece como silhueta no front.
  */
 class BuildCollection
 {
     /**
      * @return array{
-     *     species: array<int, array{id: int, name: string, rarityTier: string, spritePath: string, spriteShinyPath: string, specimenCount: int, shinyCount: int}>,
+     *     species: array<int, array{id: int, name: string, rarityTier: string, spritePath: string, spriteShinyPath: string, specimenCount: int, shinyCount: int, bestMint: int|null, bestIv: int|null}>,
      *     ownedSpecies: int,
      *     totalSpecimens: int,
      * }
@@ -24,7 +25,7 @@ class BuildCollection
     public function handle(User $user): array
     {
         $owned = $user->specimens()
-            ->selectRaw('species_id, count(*) as specimen_count, sum(case when is_shiny then 1 else 0 end) as shiny_count')
+            ->selectRaw('species_id, count(*) as specimen_count, sum(case when is_shiny then 1 else 0 end) as shiny_count, min(mint_number) as best_mint, max(iv_total) as best_iv')
             ->groupBy('species_id')
             ->get()
             ->keyBy('species_id');
@@ -40,6 +41,8 @@ class BuildCollection
                 'spriteShinyPath' => $species->sprite_shiny_path,
                 'specimenCount' => (int) $owned->get($species->id)?->getAttribute('specimen_count'),
                 'shinyCount' => (int) $owned->get($species->id)?->getAttribute('shiny_count'),
+                'bestMint' => $owned->has($species->id) ? (int) $owned->get($species->id)->getAttribute('best_mint') : null,
+                'bestIv' => $owned->has($species->id) ? (int) $owned->get($species->id)->getAttribute('best_iv') : null,
             ])
             ->values()
             ->all();

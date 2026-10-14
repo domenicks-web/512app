@@ -50,10 +50,31 @@
     --animate-spin-ring-slow: spin-ring 3s linear infinite;
     --animate-caret: caret-blink 1s steps(1) infinite;
     --animate-online-pulse: online-pulse 2s ease-in-out infinite;
+    --animate-foil-sweep: foil-sweep 3.6s ease-in-out infinite;
+    --animate-foil-drift: foil-drift 8s linear infinite;
 
     @keyframes spin-ring {
         to {
             transform: rotate(360deg);
+        }
+    }
+
+    /* Reflexo que corre pela carta rara (coleção e ficha). */
+    @keyframes foil-sweep {
+        0%,
+        55% {
+            background-position: 160% 0;
+        }
+
+        100% {
+            background-position: -60% 0;
+        }
+    }
+
+    /* Moldura holográfica do shiny girando a cor. */
+    @keyframes foil-drift {
+        to {
+            background-position: 300% 0;
         }
     }
 

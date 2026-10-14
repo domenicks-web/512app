@@ -1,8 +1,17 @@
 <script setup lang="ts">
 import { nextTick, onBeforeUnmount, ref, watch } from 'vue';
 
-/** Moldura dos modais escuros da abertura (ficha e comprovante). Fecha com Esc ou clicando fora. */
-const props = defineProps<{ open: boolean; label: string; maxWidth: string }>();
+/**
+ * Moldura dos modais da abertura (ficha e comprovante): escura na tela do
+ * pack, clara (`light`) nas telas claras como a coleção. Fecha com Esc ou
+ * clicando fora.
+ */
+const props = defineProps<{
+    open: boolean;
+    label: string;
+    maxWidth: string;
+    light?: boolean;
+}>();
 const emit = defineEmits<{ close: [] }>();
 const panel = ref<HTMLElement | null>(null);
 
@@ -46,13 +55,21 @@ onBeforeUnmount(() => document.removeEventListener('keydown', onKeydown));
             role="dialog"
             aria-modal="true"
             :aria-label="label"
-            class="relative m-auto w-full overflow-hidden rounded-[26px] bg-[#1c1f26] text-white shadow-[0_40px_90px_rgba(0,0,0,0.45)] sm:rounded-[32px]"
+            class="relative m-auto w-full overflow-hidden rounded-[26px] shadow-[0_40px_90px_rgba(0,0,0,0.45)] sm:rounded-[32px]"
+            :class="
+                light ? 'bg-white text-[#2b2f36]' : 'bg-[#1c1f26] text-white'
+            "
             :style="{ maxWidth }"
         >
             <button
                 type="button"
                 aria-label="Fechar"
-                class="absolute top-3.5 right-3.5 z-[2] flex size-[38px] cursor-pointer items-center justify-center rounded-full bg-white/8 text-[#c3cad4]"
+                class="absolute top-3.5 right-3.5 z-[2] flex size-[38px] cursor-pointer items-center justify-center rounded-full"
+                :class="
+                    light
+                        ? 'bg-white/80 text-[#2b2f36] shadow-[0_2px_6px_rgba(28,32,38,0.12)]'
+                        : 'bg-white/8 text-[#c3cad4]'
+                "
                 @click="emit('close')"
             >
                 <svg

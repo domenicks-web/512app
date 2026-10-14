@@ -17,14 +17,20 @@ import {
     TIER_META,
 } from '@/lib/pack/meta';
 import { vPixelFit } from '@/lib/pack/pixelFit';
+import { rarityLook } from '@/lib/pack/rarity';
 import type { PackSpecimen } from '@/lib/pack/types';
 import PackModal from './PackModal.vue';
 
-/** Ficha do espécime: sprite até 4×, régua de tamanho, IVs, natureza, captura e hash. */
+/**
+ * Ficha do espécime: sprite até 4×, régua de tamanho, IVs, natureza,
+ * captura e hash. Escura na abertura do pack; clara (`light`) na coleção,
+ * com o painel no estilo da raridade (o mesmo da carta).
+ */
 const props = defineProps<{
     specimen: PackSpecimen | null;
     /** Mais de um espécime da espécie (coleção): "2 de 3" com setas. */
     position?: { index: number; count: number } | null;
+    light?: boolean;
 }>();
 const isMobile = useMediaQuery('(max-width: 639.98px)');
 const emit = defineEmits<{ close: []; prev: []; next: [] }>();
@@ -40,6 +46,41 @@ const caught = computed(() =>
               .replace('.', '')
         : '',
 );
+
+const look = computed(() =>
+    props.specimen
+        ? rarityLook(props.specimen.tier, props.specimen.isShiny)
+        : null,
+);
+
+/** Cores que mudam entre a ficha escura e a clara. */
+const tone = computed(() =>
+    props.light
+        ? {
+              muted: 'text-[#767c85]',
+              soft: 'text-[#5a6069]',
+              track: 'bg-[#eef0f2]',
+              band: 'bg-[#e4e7eb]',
+              knob: 'bg-[#2b2f36] shadow-[0_0_0_4px_rgba(43,47,54,0.12)]',
+              chip: 'bg-[#f4f5f6]',
+              box: 'bg-[#f4f5f6]',
+              gold: '#a87700',
+              value: '#2b2f36',
+              verified: 'bg-[#e3f1ea] text-[#2f7556]',
+          }
+        : {
+              muted: 'text-[#7d8794]',
+              soft: 'text-[#c3cad4]',
+              track: 'bg-white/8',
+              band: 'bg-white/6',
+              knob: 'bg-white shadow-[0_0_0_4px_rgba(255,255,255,0.15)]',
+              chip: 'bg-white/8',
+              box: 'bg-white/5',
+              gold: '#FFC94D',
+              value: '#ffffff',
+              verified: 'bg-[rgba(63,143,107,0.2)] text-[#6fd0a2]',
+          },
+);
 </script>
 
 <template>
@@ -47,13 +88,33 @@ const caught = computed(() =>
         :open="specimen !== null"
         :label="specimen ? `Ficha de ${specimen.name}` : 'Ficha'"
         max-width="780px"
+        :light="light"
         @close="emit('close')"
     >
-        <div v-if="specimen" class="flex flex-wrap">
+        <div v-if="specimen && look" class="flex flex-wrap">
             <div
                 class="relative flex min-h-[190px] flex-[1_1_300px] items-center justify-center overflow-hidden sm:min-h-[340px]"
-                :style="{ background: panelBackground(specimen) }"
+                :style="{
+                    background: light ? look.panel : panelBackground(specimen),
+                }"
             >
+                <div
+                    v-if="light"
+                    class="absolute inset-x-0 top-0 h-1"
+                    :class="
+                        specimen.isShiny ? 'motion-safe:animate-foil-drift' : ''
+                    "
+                    :style="{
+                        background: look.frame,
+                        backgroundSize: specimen.isShiny
+                            ? '300% 100%'
+                            : undefined,
+                    }"
+                />
+                <div
+                    v-if="light"
+                    class="absolute bottom-[18%] left-1/2 h-4 w-40 -translate-x-1/2 rounded-[50%] bg-black/12 blur-[5px]"
+                />
                 <img
                     v-pixel-fit="{
                         cap: isMobile ? 3 : 4,
@@ -67,12 +128,17 @@ const caught = computed(() =>
                     class="relative block [image-rendering:pixelated]"
                 />
                 <div
+                    v-if="!light"
                     class="pointer-events-none absolute inset-0 bg-[length:240%_240%] mix-blend-screen"
                     :style="{
                         backgroundImage: holoBackground(specimen),
                         backgroundPosition: holoPosition(specimen),
                         opacity: specimen.isShiny ? 0.45 : 0.4,
                     }"
+                />
+                <div
+                    v-else-if="look.sheen"
+                    class="motion-safe:animate-foil-sweep pointer-events-none absolute inset-0 bg-[linear-gradient(115deg,rgba(255,255,255,0)_38%,rgba(255,255,255,0.7)_50%,rgba(255,255,255,0)_62%)] bg-[length:250%_100%] bg-[position:160%_0] mix-blend-overlay"
                 />
                 <div
                     v-if="position && position.count > 1"
@@ -123,6 +189,7 @@ const caught = computed(() =>
                     </button>
                 </div>
             </div>
+
             <div
                 class="flex min-w-0 flex-[1_1_360px] flex-col gap-4 px-5 pt-5 pb-5 sm:gap-[22px] sm:px-7 sm:pt-[30px] sm:pb-7"
             >
@@ -133,17 +200,25 @@ const caught = computed(() =>
                         >
                             {{ specimen.name }}
                         </div>
-                        <div class="text-sm font-semibold text-[#7d8794]">
+                        <div class="text-sm font-semibold" :class="tone.muted">
                             #{{ specimen.dex }}
                         </div>
                     </div>
                     <div class="flex flex-wrap gap-1.5">
                         <span
                             class="flex h-[26px] items-center rounded-full px-2.5 text-xs font-extrabold"
-                            :style="{
-                                background: TIER_META[specimen.tier].color,
-                                color: TIER_META[specimen.tier].fg,
-                            }"
+                            :style="
+                                light
+                                    ? {
+                                          background: look.badge,
+                                          color: look.badgeInk,
+                                      }
+                                    : {
+                                          background:
+                                              TIER_META[specimen.tier].color,
+                                          color: TIER_META[specimen.tier].fg,
+                                      }
+                            "
                             >{{ TIER_META[specimen.tier].label }}</span
                         >
                         <span
@@ -152,11 +227,14 @@ const caught = computed(() =>
                             >Shiny</span
                         >
                         <span
-                            class="flex h-[26px] items-center rounded-full bg-white/8 px-2.5 font-mono text-xs font-extrabold"
+                            class="flex h-[26px] items-center rounded-full px-2.5 font-mono text-xs font-extrabold"
+                            :class="tone.chip"
                             :style="{
                                 color: isGoldMint(specimen)
-                                    ? '#FFC94D'
-                                    : '#c3cad4',
+                                    ? tone.gold
+                                    : light
+                                      ? '#5a6069'
+                                      : '#c3cad4',
                             }"
                             >Nº {{ pad(specimen.mint, 4) }}</span
                         >
@@ -167,26 +245,29 @@ const caught = computed(() =>
                     <div
                         class="flex justify-between gap-2.5 text-xs font-extrabold"
                     >
-                        <span class="text-[#c3cad4]"
+                        <span :class="tone.soft"
                             >Tamanho {{ sizeLabel(specimen) }}</span
                         >
-                        <span class="font-semibold text-[#7d8794]">{{
+                        <span class="font-semibold" :class="tone.muted">{{
                             sizeText(specimen)
                         }}</span>
                     </div>
-                    <div class="relative h-2 rounded-full bg-white/8">
+                    <div class="relative h-2 rounded-full" :class="tone.track">
                         <div
-                            class="absolute top-0 right-[20%] bottom-0 left-[20%] bg-white/6"
+                            class="absolute top-0 right-[20%] bottom-0 left-[20%]"
+                            :class="tone.band"
                         />
                         <div
-                            class="absolute top-1/2 -mt-2 -ml-2 size-4 rounded-full bg-white shadow-[0_0_0_4px_rgba(255,255,255,0.15)]"
+                            class="absolute top-1/2 -mt-2 -ml-2 size-4 rounded-full"
+                            :class="tone.knob"
                             :style="{
                                 left: `${(specimen.sizeRoll * 100).toFixed(1)}%`,
                             }"
                         />
                     </div>
                     <div
-                        class="relative h-3.5 text-[10px] font-extrabold text-[#7d8794]"
+                        class="relative h-3.5 text-[10px] font-extrabold"
+                        :class="tone.muted"
                     >
                         <span class="absolute left-0">XXS</span
                         ><span class="absolute left-[11%] -translate-x-1/2"
@@ -201,7 +282,7 @@ const caught = computed(() =>
 
                 <div class="flex flex-col gap-1.5 sm:gap-[9px]">
                     <div class="flex justify-between text-xs font-extrabold">
-                        <span class="text-[#c3cad4]">IVs</span
+                        <span :class="tone.soft">IVs</span
                         ><span>{{ specimen.ivTotal }} / {{ IV_MAX }}</span>
                     </div>
                     <div
@@ -209,11 +290,15 @@ const caught = computed(() =>
                         :key="k"
                         class="grid grid-cols-[34px_minmax(0,1fr)_22px] items-center gap-2.5"
                     >
-                        <div class="text-[11px] font-extrabold text-[#7d8794]">
+                        <div
+                            class="text-[11px] font-extrabold"
+                            :class="tone.muted"
+                        >
                             {{ STATS[k] }}
                         </div>
                         <div
-                            class="h-1.5 overflow-hidden rounded-full bg-white/8"
+                            class="h-1.5 overflow-hidden rounded-full"
+                            :class="tone.track"
                         >
                             <div
                                 class="h-full rounded-full"
@@ -228,7 +313,7 @@ const caught = computed(() =>
                         <div
                             class="text-right text-xs font-extrabold"
                             :style="{
-                                color: value === 31 ? '#FFC94D' : '#ffffff',
+                                color: value === 31 ? tone.gold : tone.value,
                             }"
                         >
                             {{ value }}
@@ -238,7 +323,10 @@ const caught = computed(() =>
 
                 <div class="grid grid-cols-2 gap-3.5">
                     <div class="flex flex-col gap-[5px]">
-                        <div class="text-[11px] font-extrabold text-[#7d8794]">
+                        <div
+                            class="text-[11px] font-extrabold"
+                            :class="tone.muted"
+                        >
                             Natureza
                         </div>
                         <div
@@ -255,7 +343,10 @@ const caught = computed(() =>
                         </div>
                     </div>
                     <div class="flex flex-col gap-[5px]">
-                        <div class="text-[11px] font-extrabold text-[#7d8794]">
+                        <div
+                            class="text-[11px] font-extrabold"
+                            :class="tone.muted"
+                        >
                             Capturado
                         </div>
                         <div class="text-sm font-extrabold">{{ caught }}</div>
@@ -263,20 +354,26 @@ const caught = computed(() =>
                 </div>
 
                 <div
-                    class="flex items-center justify-between gap-2.5 rounded-2xl bg-white/5 px-3.5 py-3"
+                    class="flex items-center justify-between gap-2.5 rounded-2xl px-3.5 py-3"
+                    :class="tone.box"
                 >
                     <div class="flex min-w-0 flex-col gap-[3px]">
-                        <div class="text-[11px] font-extrabold text-[#7d8794]">
+                        <div
+                            class="text-[11px] font-extrabold"
+                            :class="tone.muted"
+                        >
                             Hash do espécime
                         </div>
                         <div
-                            class="font-mono text-sm font-extrabold text-[#c3cad4]"
+                            class="font-mono text-sm font-extrabold"
+                            :class="tone.soft"
                         >
                             {{ shortHash(specimen.hash) }}
                         </div>
                     </div>
                     <span
-                        class="flex h-[26px] items-center gap-1.5 rounded-full bg-[rgba(63,143,107,0.2)] px-2.5 text-xs font-extrabold whitespace-nowrap text-[#6fd0a2]"
+                        class="flex h-[26px] items-center gap-1.5 rounded-full px-2.5 text-xs font-extrabold whitespace-nowrap"
+                        :class="tone.verified"
                     >
                         <svg
                             width="11"

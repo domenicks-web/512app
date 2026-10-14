@@ -1,11 +1,10 @@
 <script setup lang="ts">
-import FittedSprite from '@/components/FittedSprite.vue';
 import { computed, ref } from 'vue';
+import CollectionCard from '@/components/collection/CollectionCard.vue';
 import GroupScreen from '@/components/group/GroupScreen.vue';
 import SpecimenSheet from '@/components/pack/SpecimenSheet.vue';
 import EntryLayout from '@/layouts/EntryLayout.vue';
-import { CYAN, rgba, TIER_META } from '@/lib/pack/meta';
-import type { PackSpecimen, Tier } from '@/lib/pack/types';
+import type { PackSpecimen } from '@/lib/pack/types';
 import { species as speciesRoute } from '@/routes/collection';
 
 defineOptions({ layout: EntryLayout });
@@ -24,6 +23,8 @@ type SpeciesEntry = {
     spriteShinyPath: string;
     specimenCount: number;
     shinyCount: number;
+    bestMint: number | null;
+    bestIv: number | null;
 };
 
 const props = defineProps<{
@@ -61,64 +62,6 @@ const percent = computed(() =>
         ? Math.round((props.ownedSpecies / props.species.length) * 100)
         : 0,
 );
-
-const dexNumber = (id: number) => `#${String(id).padStart(3, '0')}`;
-
-/** Intensidade do brilho da raridade no fundo da carta. */
-const TIER_GLOW: Record<Tier, number> = {
-    comum: 0.14,
-    incomum: 0.24,
-    raro: 0.3,
-    lendario: 0.4,
-};
-/** Anel da carta: fino nas comuns, forte (com brilho) nas raras. */
-const TIER_RING: Record<Tier, number> = {
-    comum: 0.35,
-    incomum: 0.75,
-    raro: 1,
-    lendario: 1,
-};
-
-function cardStyle(entry: SpeciesEntry): Record<string, string> {
-    if (entry.specimenCount === 0) {
-        return {};
-    }
-
-    const tier = entry.rarityTier as Tier;
-    const shiny = entry.shinyCount > 0;
-    const glow = shiny ? CYAN : TIER_META[tier].glow;
-    const ringColor = shiny
-        ? CYAN
-        : tier === 'comum'
-          ? '#9aa0a8'
-          : TIER_META[tier].color;
-    const strong = shiny || tier === 'raro' || tier === 'lendario';
-    const lift = strong
-        ? `0 10px 24px ${rgba(ringColor, 0.3)}`
-        : '0 8px 18px rgba(28,32,38,0.07)';
-
-    return {
-        background: `radial-gradient(80% 65% at 50% 42%, ${rgba(glow, TIER_GLOW[tier] ?? 0.14)}, ${rgba(glow, 0)} 100%), #ffffff`,
-        boxShadow: `0 0 0 2px ${rgba(ringColor, shiny ? 1 : (TIER_RING[tier] ?? 0.35))}, ${lift}`,
-    };
-}
-
-/** Rótulo da raridade embaixo do nome, na cor do tier (legível no branco). */
-function tierLabel(entry: SpeciesEntry): { text: string; color: string } {
-    if (entry.shinyCount > 0) {
-        return { text: 'Shiny', color: '#1fa9b8' };
-    }
-
-    const tier = entry.rarityTier as Tier;
-    const color =
-        tier === 'comum'
-            ? '#8a9099'
-            : tier === 'lendario'
-              ? '#c99a1c'
-              : TIER_META[tier].color;
-
-    return { text: TIER_META[tier].label, color };
-}
 
 // Ficha: os espécimes da espécie tocada, um de cada vez.
 const sheetSpecimens = ref<PackSpecimen[]>([]);
@@ -214,76 +157,18 @@ function step(delta: number) {
 
             <ul
                 data-enter
-                class="grid grid-cols-[repeat(auto-fill,minmax(96px,1fr))] gap-3"
+                class="grid grid-cols-[repeat(auto-fill,minmax(108px,1fr))] gap-3 sm:grid-cols-[repeat(auto-fill,minmax(128px,1fr))] sm:gap-4"
             >
                 <li
                     v-for="entry in visibleSpecies"
                     :key="entry.id"
                     class="flex"
                 >
-                    <component
-                        :is="entry.specimenCount > 0 ? 'button' : 'div'"
-                        :type="entry.specimenCount > 0 ? 'button' : undefined"
-                        class="relative flex w-full flex-col items-center rounded-[18px] px-2 pt-2 pb-3 transition-transform"
-                        :class="[
-                            entry.specimenCount > 0
-                                ? 'cursor-pointer hover:-translate-y-0.5 active:scale-[0.97]'
-                                : 'bg-white/45',
-                            loadingId === entry.id ? 'opacity-60' : '',
-                        ]"
-                        :style="cardStyle(entry)"
-                        :aria-label="
-                            entry.specimenCount > 0
-                                ? `Ver ${entry.name}`
-                                : undefined
-                        "
-                        @click="openSpecies(entry)"
-                    >
-                        <span
-                            class="text-faint absolute top-2 left-2.5 text-[11px] font-black tracking-[0.04em]"
-                            >{{ dexNumber(entry.id) }}</span
-                        >
-                        <span
-                            v-if="entry.shinyCount > 0"
-                            class="text-shiny absolute top-1.5 right-1.5 rounded-full bg-[rgba(77,217,232,0.14)] px-1.5 py-0.5 text-[10px] font-black tracking-[0.06em] uppercase"
-                            :title="`${entry.shinyCount} shiny`"
-                            >Shiny</span
-                        >
-                        <FittedSprite
-                            :src="`/storage/${entry.shinyCount > 0 ? entry.spriteShinyPath : entry.spritePath}`"
-                            :alt="entry.specimenCount > 0 ? entry.name : ''"
-                            :size="72"
-                            :padding="6"
-                            class="mt-3"
-                            :class="
-                                entry.specimenCount > 0
-                                    ? ''
-                                    : 'opacity-[0.13] brightness-0'
-                            "
-                        />
-                        <span
-                            class="w-full truncate text-center text-[12.5px] font-extrabold"
-                            :class="
-                                entry.specimenCount > 0
-                                    ? 'text-ink'
-                                    : 'text-placeholder'
-                            "
-                            >{{
-                                entry.specimenCount > 0 ? entry.name : '???'
-                            }}</span
-                        >
-                        <span
-                            v-if="entry.specimenCount > 0"
-                            class="mt-1 text-[10px] font-black tracking-[0.08em] uppercase"
-                            :style="{ color: tierLabel(entry).color }"
-                            >{{ tierLabel(entry).text }}</span
-                        >
-                        <span
-                            v-if="entry.specimenCount > 1"
-                            class="bg-ink absolute -right-1 -bottom-1 rounded-full px-2 py-0.5 text-[11px] font-black text-white"
-                            >×{{ entry.specimenCount }}</span
-                        >
-                    </component>
+                    <CollectionCard
+                        :entry="entry"
+                        :loading="loadingId === entry.id"
+                        @open="openSpecies(entry)"
+                    />
                 </li>
             </ul>
 
@@ -302,6 +187,7 @@ function step(delta: number) {
         <SpecimenSheet
             :specimen="sheetSpecimen"
             :position="{ index: sheetIndex, count: sheetSpecimens.length }"
+            light
             @close="sheetSpecimens = []"
             @prev="step(-1)"
             @next="step(1)"
