@@ -179,4 +179,5 @@ Use os **ícones de Pokémon que já existem no projeto**. O jogo é sobre Poké
 - `512 Experiência.dc.html`: protótipo completo. A lógica de animação, com todos os timings, está na classe `Component`: `runLoading`, `flight`, `enterLogin`, `flipPw`, `loginGo`, `collapseToPill`/`morphFromPill`, `pick`, `finishOnboarding`, `enterHome`, `placeRing`. O campo de pontos está em `tick`.
 - `support.js`: runtime necessário só para abrir o protótipo. Não vai para produção.
 - `SPEC.md`: regras do produto.
+- `ABERTURA.md` + `512 Abertura.dc.html`: abertura do pack. Atenção às 3 mudanças obrigatórias no topo do ABERTURA.md.
 - `ADMIN.md` + `512 Admin.dc.html`: painel admin (convites e jogadores), com schema extra, comandos Artisan, rotas e telas.

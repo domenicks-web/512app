@@ -1,0 +1,905 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@600;800;900&family=JetBrains+Mono:wght@800&display=swap" rel="stylesheet">
+<style>
+  html, body { margin: 0; height: 100%; background: #1c1f26; color: #ffffff; -webkit-font-smoothing: antialiased; overflow: hidden; }
+  a { color: #f24d4d; text-decoration: none; }
+  a:hover { color: #ff7070; }
+  button { font-family: inherit; }
+  img { -webkit-user-drag: none; }
+</style>
+</helmet>
+
+<div ref="{{ root }}" onPointerUp="{{ release }}" onPointerCancel="{{ release }}" onClick="{{ tap }}" style="position: fixed; inset: 0; overflow: hidden; background: #1c1f26; font-family: 'Inter', sans-serif; color: #ffffff; user-select: none; -webkit-user-select: none; -webkit-tap-highlight-color: transparent;">
+
+  <div data-k="glowA" style="position: absolute; inset: 0; pointer-events: none; background: radial-gradient(70% 45% at 50% 46%, rgba(242,77,77,0.16), rgba(242,77,77,0) 100%);"></div>
+  <div data-k="glowB" style="position: absolute; inset: 0; pointer-events: none; opacity: 0;"></div>
+  <div data-k="chargeGlow" style="position: absolute; inset: 0; pointer-events: none; opacity: 0; background: radial-gradient(38% 30% at 50% 47%, rgba(242,77,77,0.42), rgba(242,77,77,0) 100%);"></div>
+
+  <div data-k="stage" style="position: absolute; inset: 0;">
+
+    <div data-k="idle" style="position: absolute; inset: 0; box-sizing: border-box; padding: 84px 20px 6vh; display: flex; flex-direction: column; align-items: center; justify-content: space-between; gap: 20px;">
+      <div style="display: flex; flex-direction: column; align-items: center; gap: 10px; text-align: center;">
+        <div style="font-size: 11px; font-weight: 800; letter-spacing: 0.2em; text-transform: uppercase; color: #7d8794;">Pack de hoje · {{ today }}</div>
+        <div style="font-weight: 900; font-size: clamp(30px, 5vw, 44px); letter-spacing: -0.035em; line-height: 1.05;">Cinco espécimes</div>
+        <div style="font-weight: 600; font-size: 14px; color: #7d8794;">O último é incomum ou melhor</div>
+      </div>
+
+      <div style="flex: 1 1 auto; min-height: 0; width: 100%; display: flex; align-items: center; justify-content: center;"><div style="position: relative; width: min(210px, 50vw, 30vh); aspect-ratio: 1;">
+        <div data-k="ballWrap" onPointerDown="{{ press }}" style="position: absolute; inset: 0; cursor: pointer; touch-action: none;">
+          <div data-k="ballShadow" style="position: absolute; left: 16%; right: 16%; bottom: -17%; height: 9%; border-radius: 50%; background: rgba(0,0,0,0.5); filter: blur(9px);"></div>
+          <svg viewBox="0 0 100 100" style="position: absolute; inset: -17%; width: 134%; height: 134%; overflow: visible; transform: rotate(-90deg); pointer-events: none;"><circle cx="50" cy="50" r="48" fill="none" stroke="rgba(255,255,255,0.07)" stroke-width="1.2"></circle><circle data-k="ringFill" cx="50" cy="50" r="48" fill="none" stroke="#f24d4d" stroke-width="1.8" stroke-linecap="round" stroke-dasharray="301.6" stroke-dashoffset="301.6"></circle></svg>
+          <div data-k="ballShake" style="position: absolute; inset: 0; transform-origin: 50% 85%;">
+            <div data-k="bTop" style="position: absolute; left: 0; top: 0; width: 100%; height: 50%; background: #f24d4d; border-radius: 999px 999px 0 0; overflow: hidden; transform-origin: 10% 100%;">
+              <div style="position: absolute; inset: 0; background: radial-gradient(140% 120% at 72% 115%, rgba(110,10,20,0.28), rgba(110,10,20,0) 60%);"></div>
+              <div style="position: absolute; left: 18%; top: 26%; width: 25%; height: 15%; border-radius: 999px; background: #ffd9d9; opacity: 0.75; transform: rotate(-30deg);"></div>
+            </div>
+            <div data-k="bBot" style="position: absolute; left: 0; top: 50%; width: 100%; height: 50%; background: #f4f5f7; border-radius: 0 0 999px 999px; transform-origin: 10% 0%; z-index: 2;">
+              <div style="position: absolute; inset: 0; border-radius: inherit; background: radial-gradient(130% 120% at 60% 125%, rgba(28,31,38,0.26), rgba(28,31,38,0) 62%);"></div>
+              <div style="position: absolute; left: 0; right: 0; top: -8%; height: 16%; background: #434a53;"></div>
+              <div style="position: absolute; left: 50%; top: 0; width: 34%; aspect-ratio: 1; transform: translate(-50%, -50%); border-radius: 999px; background: #434a53; display: flex; align-items: center; justify-content: center;">
+                <div data-k="bBtn" style="width: 56%; height: 56%; border-radius: 999px; background: #e4e7eb; box-shadow: inset 0 -3px 0 rgba(0,0,0,0.12);"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div></div>
+
+      <div style="display: flex; flex-direction: column; align-items: center; gap: 16px;">
+        <div style="font-weight: 800; font-size: 15px; color: #c3cad4;">{{ hint }}</div>
+        <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 8px;">
+          <div title="sha256(server_seed), gravado antes do sorteio" style="height: 32px; padding: 0 12px; border-radius: 999px; background: rgba(255,255,255,0.06); display: flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 600; color: #7d8794;">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><rect x="5" y="11" width="14" height="10" rx="3"></rect><path d="M8 11V8a4 4 0 0 1 8 0v3"></path></svg>
+            Hash do servidor
+            <span style="font-family: 'JetBrains Mono', monospace; font-weight: 800; color: #c3cad4;">{{ hashShort }}</span>
+          </div>
+          <label onPointerDown="{{ stop }}" onClick="{{ stop }}" title="Você pode trocar sua client seed antes de abrir" style="height: 32px; padding: 0 6px 0 12px; border-radius: 999px; background: rgba(255,255,255,0.06); display: flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 600; color: #7d8794; cursor: text;">
+            Client seed
+            <input value="{{ clientSeed }}" onChange="{{ onSeed }}" onBlur="{{ endSeed }}" onKeyDown="{{ seedKey }}" maxlength="24" spellcheck="false" size="{{ seedSize }}" style="height: 26px; border: 0; padding: 0 6px; border-radius: 999px; background: transparent; color: #c3cad4; font-family: 'JetBrains Mono', monospace; font-weight: 800; font-size: 12px; outline: none;">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 6px;"><path d="M4 20h4L19 9l-4-4L4 16z"></path></svg>
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <div data-k="slots" style="position: absolute; left: 50%; bottom: 10vh; width: min(640px, 94vw); transform: translateX(-50%); display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 8px; opacity: 0;">
+      <sc-for list="{{ slots }}" as="s" hint-placeholder-count="5">
+        <div data-slot="{{ s.i }}" style="position: relative; display: flex; flex-direction: column; align-items: center; gap: 12px; min-width: 0;">
+          <div data-k="sbox" style="position: relative; width: 100%; height: 112px; display: flex; align-items: flex-end; justify-content: center;">
+            <div style="position: absolute; left: 24%; right: 24%; bottom: -5px; height: 10px; border-radius: 50%; background: rgba(0,0,0,0.42); filter: blur(4px);"></div>
+            <img data-k="sspr" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-src="{{ s.src }}" data-fb="{{ s.fb }}" data-cap="2" data-mh="106" alt="{{ s.name }}" draggable="false" style="position: relative; display: block; image-rendering: pixelated; opacity: 0; transform-origin: 50% 100%;">
+            <div data-k="mball" style="position: absolute; left: 50%; bottom: 0; width: 46px; height: 46px; margin-left: -23px; opacity: 0;">
+              <div data-k="mShake" style="position: absolute; inset: 0; transform-origin: 50% 90%;">
+                <div data-k="mTop" style="position: absolute; left: 0; top: 0; width: 100%; height: 50%; background: #f24d4d; border-radius: 999px 999px 0 0; overflow: hidden; transform-origin: 10% 100%;">
+                  <div style="position: absolute; left: 18%; top: 28%; width: 25%; height: 16%; border-radius: 999px; background: #ffd9d9; opacity: 0.75; transform: rotate(-30deg);"></div>
+                </div>
+                <div style="position: absolute; left: 0; top: 50%; width: 100%; height: 50%; background: #f4f5f7; border-radius: 0 0 999px 999px; z-index: 2;">
+                  <div style="position: absolute; left: 0; right: 0; top: -9%; height: 18%; background: #434a53;"></div>
+                  <div style="position: absolute; left: 50%; top: 0; width: 36%; aspect-ratio: 1; transform: translate(-50%, -50%); border-radius: 999px; background: #434a53; display: flex; align-items: center; justify-content: center;"><div style="width: 52%; height: 52%; border-radius: 999px; background: #e4e7eb;"></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div data-k="slabel" style="opacity: 0; display: flex; flex-direction: column; align-items: center; gap: 6px; max-width: 100%;">
+            <div style="font-weight: 800; font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%;">{{ s.name }}</div>
+            <div style="width: 22px; height: 4px; border-radius: 999px; background: {{ s.bar }};"></div>
+          </div>
+        </div>
+      </sc-for>
+    </div>
+
+    <div data-k="dark" style="position: absolute; inset: 0; background: #000000; opacity: 0; pointer-events: none;"></div>
+
+    <div data-k="cer" style="position: absolute; inset: 0; pointer-events: none;">
+      <div data-k="rays" style="position: absolute; left: 50%; top: calc(48% - 90px); width: 1200px; height: 1200px; margin: -600px 0 0 -600px; border-radius: 50%; opacity: 0; background: repeating-conic-gradient(from 0deg, rgba(255,201,77,0.2) 0deg 5deg, rgba(255,201,77,0) 5deg 15deg);"></div>
+      <div data-k="beam" style="position: absolute; left: 50%; top: 0; width: 300px; margin-left: -150px; height: calc(48% + 40px); opacity: 0; transform-origin: 50% 80%;"></div>
+      <div data-k="halo" style="position: absolute; left: 50%; top: calc(48% - 90px); width: 520px; height: 520px; margin: -260px 0 0 -260px; border-radius: 50%; opacity: 0;"></div>
+
+      <div data-k="cball" style="position: absolute; left: 50%; top: calc(48% - 70px); width: 132px; height: 132px; margin: -66px 0 0 -66px; opacity: 0;">
+        <div data-k="cShake" style="position: absolute; inset: 0; transform-origin: 50% 90%;">
+          <div data-k="cTop" style="position: absolute; left: 0; top: 0; width: 100%; height: 50%; background: #f24d4d; border-radius: 999px 999px 0 0; overflow: hidden; transform-origin: 10% 100%;">
+            <div style="position: absolute; inset: 0; background: radial-gradient(140% 120% at 72% 115%, rgba(110,10,20,0.28), rgba(110,10,20,0) 60%);"></div>
+            <div style="position: absolute; left: 18%; top: 26%; width: 25%; height: 15%; border-radius: 999px; background: #ffd9d9; opacity: 0.75; transform: rotate(-30deg);"></div>
+          </div>
+          <div style="position: absolute; left: 0; top: 50%; width: 100%; height: 50%; background: #f4f5f7; border-radius: 0 0 999px 999px; z-index: 2;">
+            <div style="position: absolute; inset: 0; border-radius: inherit; background: radial-gradient(130% 120% at 60% 125%, rgba(28,31,38,0.26), rgba(28,31,38,0) 62%);"></div>
+            <div style="position: absolute; left: 0; right: 0; top: -8%; height: 16%; background: #434a53;"></div>
+            <div style="position: absolute; left: 50%; top: 0; width: 34%; aspect-ratio: 1; transform: translate(-50%, -50%); border-radius: 999px; background: #434a53; display: flex; align-items: center; justify-content: center;"><div data-k="cBtn" style="width: 56%; height: 56%; border-radius: 999px; background: #e4e7eb;"></div></div>
+          </div>
+        </div>
+      </div>
+
+      <div style="position: absolute; left: 0; right: 0; top: 48%; height: 0; display: flex; align-items: flex-end; justify-content: center;">
+        <div data-k="cspr" style="position: relative; opacity: 0; transform-origin: 50% 100%;">
+          <div data-k="cfloat" style="position: relative;">
+            <img data-k="cimg" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-src="{{ cerSrc }}" data-fb="{{ cerFb }}" data-cap="4" data-min="2" data-mh="300" data-mw="340" data-cer="1" alt="" draggable="false" style="display: block; image-rendering: pixelated;">
+            <div data-k="cshine" style="position: absolute; inset: 0; pointer-events: none; opacity: 0; background-image: linear-gradient(110deg, rgba(255,255,255,0) 42%, rgba(255,255,255,0.95) 50%, rgba(255,255,255,0) 58%); background-size: 320% 100%; background-position: 100% 0; -webkit-mask-size: 100% 100%; mask-size: 100% 100%; -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat;"></div>
+          </div>
+        </div>
+      </div>
+
+      <div data-k="cinfo" style="position: absolute; left: 0; right: 0; top: calc(48% + 26px); padding: 0 20px; display: flex; flex-direction: column; align-items: center; gap: 14px; text-align: center;">
+        <div data-k="cname" style="display: flex; flex-wrap: wrap; justify-content: center; font-weight: 900; font-size: clamp(42px, 8vw, 76px); letter-spacing: -0.035em; line-height: 1;">
+          <sc-for list="{{ cerLetters }}" as="l" hint-placeholder-count="0">
+            <span data-l="1" style="display: inline-block; opacity: 0; white-space: pre;">{{ l.c }}</span>
+          </sc-for>
+        </div>
+        <div data-k="cchips" style="opacity: 0; display: flex; flex-wrap: nowrap; justify-content: center; gap: 8px; white-space: nowrap;">
+          <span style="height: 28px; padding: 0 12px; border-radius: 999px; background: {{ cerTierBg }}; color: {{ cerTierFg }}; font-size: 12px; font-weight: 800; display: flex; align-items: center;">{{ cerTier }}</span>
+          <span style="height: 28px; padding: 0 12px; border-radius: 999px; background: #4dd9e8; color: #1c1f26; font-size: 12px; font-weight: 800; display: {{ cerShinyDisp }}; align-items: center; gap: 6px;"><svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M12 1l2.6 8.4L23 12l-8.4 2.6L12 23l-2.6-8.4L1 12l8.4-2.6z"></path></svg>Shiny</span>
+          <span style="height: 28px; padding: 0 12px; border-radius: 999px; background: {{ cerMintBg }}; color: {{ cerMintFg }}; font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 800; display: flex; align-items: center;">Nº {{ cerMint }}</span>
+        </div>
+        <div data-k="cmeta" style="opacity: 0; font-weight: 600; font-size: 14px; line-height: 1.5; color: #c3cad4; max-width: 520px; text-wrap: pretty;">{{ cerMeta }}</div>
+        <div data-k="cnext" style="opacity: 0; margin-top: 8px; font-weight: 800; font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase; color: #7d8794;">Toque para continuar</div>
+      </div>
+    </div>
+  </div>
+
+  <canvas data-k="fx" style="position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none;"></canvas>
+  <div data-k="black" style="position: absolute; inset: 0; background: #000000; opacity: 0; pointer-events: none;"></div>
+  <div data-k="flash" style="position: absolute; inset: 0; background: #ffffff; opacity: 0; pointer-events: none;"></div>
+
+  <div data-k="sum" style="position: absolute; inset: 0; z-index: 10; background: #eff0f2; color: #2b2f36; overflow-y: auto; overflow-x: hidden; visibility: hidden; clip-path: circle(0% at 50% 85%);">
+    <div style="max-width: 1120px; margin: 0 auto; padding: 92px 24px 56px; box-sizing: border-box; display: flex; flex-direction: column; gap: 30px;">
+      <div data-k="sumHead" style="display: flex; flex-direction: column; gap: 8px;">
+        <div style="font-size: 11px; font-weight: 800; letter-spacing: 0.2em; text-transform: uppercase; color: #767c85;">Pack de hoje · aberto às {{ openedAt }}</div>
+        <div style="font-weight: 900; font-size: clamp(30px, 5vw, 48px); letter-spacing: -0.035em; line-height: 1.04; text-wrap: balance;">{{ sumTitle }}</div>
+        <div style="font-weight: 600; font-size: 15px; color: #6c737c;">{{ sumSub }}</div>
+      </div>
+
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(176px, 1fr)); gap: 16px;">
+        <sc-for list="{{ cards }}" as="c" hint-placeholder-count="5">
+          <div data-card="{{ c.i }}" onMouseMove="{{ c.move }}" onMouseLeave="{{ c.leave }}" onClick="{{ c.open }}" style="opacity: 0; background: #ffffff; border-radius: 28px; padding: 10px; box-shadow: 0 2px 3px rgba(28,32,38,0.05), 0 22px 48px rgba(43,47,54,0.14); cursor: pointer; display: flex; flex-direction: column; gap: 12px; transition: transform 0.18s ease-out;">
+            <div style="position: relative; height: 178px; border-radius: 20px; overflow: hidden; background: {{ c.panel }}; box-shadow: {{ c.ring }}; display: flex; align-items: center; justify-content: center;">
+              <img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-src="{{ c.src }}" data-fb="{{ c.fb }}" data-cap="3" data-mh="140" alt="{{ c.name }}" draggable="false" style="display: block; image-rendering: pixelated; position: relative;">
+              <div data-holo="1" style="position: absolute; inset: 0; pointer-events: none; background-image: {{ c.holo }}; background-size: 240% 240%; background-position: {{ c.holoPos }}; mix-blend-mode: screen; opacity: {{ c.holoOp }}; transition: background-position 0.18s ease-out;"></div>
+              <sc-if value="{{ c.shiny }}" hint-placeholder-val="{{ false }}">
+                <div style="position: absolute; left: 10px; top: 10px; height: 24px; padding: 0 9px; border-radius: 999px; background: #4dd9e8; color: #1c1f26; font-size: 11px; font-weight: 800; display: flex; align-items: center; gap: 5px;"><svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><path d="M12 1l2.6 8.4L23 12l-8.4 2.6L12 23l-2.6-8.4L1 12l8.4-2.6z"></path></svg>Shiny</div>
+              </sc-if>
+              <div style="position: absolute; right: 12px; top: 13px; font-family: 'JetBrains Mono', monospace; font-weight: 800; font-size: 11px; color: {{ c.mintFg }};">Nº {{ c.mint }}</div>
+            </div>
+            <div style="padding: 0 6px 6px; display: flex; flex-direction: column; gap: 10px;">
+              <div style="display: flex; align-items: baseline; justify-content: space-between; gap: 8px;">
+                <div style="font-weight: 900; font-size: 18px; letter-spacing: -0.02em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ c.name }}</div>
+                <div style="font-weight: 600; font-size: 12px; color: #8a9099;">#{{ c.dex }}</div>
+              </div>
+              <div style="display: flex; flex-wrap: wrap; gap: 6px;">
+                <span style="height: 24px; padding: 0 9px; border-radius: 999px; background: {{ c.tierBg }}; color: {{ c.tierFg }}; font-size: 11px; font-weight: 800; display: flex; align-items: center;">{{ c.tier }}</span>
+                <span style="height: 24px; padding: 0 9px; border-radius: 999px; background: #eff0f2; color: #2b2f36; font-size: 11px; font-weight: 800; display: flex; align-items: center;">{{ c.size }}</span>
+                <span style="height: 24px; padding: 0 9px; border-radius: 999px; background: #eff0f2; color: #2b2f36; font-size: 11px; font-weight: 800; display: flex; align-items: center; gap: 6px;"><span style="width: 7px; height: 7px; border-radius: 999px; background: {{ c.natureCol }};"></span>{{ c.nature }}</span>
+              </div>
+              <div style="display: flex; align-items: center; gap: 10px;">
+                <div style="font-size: 12px; font-weight: 800; color: #767c85; white-space: nowrap;">IV {{ c.iv }}</div>
+                <div style="flex: 1; height: 6px; border-radius: 999px; background: #eef0f2; overflow: hidden;"><div style="height: 100%; width: {{ c.ivPct }}; border-radius: 999px; background: {{ c.natureCol }};"></div></div>
+              </div>
+            </div>
+          </div>
+        </sc-for>
+      </div>
+
+      <div data-k="sumFoot" style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 18px; padding-top: 6px;">
+        <div style="display: flex; flex-direction: column; gap: 4px;">
+          <div style="font-size: 12px; font-weight: 800; color: #767c85;">Próximo pack em</div>
+          <div style="font-family: 'JetBrains Mono', monospace; font-weight: 800; font-size: 26px; letter-spacing: -0.02em;">{{ countdown }}</div>
+        </div>
+        <div style="display: flex; flex-wrap: wrap; gap: 10px;">
+          <button onClick="{{ openProof }}" style="height: 52px; padding: 0 20px; border: 0; border-radius: 999px; background: #ffffff; box-shadow: inset 0 0 0 2px #e4e6ea; color: #2b2f36; font-weight: 800; font-size: 15px; cursor: pointer; display: flex; align-items: center; gap: 8px;" style-hover="box-shadow: inset 0 0 0 2px #c9ccd2;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#3f8f6b" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 3v5c0 4.5-3 8.3-7 10-4-1.7-7-5.5-7-10V6z"></path><path d="M8.5 12l2.5 2.5 4.5-5"></path></svg>
+            Comprovante
+          </button>
+          <button onClick="{{ replay }}" style="height: 52px; padding: 0 20px; border: 0; border-radius: 999px; background: #ffffff; box-shadow: inset 0 0 0 2px #e4e6ea; color: #2b2f36; font-weight: 800; font-size: 15px; cursor: pointer; display: flex; align-items: center; gap: 8px;" style-hover="box-shadow: inset 0 0 0 2px #c9ccd2;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12a8 8 0 1 0 2.4-5.7"></path><path d="M4 4v4h4"></path></svg>
+            Abrir outro (demo)
+          </button>
+          <button style="height: 52px; padding: 0 22px 0 18px; border: 0; border-radius: 999px; background: #f24d4d; color: #ffffff; font-weight: 800; font-size: 15px; cursor: pointer; display: flex; align-items: center; gap: 10px; box-shadow: 0 10px 22px rgba(242,77,77,0.42);" style-active="transform: scale(0.97);">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><mask id="pbS"><rect width="24" height="24" fill="#ffffff"></rect><rect x="0" y="10.9" width="24" height="2.2" fill="#000000"></rect><circle cx="12" cy="12" r="4.6" fill="#000000"></circle><circle cx="12" cy="12" r="2.4" fill="#ffffff"></circle></mask><circle cx="12" cy="12" r="10" fill="currentColor" mask="url(#pbS)"></circle></svg>
+            Ver coleção
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div style="position: absolute; left: 0; right: 0; top: 0; z-index: 20; padding: 18px 20px; display: flex; align-items: center; justify-content: space-between; pointer-events: none;">
+    <div style="background: #f24d4d; border-radius: 12px; padding: 7px 12px 8px; display: flex; align-items: center; gap: 7px; box-shadow: 0 6px 14px rgba(242,77,77,0.28);">
+      <svg width="18" height="18" viewBox="0 0 36 36" fill="none"><rect x="3" y="5" width="30" height="26" rx="11" fill="#ffffff"></rect><rect x="3" y="16.2" width="30" height="3.6" fill="#f24d4d"></rect><rect x="7.5" y="9" width="9" height="4" rx="2" fill="#ffd9d9"></rect></svg>
+      <div style="font-weight: 900; font-size: 18px; line-height: 1; letter-spacing: -0.03em; color: #ffffff;">512</div>
+    </div>
+    <button onClick="{{ toggleMute }}" aria-label="{{ muteLabel }}" style="pointer-events: auto; width: 40px; height: 40px; border: 0; border-radius: 999px; background: {{ hudBg }}; color: {{ hudFg }}; box-shadow: {{ hudSh }}; cursor: pointer; display: flex; align-items: center; justify-content: center;">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9h4l5-4v14l-5-4H4z"></path>
+        <sc-if value="{{ soundOn }}" hint-placeholder-val="{{ true }}"><path d="M16.5 8.5a5 5 0 0 1 0 7"></path><path d="M19 6a8.5 8.5 0 0 1 0 12"></path></sc-if>
+        <sc-if value="{{ soundOff }}" hint-placeholder-val="{{ false }}"><path d="M17 9.5l5 5M22 9.5l-5 5"></path></sc-if>
+      </svg>
+    </button>
+  </div>
+
+  <sc-if value="{{ hasFicha }}" hint-placeholder-val="{{ false }}">
+    <div onClick="{{ closeFicha }}" style="position: absolute; inset: 0; z-index: 30; background: rgba(28,31,38,0.62); display: flex; align-items: center; justify-content: center; padding: 20px; box-sizing: border-box; overflow-y: auto; overflow-x: hidden;">
+      <div data-k="ficha" onClick="{{ stop }}" style="position: relative; width: 100%; max-width: 780px; margin: auto; background: #1c1f26; color: #ffffff; border-radius: 32px; overflow: hidden; display: flex; flex-wrap: wrap; box-shadow: 0 40px 90px rgba(0,0,0,0.45);">
+        <button onClick="{{ closeFicha }}" aria-label="Fechar" style="position: absolute; right: 14px; top: 14px; z-index: 2; width: 38px; height: 38px; border: 0; border-radius: 999px; background: rgba(255,255,255,0.08); color: #c3cad4; cursor: pointer; display: flex; align-items: center; justify-content: center;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"></path></svg></button>
+        <div style="flex: 1 1 300px; min-height: 340px; position: relative; overflow: hidden; background: {{ f.panel }}; display: flex; align-items: center; justify-content: center;">
+          <img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-src="{{ f.src }}" data-fb="{{ f.fb }}" data-cap="4" data-mh="260" data-mw="300" alt="{{ f.name }}" draggable="false" style="display: block; image-rendering: pixelated; position: relative;">
+          <div style="position: absolute; inset: 0; pointer-events: none; background-image: {{ f.holo }}; background-size: 240% 240%; background-position: {{ f.holoPos }}; mix-blend-mode: screen; opacity: {{ f.holoOp }};"></div>
+        </div>
+        <div style="flex: 1 1 360px; min-width: 0; padding: 30px 28px 28px; display: flex; flex-direction: column; gap: 22px;">
+          <div style="display: flex; flex-direction: column; gap: 10px;">
+            <div style="display: flex; align-items: baseline; gap: 10px;">
+              <div style="font-weight: 900; font-size: 34px; letter-spacing: -0.03em; line-height: 1;">{{ f.name }}</div>
+              <div style="font-weight: 600; font-size: 14px; color: #7d8794;">#{{ f.dex }}</div>
+            </div>
+            <div style="display: flex; flex-wrap: wrap; gap: 6px;">
+              <span style="height: 26px; padding: 0 10px; border-radius: 999px; background: {{ f.tierBg }}; color: {{ f.tierFg }}; font-size: 12px; font-weight: 800; display: flex; align-items: center;">{{ f.tier }}</span>
+              <sc-if value="{{ f.shiny }}" hint-placeholder-val="{{ false }}"><span style="height: 26px; padding: 0 10px; border-radius: 999px; background: #4dd9e8; color: #1c1f26; font-size: 12px; font-weight: 800; display: flex; align-items: center;">Shiny</span></sc-if>
+              <span style="height: 26px; padding: 0 10px; border-radius: 999px; background: rgba(255,255,255,0.08); color: {{ f.mintFg }}; font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 800; display: flex; align-items: center;">Nº {{ f.mint }}</span>
+            </div>
+          </div>
+
+          <div style="display: flex; flex-direction: column; gap: 10px;">
+            <div style="display: flex; justify-content: space-between; gap: 10px; font-size: 12px; font-weight: 800;"><span style="color: #c3cad4;">Tamanho {{ f.size }}</span><span style="color: #7d8794; font-weight: 600;">{{ f.sizeTxt }}</span></div>
+            <div style="position: relative; height: 8px; border-radius: 999px; background: rgba(255,255,255,0.08);">
+              <div style="position: absolute; left: 20%; right: 20%; top: 0; bottom: 0; background: rgba(255,255,255,0.06);"></div>
+              <div style="position: absolute; top: 50%; left: {{ f.sizePos }}; width: 16px; height: 16px; margin: -8px 0 0 -8px; border-radius: 999px; background: #ffffff; box-shadow: 0 0 0 4px rgba(255,255,255,0.15);"></div>
+            </div>
+            <div style="position: relative; height: 14px; font-size: 10px; font-weight: 800; color: #7d8794;">
+              <span style="position: absolute; left: 0;">XXS</span><span style="position: absolute; left: 11%; transform: translateX(-50%);">XS</span><span style="position: absolute; left: 50%; transform: translateX(-50%);">M</span><span style="position: absolute; left: 89%; transform: translateX(-50%);">XL</span><span style="position: absolute; right: 0;">XXL</span>
+            </div>
+          </div>
+
+          <div style="display: flex; flex-direction: column; gap: 9px;">
+            <div style="display: flex; justify-content: space-between; font-size: 12px; font-weight: 800;"><span style="color: #c3cad4;">IVs</span><span style="color: #ffffff;">{{ f.iv }} / 186</span></div>
+            <sc-for list="{{ f.ivRows }}" as="r" hint-placeholder-count="6">
+              <div style="display: grid; grid-template-columns: 34px minmax(0, 1fr) 22px; align-items: center; gap: 10px;">
+                <div style="font-size: 11px; font-weight: 800; color: #7d8794;">{{ r.k }}</div>
+                <div style="height: 6px; border-radius: 999px; background: rgba(255,255,255,0.08); overflow: hidden;"><div style="height: 100%; width: {{ r.pct }}; border-radius: 999px; background: {{ f.natureCol }};"></div></div>
+                <div style="font-size: 12px; font-weight: 800; text-align: right; color: {{ r.fg }};">{{ r.v }}</div>
+              </div>
+            </sc-for>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
+            <div style="display: flex; flex-direction: column; gap: 5px;">
+              <div style="font-size: 11px; font-weight: 800; color: #7d8794;">Natureza</div>
+              <div style="display: flex; align-items: center; gap: 8px; font-weight: 800; font-size: 14px;"><span style="width: 9px; height: 9px; border-radius: 999px; background: {{ f.natureCol }};"></span>{{ f.nature }}</div>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 5px;">
+              <div style="font-size: 11px; font-weight: 800; color: #7d8794;">Capturado</div>
+              <div style="font-weight: 800; font-size: 14px;">{{ f.caught }}</div>
+            </div>
+          </div>
+
+          <div style="display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 12px 14px; border-radius: 16px; background: rgba(255,255,255,0.05);">
+            <div style="display: flex; flex-direction: column; gap: 3px; min-width: 0;">
+              <div style="font-size: 11px; font-weight: 800; color: #7d8794;">Hash do espécime</div>
+              <div style="font-family: 'JetBrains Mono', monospace; font-weight: 800; font-size: 14px; color: #c3cad4;">{{ f.hash }}</div>
+            </div>
+            <span style="height: 26px; padding: 0 10px; border-radius: 999px; background: rgba(63,143,107,0.2); color: #6fd0a2; font-size: 12px; font-weight: 800; display: flex; align-items: center; gap: 6px; white-space: nowrap;"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg>Verificado</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ hasProof }}" hint-placeholder-val="{{ false }}">
+    <div onClick="{{ closeProof }}" style="position: absolute; inset: 0; z-index: 30; background: rgba(28,31,38,0.62); display: flex; align-items: center; justify-content: center; padding: 20px; box-sizing: border-box; overflow-y: auto; overflow-x: hidden;">
+      <div data-k="proof" onClick="{{ stop }}" style="position: relative; width: 100%; max-width: 640px; margin: auto; background: #1c1f26; background-image: radial-gradient(70% 45% at 50% 0%, rgba(63,143,107,0.16), rgba(63,143,107,0) 100%); color: #ffffff; border-radius: 32px; padding: 30px 28px 26px; box-sizing: border-box; display: flex; flex-direction: column; gap: 20px; box-shadow: 0 40px 90px rgba(0,0,0,0.45);">
+        <button onClick="{{ closeProof }}" aria-label="Fechar" style="position: absolute; right: 14px; top: 14px; width: 38px; height: 38px; border: 0; border-radius: 999px; background: rgba(255,255,255,0.08); color: #c3cad4; cursor: pointer; display: flex; align-items: center; justify-content: center;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"></path></svg></button>
+        <div style="display: flex; flex-direction: column; gap: 6px; padding-right: 40px;">
+          <div style="font-size: 11px; font-weight: 800; letter-spacing: 0.18em; text-transform: uppercase; color: #7d8794;">Comprovante · nonce {{ nonce }}</div>
+          <div style="font-weight: 900; font-size: 28px; letter-spacing: -0.03em;">O sorteio confere</div>
+          <div style="font-weight: 600; font-size: 14px; line-height: 1.5; color: #c3cad4; text-wrap: pretty;">O hash foi mostrado antes da abertura. A server seed revelada agora gera o mesmo hash, e cada slot sai de HMAC-SHA256(server_seed, "client_seed:nonce:slot:n").</div>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 12px;">
+          <div style="display: flex; flex-direction: column; gap: 4px;"><div style="font-size: 11px; font-weight: 800; color: #7d8794;">Hash do servidor (antes)</div><div style="font-family: 'JetBrains Mono', monospace; font-weight: 800; font-size: 12px; line-height: 1.5; color: #c3cad4; word-break: break-all; user-select: text;">{{ hash }}</div></div>
+          <div style="display: flex; flex-direction: column; gap: 4px;"><div style="font-size: 11px; font-weight: 800; color: #7d8794;">Server seed (revelada)</div><div style="font-family: 'JetBrains Mono', monospace; font-weight: 800; font-size: 12px; line-height: 1.5; color: #c3cad4; word-break: break-all; user-select: text;">{{ serverSeed }}</div></div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+            <div style="display: flex; flex-direction: column; gap: 4px;"><div style="font-size: 11px; font-weight: 800; color: #7d8794;">Client seed</div><div style="font-family: 'JetBrains Mono', monospace; font-weight: 800; font-size: 13px; color: #c3cad4;">{{ clientSeed }}</div></div>
+            <div style="display: flex; flex-direction: column; gap: 4px;"><div style="font-size: 11px; font-weight: 800; color: #7d8794;">Nonce</div><div style="font-family: 'JetBrains Mono', monospace; font-weight: 800; font-size: 13px; color: #c3cad4;">{{ nonce }}</div></div>
+          </div>
+          <div style="display: flex; align-items: center; gap: 10px; padding: 12px 14px; border-radius: 16px; background: rgba(63,143,107,0.16); color: #6fd0a2; font-weight: 800; font-size: 13px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg>sha256(server_seed) = hash do servidor</div>
+        </div>
+        <div style="display: flex; flex-direction: column; border-radius: 18px; background: rgba(255,255,255,0.04); overflow: hidden;">
+          <sc-for list="{{ proofRows }}" as="p" hint-placeholder-count="5">
+            <div style="display: grid; grid-template-columns: 54px minmax(0, 1fr) auto; align-items: center; gap: 12px; padding: 11px 14px; border-top: 1px solid rgba(255,255,255,0.05);">
+              <div style="font-size: 11px; font-weight: 800; color: #7d8794;">Slot {{ p.n }}</div>
+              <div style="font-family: 'JetBrains Mono', monospace; font-weight: 800; font-size: 12px; color: #7d8794; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ p.hmac }}</div>
+              <div style="display: flex; align-items: center; gap: 8px; font-weight: 800; font-size: 13px;"><span style="width: 8px; height: 8px; border-radius: 999px; background: {{ p.col }};"></span>{{ p.name }}</div>
+            </div>
+          </sc-for>
+        </div>
+        <sc-if value="{{ scripted }}" hint-placeholder-val="{{ false }}">
+          <div style="font-weight: 600; font-size: 12px; line-height: 1.5; color: #7d8794; text-wrap: pretty;">Roteiro de demonstração ativo: espécie, shiny e mint foram fixados para mostrar as cerimônias. Tamanho, natureza e IVs saem do HMAC. Em "Sorteio real" tudo sai da seed.</div>
+        </sc-if>
+      </div>
+    </div>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;roteiro&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Raro + shiny&quot;,&quot;Lendário&quot;,&quot;Sorteio real&quot;],&quot;default&quot;:&quot;Raro + shiny&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Pack&quot;},&quot;abertura&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Segurar&quot;,&quot;Tocar&quot;],&quot;default&quot;:&quot;Segurar&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Interação&quot;},&quot;som&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Interação&quot;}}">
+const BASE = 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon';
+const NAMES = "Bulbasaur,Ivysaur,Venusaur,Charmander,Charmeleon,Charizard,Squirtle,Wartortle,Blastoise,Caterpie,Metapod,Butterfree,Weedle,Kakuna,Beedrill,Pidgey,Pidgeotto,Pidgeot,Rattata,Raticate,Spearow,Fearow,Ekans,Arbok,Pikachu,Raichu,Sandshrew,Sandslash,Nidoran♀,Nidorina,Nidoqueen,Nidoran♂,Nidorino,Nidoking,Clefairy,Clefable,Vulpix,Ninetales,Jigglypuff,Wigglytuff,Zubat,Golbat,Oddish,Gloom,Vileplume,Paras,Parasect,Venonat,Venomoth,Diglett,Dugtrio,Meowth,Persian,Psyduck,Golduck,Mankey,Primeape,Growlithe,Arcanine,Poliwag,Poliwhirl,Poliwrath,Abra,Kadabra,Alakazam,Machop,Machoke,Machamp,Bellsprout,Weepinbell,Victreebel,Tentacool,Tentacruel,Geodude,Graveler,Golem,Ponyta,Rapidash,Slowpoke,Slowbro,Magnemite,Magneton,Farfetch'd,Doduo,Dodrio,Seel,Dewgong,Grimer,Muk,Shellder,Cloyster,Gastly,Haunter,Gengar,Onix,Drowzee,Hypno,Krabby,Kingler,Voltorb,Electrode,Exeggcute,Exeggutor,Cubone,Marowak,Hitmonlee,Hitmonchan,Lickitung,Koffing,Weezing,Rhyhorn,Rhydon,Chansey,Tangela,Kangaskhan,Horsea,Seadra,Goldeen,Seaking,Staryu,Starmie,Mr. Mime,Scyther,Jynx,Electabuzz,Magmar,Pinsir,Tauros,Magikarp,Gyarados,Lapras,Ditto,Eevee,Vaporeon,Jolteon,Flareon,Porygon,Omanyte,Omastar,Kabuto,Kabutops,Aerodactyl,Snorlax,Articuno,Zapdos,Moltres,Dratini,Dragonair,Dragonite,Mewtwo,Mew".split(',');
+const TIERS = 'circircirc' + 'ircircirci' + 'ciciircici' + 'rcirircrir' + 'cicircicic' + 'icicrcicrc' + 'ircircirci' + 'rcrcircrcr' + 'ciicicicrc' + 'rciricicic' + 'icrciiicci' + 'circrcicic' + 'riiiiiircr' + 'rrirrrrcic' + 'irrllliirl' + 'l';
+const TIER = {
+  c: { label: 'Comum', color: '#463C39', fg: '#ffffff', glow: '#9aa3ad' },
+  i: { label: 'Incomum', color: '#8F5735', fg: '#ffffff', glow: '#c27a4c' },
+  r: { label: 'Raro', color: '#E07C55', fg: '#2b2f36', glow: '#E07C55' },
+  l: { label: 'Lendário', color: '#FFC94D', fg: '#2b2f36', glow: '#FFC94D' },
+};
+const CYAN = '#4DD9E8';
+const NATURES = ['Hardy', 'Lonely', 'Brave', 'Adamant', 'Naughty', 'Bold', 'Docile', 'Relaxed', 'Impish', 'Lax', 'Timid', 'Hasty', 'Serious', 'Jolly', 'Naive', 'Modest', 'Mild', 'Quiet', 'Bashful', 'Rash', 'Calm', 'Gentle', 'Sassy', 'Careful', 'Quirky'];
+const STATS = ['HP', 'Atk', 'Def', 'SpA', 'SpD', 'Spe'];
+const W = { c: 0.6, i: 0.28, r: 0.105, l: 0.015 };
+const BY = { c: [], i: [], r: [], l: [] };
+for (let n = 1; n <= 151; n++) BY[TIERS[n - 1]].push(n);
+const SCRIPTS = {
+  'Raro + shiny': [{ id: 19 }, { id: 10 }, { id: 93 }, { id: 6, mint: 7 }, { id: 25, shiny: true, mint: 31 }],
+  'Lendário': [{ id: 16 }, { id: 129 }, { id: 43 }, { id: 133 }, { id: 150, mint: 1 }],
+};
+const enc = new TextEncoder();
+const toHex = b => Array.from(b, x => x.toString(16).padStart(2, '0')).join('');
+const rgba = (hex, a) => { const n = parseInt(hex.slice(1), 16); return `rgba(${n >> 16},${(n >> 8) & 255},${n & 255},${a})`; };
+const pad = (n, k) => String(n).padStart(k, '0');
+const rand = (a, b) => a + Math.random() * (b - a);
+const ABORT = { abort: true };
+
+const ror = (x, n) => (x >>> n) | (x << (32 - n));
+const SHA_K = (() => { const k = []; let n = 2; while (k.length < 64) { let p = true; for (let d = 2; d * d <= n; d++) if (n % d === 0) { p = false; break; } if (p) k.push((Math.floor((Math.cbrt(n) % 1) * 4294967296)) >>> 0); n++; } return k; })();
+function sha256(bytes) {
+  let H = [0x6a09e667, 0xbb67ae85, 0x3c6ef372, 0xa54ff53a, 0x510e527f, 0x9b05688c, 0x1f83d9ab, 0x5be0cd19];
+  const l = bytes.length, bl = ((l + 9 + 63) >> 6) << 6, m = new Uint8Array(bl);
+  m.set(bytes); m[l] = 0x80;
+  const dv = new DataView(m.buffer), bits = l * 8;
+  dv.setUint32(bl - 4, bits >>> 0); dv.setUint32(bl - 8, Math.floor(bits / 4294967296));
+  const w = new Uint32Array(64);
+  for (let o = 0; o < bl; o += 64) {
+    for (let i = 0; i < 16; i++) w[i] = dv.getUint32(o + i * 4);
+    for (let i = 16; i < 64; i++) {
+      const a = w[i - 15], b = w[i - 2];
+      w[i] = (w[i - 16] + (ror(a, 7) ^ ror(a, 18) ^ (a >>> 3)) + w[i - 7] + (ror(b, 17) ^ ror(b, 19) ^ (b >>> 10))) >>> 0;
+    }
+    let [a, b, c, d, e, f, g, h] = H;
+    for (let i = 0; i < 64; i++) {
+      const t1 = (h + (ror(e, 6) ^ ror(e, 11) ^ ror(e, 25)) + ((e & f) ^ (~e & g)) + SHA_K[i] + w[i]) >>> 0;
+      const t2 = ((ror(a, 2) ^ ror(a, 13) ^ ror(a, 22)) + ((a & b) ^ (a & c) ^ (b & c))) >>> 0;
+      h = g; g = f; f = e; e = (d + t1) >>> 0; d = c; c = b; b = a; a = (t1 + t2) >>> 0;
+    }
+    H = [H[0] + a, H[1] + b, H[2] + c, H[3] + d, H[4] + e, H[5] + f, H[6] + g, H[7] + h].map(x => x >>> 0);
+  }
+  const out = new Uint8Array(32), odv = new DataView(out.buffer);
+  H.forEach((x, i) => odv.setUint32(i * 4, x));
+  return out;
+}
+const cat = (a, b) => { const r = new Uint8Array(a.length + b.length); r.set(a); r.set(b, a.length); return r; };
+function hmac(key, msg) {
+  let k = enc.encode(key); if (k.length > 64) k = sha256(k);
+  const kp = new Uint8Array(64); kp.set(k);
+  return sha256(cat(kp.map(x => x ^ 0x5c), sha256(cat(kp.map(x => x ^ 0x36), enc.encode(msg)))));
+}
+const u32 = (b, i) => b[i] * 16777216 + (b[i + 1] << 16) + (b[i + 2] << 8) + b[i + 3];
+function erf(x) { const s = Math.sign(x); x = Math.abs(x); const t = 1 / (1 + 0.3275911 * x); return s * (1 - (((((1.061405429 * t - 1.453152027) * t) + 1.421413741) * t - 0.284496736) * t + 0.254829592) * t * Math.exp(-x * x)); }
+const sizeClass = r => r < 0.02 ? 'XXS' : r < 0.2 ? 'XS' : r < 0.8 ? 'M' : r < 0.98 ? 'XL' : 'XXL';
+const natureCol = i => `oklch(0.74 0.14 ${Math.round(i * 14.4 + 20)})`;
+
+function pickTier(r, guaranteed) {
+  const order = guaranteed ? ['i', 'r', 'l'] : ['c', 'i', 'r', 'l'];
+  let x = r * order.reduce((a, t) => a + W[t], 0);
+  for (const t of order) { if (x < W[t]) return [t, x / W[t]]; x -= W[t]; }
+  return ['l', 0.999];
+}
+
+function derive(serverSeed, clientSeed, nonce, mode) {
+  const script = SCRIPTS[mode] || null, caught = new Date();
+  return [0, 1, 2, 3, 4].map(i => {
+    const b = hmac(serverSeed, `${clientSeed}:${nonce}:slot:${i + 1}`), seedHex = toHex(b);
+    let [tier, res] = pickTier(u32(b, 0) / 4294967296, i === 4);
+    let id = BY[tier][Math.min(BY[tier].length - 1, Math.floor(res * BY[tier].length))];
+    let shiny = u32(b, 4) / 4294967296 < 1 / 512;
+    const u1 = (((b[8] << 8) | b[9]) + 1) / 65537, u2 = ((b[10] << 8) | b[11]) / 65536;
+    const sizeRoll = Math.min(0.99999, Math.max(0, 0.5 + 0.17 * Math.sqrt(-2 * Math.log(u1)) * Math.cos(2 * Math.PI * u2)));
+    const nIdx = u32(b, 12) % 25;
+    const ivs = STATS.map((_, k) => ((b[16 + 2 * k] << 8) | b[17 + 2 * k]) % 32);
+    const sc = script && script[i];
+    if (sc) { id = sc.id; tier = TIERS[id - 1]; shiny = !!sc.shiny; }
+    const m16 = (b[28] << 8) | b[29];
+    const mint = (sc && sc.mint) || { c: 120 + m16 % 380, i: 40 + m16 % 160, r: 3 + m16 % 40, l: 1 + m16 % 4 }[tier];
+    const name = NAMES[id - 1], T = TIER[tier];
+    const pct = Math.max(1, Math.min(99, Math.round(50 * (1 + erf((sizeRoll - 0.5) / 0.17 / Math.SQRT2)))));
+    const ivTotal = ivs.reduce((a, v) => a + v, 0);
+    const hash = toHex(hmac('512-demo-specimen-secret', `${id}|${seedHex}|${mint}|${caught.toISOString()}`));
+    return {
+      i, id, name, tier, shiny, T, glow: shiny ? CYAN : T.glow, ceremony: shiny || tier === 'r' || tier === 'l',
+      dex: pad(id, 3), mint: pad(mint, 4), mintNum: mint, sizeRoll, size: sizeClass(sizeRoll), pct,
+      sizeTxt: pct >= 50 ? `maior que ${pct}% dos ${name}` : `menor que ${100 - pct}% dos ${name}`,
+      nature: NATURES[nIdx], natureCol: natureCol(nIdx), ivs, ivTotal, seedHex, hash, caught,
+      holo: { angle: Math.round(20 + b[30] / 255 * 140), off: Math.round(b[31] / 255 * 100), inten: 0.35 + b[29] / 255 * 0.5 },
+      src: `${BASE}/versions/generation-v/black-white/animated/${shiny ? 'shiny/' : ''}${id}.gif`,
+      fb: `${BASE}/${shiny ? 'shiny/' : ''}${id}.png`,
+    };
+  });
+}
+
+class SFX {
+  constructor() { this.ctx = null; this.on = true; }
+  init() {
+    try {
+      if (!this.ctx) {
+        const C = window.AudioContext || window.webkitAudioContext; if (!C) return;
+        this.ctx = new C(); this.out = this.ctx.createGain(); this.out.gain.value = 0.55;
+        const comp = this.ctx.createDynamicsCompressor(); this.out.connect(comp); comp.connect(this.ctx.destination);
+      }
+      if (this.ctx.state === 'suspended') this.ctx.resume();
+    } catch (e) {}
+  }
+  ok() { return this.ctx && this.on; }
+  tone(f, dur, o = {}) {
+    if (!this.ok()) return;
+    const c = this.ctx, t = c.currentTime + (o.d || 0), os = c.createOscillator(), g = c.createGain();
+    os.type = o.type || 'sine'; os.frequency.setValueAtTime(f, t);
+    if (o.to) os.frequency.exponentialRampToValueAtTime(o.to, t + (o.slide || dur));
+    g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(o.g || 0.2, t + (o.a || 0.005)); g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    os.connect(g); g.connect(this.out); os.start(t); os.stop(t + dur + 0.05);
+  }
+  noise(dur, o = {}) {
+    if (!this.ok()) return;
+    const c = this.ctx, t = c.currentTime + (o.d || 0);
+    if (!this.nb) { const b = c.createBuffer(1, c.sampleRate * 2, c.sampleRate), d = b.getChannelData(0); for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1; this.nb = b; }
+    const s = c.createBufferSource(), f = c.createBiquadFilter(), g = c.createGain();
+    s.buffer = this.nb; f.type = o.type || 'lowpass'; f.Q.value = o.q || 1;
+    f.frequency.setValueAtTime(o.f0 || 2000, t); if (o.f1) f.frequency.exponentialRampToValueAtTime(o.f1, t + dur);
+    g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(o.g || 0.2, t + (o.a || 0.01)); g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    s.connect(f); f.connect(g); g.connect(this.out); s.start(t); s.stop(t + dur + 0.05);
+  }
+  rumble(v) {
+    if (!this.ctx) return;
+    if (!this.rb) {
+      const c = this.ctx, o = c.createOscillator(), f = c.createBiquadFilter(), g = c.createGain();
+      o.type = 'sawtooth'; o.frequency.value = 40; f.type = 'lowpass'; f.frequency.value = 160; g.gain.value = 0;
+      o.connect(f); f.connect(g); g.connect(this.out); o.start(); this.rb = { o, f, g };
+    }
+    const t = this.ctx.currentTime;
+    this.rb.g.gain.setTargetAtTime(this.on ? v * v * 0.2 : 0, t, 0.04);
+    this.rb.o.frequency.setTargetAtTime(38 + v * 70, t, 0.04);
+    this.rb.f.frequency.setTargetAtTime(140 + v * 520, t, 0.04);
+  }
+  tick(v) { this.tone(700 + v * 1100, 0.035, { type: 'square', g: 0.025 + v * 0.045 }); }
+  burst() { this.noise(0.9, { f0: 6000, f1: 120, g: 0.6 }); this.tone(92, 0.65, { to: 30, g: 0.75 }); this.tone(1800, 0.25, { to: 300, g: 0.08, type: 'triangle' }); }
+  land(i) { this.tone(250 + i * 28, 0.09, { type: 'triangle', g: 0.14, to: 170 }); }
+  pop(i, tier) { const b = 520 + i * 70; this.tone(b, 0.14, { to: b * 1.9, slide: 0.07, g: 0.18 }); this.noise(0.07, { type: 'highpass', f0: 3000, g: 0.05 }); if (tier !== 'c') this.tone(b * 2, 0.28, { g: 0.06, d: 0.06, type: 'triangle' }); }
+  whoosh(up) { this.noise(0.8, { type: 'bandpass', f0: up ? 300 : 2400, f1: up ? 2400 : 250, q: 1.2, g: 0.14 }); }
+  freeze() { this.tone(150, 0.9, { to: 55, g: 0.2 }); this.noise(0.5, { f0: 900, f1: 90, g: 0.08 }); }
+  tok(k) { this.tone(215 - k * 12, 0.11, { type: 'triangle', g: 0.32, to: 150 }); this.noise(0.04, { type: 'highpass', f0: 2500, g: 0.06 }); }
+  open() { this.tone(330, 0.5, { to: 880, slide: 0.35, g: 0.12, type: 'triangle' }); this.noise(0.5, { type: 'bandpass', f0: 600, f1: 5200, g: 0.1 }); }
+  rise() { this.tone(110, 1.5, { to: 330, slide: 1.4, g: 0.08, a: 0.3, type: 'triangle' }); }
+  chord(tier, shiny) {
+    const sets = { c: [523.25, 659.25, 783.99], i: [523.25, 659.25, 783.99], r: [523.25, 659.25, 783.99, 1046.5], l: [392, 493.88, 587.33, 783.99, 987.77] };
+    const n = sets[tier], L = tier === 'l' ? 2.8 : 1.9;
+    n.forEach((f, k) => { this.tone(f, L, { g: 0.08, d: k * 0.07, a: 0.02 }); this.tone(f / 2, L, { g: 0.045, d: k * 0.07, type: 'triangle', a: 0.03 }); });
+    if (tier === 'l') this.tone(62, 2.6, { g: 0.35, a: 0.01 });
+    if (shiny) [1568, 2093, 2637, 3136, 4186].forEach((f, k) => this.tone(f, 0.55, { type: 'triangle', g: 0.05, d: 0.12 + k * 0.055 }));
+  }
+  glint() { this.tone(2600 + Math.random() * 900, 0.16, { type: 'triangle', g: 0.035 }); }
+  summary() { [659.25, 880, 1318.5].forEach((f, k) => this.tone(f, 1.1, { g: 0.06, d: k * 0.09, a: 0.02 })); }
+}
+
+class Component extends DCLogic {
+  constructor(p) {
+    super(p);
+    const mode = this.props.roteiro ?? 'Raro + shiny', seed = toHex(crypto.getRandomValues(new Uint8Array(32)));
+    this.state = {
+      mode, serverSeed: seed, hash: toHex(sha256(enc.encode(seed))), clientSeed: 'lin-sorte', nonce: 41,
+      pack: derive(seed, 'lin-sorte', 41, mode), phase: 'idle', cer: null, ficha: null, proof: false,
+      editingSeed: false, muted: false, openedAt: null, now: Date.now(),
+    };
+    this.R = {}; this.touched = []; this.tok = 0; this.mode = 'idle';
+    this.charge = 0; this.ph = 0; this.lastK = 0; this.idleT = 0; this.tilt = 0; this.ptr = null;
+    this.fx = { ps: [], dust: [] }; this.sfx = new SFX(); this.sparkSlots = [];
+  }
+  ref(n) { return this.R[n] || (this.R[n] = React.createRef()); }
+  get root() { return this.R.root && this.R.root.current; }
+  $(k) { return this.root ? this.root.querySelector(`[data-k="${k}"]`) : null; }
+  slot(i, k) { const s = this.root && this.root.querySelector(`[data-slot="${i}"]`); return s && k ? s.querySelector(`[data-k="${k}"]`) : s; }
+  a(el, kf, dur, o = {}) {
+    if (!el) return Promise.resolve();
+    const an = el.animate(kf, { duration: dur, delay: o.d || 0, easing: o.e || 'cubic-bezier(.2,.8,.2,1)', fill: o.fill || 'forwards', iterations: o.it || 1, direction: o.dir || 'normal' });
+    return an.finished.catch(() => {});
+  }
+  setS(el, obj) { if (!el) return; Object.keys(obj).forEach(k => { this.touched.push([el, k, el.style[k]]); el.style[k] = obj[k]; }); }
+  sleep(ms) { const t = this.tok; return new Promise((res, rej) => setTimeout(() => (t === this.tok ? res() : rej(ABORT)), ms)); }
+  center(el) { const r = el.getBoundingClientRect(); return { x: r.left + r.width / 2, y: r.top + r.height / 2, w: r.width, h: r.height }; }
+  vib(p) { try { navigator.vibrate && navigator.vibrate(p); } catch (e) {} }
+
+  componentDidMount() {
+    this.cv = this.$('fx'); this.cx = this.cv.getContext('2d');
+    this.onResize = () => { const d = Math.min(2, window.devicePixelRatio || 1); this.dpr = d; this.cv.width = innerWidth * d; this.cv.height = innerHeight * d; this.cx.setTransform(d, 0, 0, d, 0, 0); };
+    this.onResize();
+    this.fx.dust = Array.from({ length: 56 }, () => ({ x: rand(0, innerWidth), y: rand(0, innerHeight), vx: rand(-4, 4), vy: rand(-12, -3), r: rand(0.6, 1.8), a: rand(0.06, 0.26), tw: rand(0, 6) }));
+    this.onMove = e => { this.ptr = { x: e.clientX, y: e.clientY }; };
+    this.onKey = e => {
+      if (e.repeat || (e.target && e.target.tagName === 'INPUT')) return;
+      if (e.code === 'Space' || e.code === 'Enter') { e.preventDefault(); if (this.mode === 'idle') this.startCharge(); else this.tapNow(); }
+    };
+    this.onKeyUp = e => { if (e.code === 'Space' || e.code === 'Enter') this.charging = false; };
+    this.onUp = () => { this.charging = false; };
+    addEventListener('resize', this.onResize); addEventListener('pointermove', this.onMove);
+    addEventListener('keydown', this.onKey); addEventListener('keyup', this.onKeyUp); addEventListener('pointerup', this.onUp);
+    this.last = performance.now(); this.raf = requestAnimationFrame(this.loop);
+    this.onImgLoad = e => { if (e.target && e.target.tagName === 'IMG') this.fitImg(e.target); };
+    this.onImgErr = e => { const img = e.target; if (img && img.tagName === 'IMG' && img.dataset.fb && img.src !== img.dataset.fb && !img.src.startsWith('data:')) img.src = img.dataset.fb; };
+    this.root.addEventListener('load', this.onImgLoad, true); this.root.addEventListener('error', this.onImgErr, true);
+    this.syncImgs();
+    const rays = this.$('rays'); if (rays) rays.style.webkitMaskImage = rays.style.maskImage = 'radial-gradient(circle, #000 0%, rgba(0,0,0,0) 60%)';
+    this.preload(this.state.pack); this.introIdle();
+  }
+  componentWillUnmount() {
+    cancelAnimationFrame(this.raf); this.tok++; clearInterval(this.clock);
+    removeEventListener('resize', this.onResize); removeEventListener('pointermove', this.onMove);
+    removeEventListener('keydown', this.onKey); removeEventListener('keyup', this.onKeyUp); removeEventListener('pointerup', this.onUp);
+    try { this.sfx.ctx && this.sfx.ctx.close(); } catch (e) {}
+  }
+  componentDidUpdate(pp, ps) {
+    this.syncImgs();
+    const mode = this.props.roteiro ?? 'Raro + shiny';
+    if (mode !== this.state.mode && this.mode === 'idle') this.setState({ mode, pack: derive(this.state.serverSeed, this.state.clientSeed, this.state.nonce, mode) }, () => this.preload(this.state.pack));
+    if (this.state.ficha != null && ps.ficha == null) this.a(this.$('ficha'), [{ opacity: 0, transform: 'translateY(30px) scale(.96)' }, { opacity: 1, transform: 'none' }], 420, { e: 'cubic-bezier(.2,1.3,.4,1)', fill: 'none' });
+    if (this.state.proof && !ps.proof) this.a(this.$('proof'), [{ opacity: 0, transform: 'translateY(30px) scale(.96)' }, { opacity: 1, transform: 'none' }], 420, { e: 'cubic-bezier(.2,1.3,.4,1)', fill: 'none' });
+  }
+  fitImg(img) {
+        const nw = img.naturalWidth, nh = img.naturalHeight; if (!nw || img.src.startsWith('data:')) return;
+        const mw = Math.min(+img.dataset.mw || img.parentElement.clientWidth || 100, innerWidth * 0.8), mh = Math.min(+img.dataset.mh || 100, img.dataset.cer ? innerHeight * 0.48 - 60 : innerHeight * 0.32), cap = +img.dataset.cap || 2;
+        let k = Math.max(1, Math.floor(Math.min(cap, mw / nw, mh / nh)));
+        if (k < 2 && +img.dataset.min >= 2 && mh / nh >= 1.5) k = 2;
+        img.style.width = nw * k + 'px'; img.style.height = nh * k + 'px';
+      }
+  syncImgs() {
+    if (!this.root) return;
+    this.root.querySelectorAll('img[data-src]').forEach(im => {
+      const want = im.dataset.src; if (!want || want.includes('{{')) return;
+      if (im.dataset.cur !== want) { im.dataset.cur = want; im.src = want; }
+      else if (im.complete && im.naturalWidth && !im.style.width) this.fitImg(im);
+    });
+  }
+  preload(pack) { pack.forEach(p => { const im = new Image(); im.src = p.src; }); }
+  introIdle() {
+    this.a(this.$('ballWrap'), [{ opacity: 0, transform: 'translateY(-60px) scale(.7)' }, { opacity: 1, transform: 'translateY(8px) scale(1.03)', offset: 0.7 }, { opacity: 1, transform: 'none' }], 900, { e: 'cubic-bezier(.3,.8,.4,1)', fill: 'none' });
+  }
+
+  startCharge() {
+    if (this.mode !== 'idle') return;
+    this.sfx.init(); this.charging = true;
+    if ((this.props.abertura ?? 'Segurar') === 'Tocar') this.auto = true;
+  }
+
+  emit(x, y, n, o = {}) {
+    const cols = o.cols || ['#ffffff'];
+    for (let k = 0; k < n; k++) {
+      const ang = (o.ang ?? 0) + (o.spread == null ? Math.random() * Math.PI * 2 : (Math.random() - 0.5) * o.spread);
+      const sp = rand(o.sp ? o.sp[0] : 2, o.sp ? o.sp[1] : 8), life = rand(o.life ? o.life[0] : 0.5, o.life ? o.life[1] : 1.1);
+      this.fx.ps.push({ x: x + rand(-(o.jit || 0), o.jit || 0), y: y + rand(-(o.jit || 0), o.jit || 0), vx: Math.cos(ang) * sp, vy: Math.sin(ang) * sp, life, max: life, r: rand(o.r ? o.r[0] : 1.5, o.r ? o.r[1] : 4), col: cols[k % cols.length], g: o.g ?? 0.12, drag: o.drag ?? 0.95, shape: o.shape || 'dot', free: !!o.free, rot: rand(0, 6) });
+    }
+  }
+  star(c, x, y, r, rot) {
+    c.save(); c.translate(x, y); c.rotate(rot); c.beginPath();
+    for (let k = 0; k < 8; k++) { const rr = k % 2 ? r * 0.28 : r, an = k * Math.PI / 4; c.lineTo(Math.cos(an) * rr, Math.sin(an) * rr); }
+    c.closePath(); c.fill(); c.restore();
+  }
+  loop = ts => {
+    this.raf = requestAnimationFrame(this.loop);
+    const dt = Math.min(0.05, (ts - this.last) / 1000); this.last = ts;
+    if (this.mode === 'idle') this.idleFrame(dt);
+    const c = this.cx, W0 = innerWidth, H0 = innerHeight, f60 = dt * 60;
+    c.clearRect(0, 0, W0, H0);
+    for (const d of this.fx.dust) {
+      if (!this.frozen) { d.x += d.vx * dt; d.y += d.vy * dt; d.tw += dt * 1.5; if (d.y < -10) { d.y = H0 + 10; d.x = rand(0, W0); } }
+      c.globalAlpha = d.a * (0.6 + 0.4 * Math.sin(d.tw)); c.fillStyle = '#ffffff'; c.beginPath(); c.arc(d.x, d.y, d.r, 0, 6.283); c.fill();
+    }
+    if (this.twinkle && Math.random() < dt * 14) {
+      const r = this.twinkle.el.getBoundingClientRect();
+      if (r.width) this.fx.ps.push({ x: rand(r.left - 20, r.right + 20), y: rand(r.top - 10, r.bottom), vx: 0, vy: -0.25, life: 0.8, max: 0.8, r: rand(3, 7), col: this.twinkle.col, g: 0, drag: 1, shape: 'star', free: true, rot: rand(0, 1) });
+    }
+    if (this.sparkSlots.length && Math.random() < dt * 3) {
+      const i = this.sparkSlots[Math.floor(Math.random() * this.sparkSlots.length)], im = this.slot(i, 'sspr');
+      if (im) { const r = im.getBoundingClientRect(); if (r.width) this.fx.ps.push({ x: rand(r.left - 6, r.right + 6), y: rand(r.top, r.bottom), vx: 0, vy: -0.2, life: 0.7, max: 0.7, r: rand(2, 4), col: CYAN, g: 0, drag: 1, shape: 'star', free: false, rot: 0 }); }
+    }
+    const ps = this.fx.ps;
+    for (let k = ps.length - 1; k >= 0; k--) {
+      const p = ps[k];
+      if (!this.frozen || p.free) {
+        if (p.target) {
+          const dx = p.target.x - p.x, dy = p.target.y - p.y, dd = Math.hypot(dx, dy);
+          p.vx += dx / dd * 0.9 * f60; p.vy += dy / dd * 0.9 * f60; p.vx *= Math.pow(0.9, f60); p.vy *= Math.pow(0.9, f60);
+          if (dd < 30) p.life = 0;
+        } else { p.vx *= Math.pow(p.drag, f60); p.vy = p.vy * Math.pow(p.drag, f60) + p.g * f60; }
+        p.x += p.vx * f60; p.y += p.vy * f60; p.life -= dt; p.rot += dt * 2;
+      }
+      if (p.life <= 0) { ps.splice(k, 1); continue; }
+      const al = Math.min(1, p.life / p.max * 1.4);
+      c.globalAlpha = al; c.fillStyle = p.col; c.strokeStyle = p.col;
+      if (p.shape === 'star') this.star(c, p.x, p.y, p.r * (0.4 + 0.6 * Math.sin(Math.PI * p.life / p.max)), p.rot);
+      else if (p.shape === 'spark') { c.lineWidth = p.r * 0.6; c.lineCap = 'round'; c.beginPath(); c.moveTo(p.x, p.y); c.lineTo(p.x - p.vx * 2.6, p.y - p.vy * 2.6); c.stroke(); }
+      else { c.beginPath(); c.arc(p.x, p.y, p.r, 0, 6.283); c.fill(); }
+    }
+    c.globalAlpha = 1;
+  };
+  idleFrame(dt) {
+    const up = this.charging || this.auto;
+    this.charge = Math.max(0, Math.min(1, this.charge + (up ? dt / (this.auto ? 1.7 : 1.35) : -dt / 0.45)));
+    const ch = this.charge, e2 = ch * ch;
+    this.ph += dt * (3 + e2 * 27) * Math.PI * 2; this.idleT += dt;
+    const sh = this.$('ballShake'); if (!sh) return;
+    const wrap = this.$('ballWrap'), bc = this.center(wrap);
+    const tgt = this.ptr ? Math.max(-1, Math.min(1, (this.ptr.x - bc.x) / (innerWidth / 2))) * 7 : 0;
+    this.tilt += (tgt - this.tilt) * Math.min(1, dt * 5);
+    const amp = ch > 0 ? 1 + e2 * 12 : 0, fy = Math.sin(this.idleT * 1.8) * 7 * (1 - ch);
+    const rot = Math.sin(this.ph) * amp + this.tilt * (1 - ch), tx = Math.sin(this.ph * 1.3) * e2 * 5;
+    sh.style.transform = `translate(${tx}px, ${fy}px) rotate(${rot}deg) scale(${1 + e2 * 0.06})`;
+    const shd = this.$('ballShadow'); if (shd) shd.style.transform = `scaleX(${1 - fy / 60})`;
+    const rf = this.$('ringFill'); if (rf) rf.setAttribute('stroke-dashoffset', String(301.6 * (1 - ch)));
+    const bb = this.$('bBtn'); if (bb) { bb.style.background = ch > 0.02 ? '#ffffff' : '#e4e7eb'; bb.style.boxShadow = `0 0 ${4 + ch * 28}px ${ch * 9}px rgba(242,77,77,${ch * 0.9}), inset 0 -3px 0 rgba(0,0,0,0.12)`; }
+    const cg = this.$('chargeGlow'); if (cg) cg.style.opacity = String(ch);
+    this.sfx.rumble(ch);
+    const k = Math.floor(this.ph / Math.PI);
+    if (k !== this.lastK) { this.lastK = k; if (ch > 0.04) this.sfx.tick(ch); }
+    if (ch > 0 && Math.random() < dt * 70 * ch) {
+      const an = rand(0, Math.PI * 2), rr = rand(170, 340);
+      this.fx.ps.push({ x: bc.x + Math.cos(an) * rr, y: bc.y + Math.sin(an) * rr, vx: 0, vy: 0, life: 1.2, max: 1.2, r: rand(1, 2.6), col: Math.random() < 0.5 ? '#f24d4d' : '#ffd9d9', g: 0, drag: 1, shape: 'spark', target: { x: bc.x, y: bc.y }, rot: 0 });
+    }
+    if (ch >= 1) this.burst().catch(() => {});
+  }
+
+  async burst() {
+    this.mode = 'run'; this.charging = false; this.auto = false; this.charge = 0; this.sfx.rumble(0);
+    const t = this.tok, S = async p => { await p; if (t !== this.tok) throw ABORT; };
+    this.setState({ phase: 'run' }); this.burstAt = Date.now();
+    this.sfx.burst(); this.vib([30, 20, 60]);
+    const bc = this.center(this.$('ballWrap'));
+    this.fx.ps = this.fx.ps.filter(p => !p.target);
+    this.setS(this.$('flash'), { opacity: '1' });
+    this.emit(bc.x, bc.y, 110, { cols: ['#f24d4d', '#ffffff', '#ffd9d9', '#ff8a8a'], sp: [4, 16], r: [1.5, 5], g: 0.22, drag: 0.95, life: [0.6, 1.3] });
+    this.emit(bc.x, bc.y, 40, { cols: ['#ffffff', '#ffd9d9'], sp: [10, 22], r: [1.5, 3], g: 0.05, drag: 0.92, shape: 'spark', life: [0.3, 0.6] });
+    this.a(this.$('bTop'), [{ transform: 'none' }, { transform: 'translate(-30%, -170%) rotate(-60deg)', opacity: 0 }], 750, { e: 'cubic-bezier(.1,.7,.3,1)' });
+    this.a(this.$('bBot'), [{ transform: 'none' }, { transform: 'translate(26%, 160%) rotate(40deg)', opacity: 0 }], 750, { e: 'cubic-bezier(.1,.7,.3,1)' });
+    this.a(this.$('stage'), [{ transform: 'none' }, { transform: 'translate(-12px, 8px)' }, { transform: 'translate(10px, -6px)' }, { transform: 'translate(-6px, 4px)' }, { transform: 'none' }], 380, { e: 'linear', fill: 'none' });
+    this.a(this.$('chargeGlow'), [{ opacity: 1 }, { opacity: 0 }], 600);
+    await S(this.sleep(90));
+    this.setS(this.$('black'), { opacity: '1' });
+    this.a(this.$('flash'), [{ opacity: 1 }, { opacity: 0 }], 300, { e: 'ease-out' });
+    await S(this.sleep(300));
+    this.setS(this.$('idle'), { visibility: 'hidden' });
+    this.fx.ps = [];
+    await S(this.sleep(520));
+    this.setS(this.$('slots'), { opacity: '1' });
+    this.a(this.$('black'), [{ opacity: 1 }, { opacity: 0 }], 500, { e: 'ease-out' });
+    for (let i = 0; i < 5; i++) {
+      const d = 160 + i * 95;
+      this.a(this.slot(i, 'mball'), [{ opacity: 0, transform: 'translateY(-110px) scale(.6)' }, { opacity: 1, transform: 'translateY(4px) scale(1.06, .92)', offset: 0.72 }, { opacity: 1, transform: 'none' }], 560, { d, e: 'cubic-bezier(.4,.1,.6,1)' });
+      setTimeout(() => { if (t === this.tok) this.sfx.land(i); }, d + 400);
+    }
+    await S(this.sleep(160 + 4 * 95 + 560 + 380));
+    for (let i = 0; i < 5; i++) {
+      const sp = this.state.pack[i];
+      if (sp.ceremony) await this.ceremony(i, S); else { await this.pop(i, S); await S(this.sleep(this.fast ? 90 : 230)); }
+    }
+    await S(this.sleep(700));
+    await this.toSummary(S);
+  }
+
+  async pop(i, S) {
+    const sp = this.state.pack[i], mb = this.slot(i, 'mball'), sh = this.slot(i, 'mShake'), top = this.slot(i, 'mTop'), img = this.slot(i, 'sspr'), lab = this.slot(i, 'slabel');
+    await S(this.a(sh, [{ transform: 'none' }, { transform: 'rotate(-14deg)' }, { transform: 'rotate(10deg)' }, { transform: 'none' }], this.fast ? 140 : 220, { e: 'ease-in-out', fill: 'none' }));
+    this.sfx.pop(i, sp.tier);
+    const c = this.center(mb);
+    this.emit(c.x, c.y - 6, sp.tier === 'c' ? 12 : 22, { cols: sp.tier === 'c' ? ['#c3cad4', '#7d8794'] : [sp.glow, '#ffd9b8'], sp: [1.5, 5], r: [1.2, 3], g: 0.04, drag: 0.92, life: [0.4, 0.8] });
+    this.a(top, [{ transform: 'none' }, { transform: 'rotate(-125deg)' }], 280, { e: 'cubic-bezier(.3,1.5,.5,1)' });
+    this.a(mb, [{ opacity: 1, transform: 'none' }, { opacity: 0, transform: 'translateY(10px) scale(.5)' }], 300, { d: 110 });
+    this.a(img, [{ opacity: 0, transform: 'translateY(30px) scale(.2)' }, { opacity: 1, transform: 'translateY(-10px) scale(1.12)', offset: 0.6 }, { opacity: 1, transform: 'none' }], 480, { d: 60, e: 'cubic-bezier(.2,.9,.3,1)' });
+    this.a(lab, [{ opacity: 0, transform: 'translateY(8px)' }, { opacity: 1, transform: 'none' }], 320, { d: 220 });
+    await S(this.sleep(this.fast ? 160 : 300));
+  }
+
+  async ceremony(i, S) {
+    const sp = this.state.pack[i], col = sp.glow, leg = sp.tier === 'l';
+    const cer = this.$('cer'); cer.getAnimations({ subtree: true }).forEach(an => an.cancel());
+    this.setState({ cer: i }); await S(this.sleep(40));
+    const mb = this.slot(i, 'mball'), msh = this.slot(i, 'mShake');
+    this.a(msh, [{ filter: 'drop-shadow(0 0 0px rgba(0,0,0,0))' }, { filter: `drop-shadow(0 0 12px ${col})` }], 500);
+    this.a(msh, [{ transform: 'none' }, { transform: 'translateX(-3px) rotate(-6deg)' }, { transform: 'translateX(3px) rotate(6deg)' }, { transform: 'none' }], 120, { it: 5, fill: 'none' });
+    await S(this.sleep(650));
+    this.frozen = true; this.sfx.freeze(); this.vib(20);
+    for (let j = 0; j < 5; j++) if (j !== i) this.a(this.slot(j), [{ opacity: 1, transform: 'none' }, { opacity: 0.06, transform: 'translateY(50px) scale(.94)' }], 600);
+    this.a(this.slot(i, 'slabel'), [{ opacity: 0 }, { opacity: 0 }], 1);
+    this.a(this.$('dark'), [{ opacity: 0 }, { opacity: leg || sp.shiny ? 0.72 : 0.58 }], 900);
+    this.a(this.$('glowA'), [{ opacity: 1 }, { opacity: 0 }], 900);
+    const gb = this.$('glowB'); this.setS(gb, { background: `radial-gradient(70% 45% at 50% 46%, ${rgba(col, 0.16)}, ${rgba(col, 0)} 100%)` });
+    this.a(gb, [{ opacity: 0 }, { opacity: 1 }], 1100);
+    const cb = this.$('cball'), r1 = this.center(mb), r2 = this.center(cb);
+    this.a(mb, [{ opacity: 0 }, { opacity: 0 }], 1);
+    this.a(cb, [{ opacity: 1, transform: `translate(${r1.x - r2.x}px, ${r1.y - r2.y}px) scale(${r1.w / r2.w})` }, { opacity: 1, transform: 'none' }], 850, { e: 'cubic-bezier(.2,.9,.2,1)' });
+    this.a(this.$('cShake'), [{ filter: `drop-shadow(0 0 12px ${col})` }, { filter: `drop-shadow(0 0 26px ${col})` }], 850);
+    this.sfx.whoosh(true);
+    await S(this.sleep(1050));
+    const rays = this.$('rays');
+    if (leg) { this.a(rays, [{ opacity: 0 }, { opacity: 0.85 }], 3200, { e: 'ease-in' }); this.a(rays, [{ transform: 'rotate(0deg)' }, { transform: 'rotate(360deg)' }], 50000, { it: Infinity, e: 'linear', fill: 'none' }); }
+    const pauses = leg ? [520, 680, 980] : [420, 560, 820];
+    for (let k = 0; k < 3; k++) {
+      this.sfx.tok(k); this.vib(12);
+      this.a(this.$('cShake'), [{ transform: 'rotate(0)' }, { transform: 'rotate(-24deg)', offset: 0.25 }, { transform: 'rotate(18deg)', offset: 0.55 }, { transform: 'rotate(-6deg)', offset: 0.8 }, { transform: 'rotate(0)' }], 560, { e: 'ease-in-out', fill: 'none' });
+      this.a(this.$('cBtn'), [{ background: '#e4e7eb' }, { background: '#ffffff', boxShadow: `0 0 14px 4px ${col}` }, { background: '#e4e7eb' }], 560, { fill: 'none' });
+      if (sp.shiny) { const c = this.center(cb); setTimeout(() => this.sfx.glint(), 200); this.emit(c.x, c.y, 5, { cols: [CYAN, '#ffffff'], shape: 'star', sp: [0.5, 2], r: [4, 8], g: -0.01, drag: 0.96, free: true, life: [0.6, 1], jit: 50 }); }
+      if (leg) this.a(this.$('stage'), [{ transform: 'none' }, { transform: 'translate(-3px, 2px)' }, { transform: 'translate(3px, -1px)' }, { transform: 'none' }], 90, { it: 5, fill: 'none', e: 'linear' });
+      await S(this.sleep(560 + pauses[k]));
+    }
+    this.sfx.open(); this.vib([20, 30, 40]);
+    const cc = this.center(cb);
+    this.a(this.$('cTop'), [{ transform: 'none' }, { transform: 'rotate(-130deg)' }], 380, { e: 'cubic-bezier(.3,1.5,.5,1)' });
+    this.a(cb, [{ opacity: 1, transform: 'none' }, { opacity: 0, transform: 'translateY(50px) scale(.7)' }], 520, { d: 260 });
+    const halo = this.$('halo'); this.setS(halo, { background: `radial-gradient(circle, ${rgba(col, 0.5)}, ${rgba(col, 0)} 65%)` });
+    this.a(halo, [{ opacity: 0, transform: 'scale(.3)' }, { opacity: 1, transform: 'scale(1)' }], 800, { e: 'cubic-bezier(.2,.9,.2,1)' });
+    const beam = this.$('beam'); this.setS(beam, { background: `radial-gradient(closest-side at 50% 62%, ${rgba(col, 0.5)}, ${rgba(col, 0)} 100%)` });
+    this.a(beam, [{ opacity: 0, transform: 'scaleY(0)' }, { opacity: 1, transform: 'scaleY(1)' }], 650, { e: 'cubic-bezier(.2,.9,.2,1)' });
+    this.emit(cc.x, cc.y, 60, { cols: [col, '#ffffff', col], sp: [3, 12], r: [1.5, 4], g: 0.06, drag: 0.94, free: true, life: [0.6, 1.4] });
+    if (sp.shiny) {
+      this.a(this.$('flash'), [{ opacity: 1 }, { opacity: 1, offset: 0.25 }, { opacity: 0 }], 180, { e: 'linear' });
+      this.emit(cc.x, cc.y, 34, { cols: [CYAN, '#ffffff'], shape: 'star', sp: [2, 9], r: [4, 9], g: 0, drag: 0.93, free: true, life: [0.8, 1.6] });
+    }
+    const cspr = this.$('cspr'), img = this.$('cimg'), sil = `brightness(0) drop-shadow(0 0 16px ${col})`;
+    this.a(img, [{ filter: sil }, { filter: sil }], 1);
+    this.a(cspr, [{ opacity: 0, transform: 'translateY(90px) scale(.25)' }, { opacity: 1, transform: 'none' }], 1600, { d: 120, e: 'cubic-bezier(.16,1,.3,1)' });
+    this.sfx.rise();
+    await S(this.sleep(1750));
+    this.a(img, [{ filter: sil }, { filter: `brightness(1) drop-shadow(0 0 0px ${col})` }], 460, { e: 'ease-out' });
+    if (!sp.shiny) this.a(this.$('flash'), [{ opacity: 0.28 }, { opacity: 0 }], 360, { e: 'ease-out' });
+    this.sfx.chord(sp.tier, sp.shiny); this.vib(30);
+    const ic = this.center(img);
+    this.emit(ic.x, ic.y, 44, { cols: [col, '#ffffff'], sp: [5, 11], r: [1.5, 3.5], g: 0, drag: 0.9, free: true, shape: 'spark', life: [0.4, 0.8] });
+    this.a(this.$('cfloat'), [{ transform: 'translateY(0)' }, { transform: 'translateY(-10px)' }], 1700, { it: Infinity, dir: 'alternate', e: 'ease-in-out', fill: 'none' });
+    if (sp.shiny) {
+      const shn = this.$('cshine'); this.setS(shn, { maskImage: `url("${sp.src}")`, webkitMaskImage: `url("${sp.src}")` });
+      this.a(shn, [{ opacity: 1, backgroundPosition: '100% 0' }, { opacity: 1, backgroundPosition: '0% 0' }], 950, { d: 250, it: 2, e: 'ease-in-out', fill: 'none' });
+    }
+    if (sp.shiny || leg) this.twinkle = { el: img, col: sp.shiny ? CYAN : '#FFC94D' };
+    await S(this.sleep(450));
+    const letters = this.$('cname').querySelectorAll('[data-l]');
+    letters.forEach((l, k) => this.a(l, [{ opacity: 0, transform: 'translateY(40px) rotate(10deg) scale(.7)' }, { opacity: 1, transform: 'none' }], 560, { d: k * 48, e: 'cubic-bezier(.2,1.5,.4,1)' }));
+    await S(this.sleep(letters.length * 48 + 320));
+    this.a(this.$('cchips'), [{ opacity: 0, transform: 'translateY(10px)' }, { opacity: 1, transform: 'none' }], 420);
+    await S(this.sleep(180));
+    this.a(this.$('cmeta'), [{ opacity: 0, transform: 'translateY(10px)' }, { opacity: 1, transform: 'none' }], 420);
+    await S(this.sleep(600));
+    const nx = this.$('cnext');
+    this.a(nx, [{ opacity: 0 }, { opacity: 1 }], 400);
+    this.a(nx, [{ opacity: 1 }, { opacity: 0.35 }], 900, { d: 400, it: Infinity, dir: 'alternate', e: 'ease-in-out', fill: 'none' });
+    await S(new Promise(res => { this.tapResolve = res; }));
+    this.tapResolve = null; this.twinkle = null; this.sfx.whoosh(false);
+    this.a(this.$('cinfo'), [{ opacity: 1 }, { opacity: 0 }], 260);
+    const simg = this.slot(i, 'sspr'), t1 = this.center(simg.getBoundingClientRect().width ? simg : this.slot(i, 'sbox')), t2 = this.center(img);
+    this.$('cfloat').getAnimations().forEach(an => an.cancel());
+    this.a(cspr, [{ opacity: 1, transform: 'none' }, { opacity: 1, transform: `translate(${t1.x - t2.x}px, ${t1.y - t2.y}px) scale(${Math.max(0.15, t1.h / t2.h)})` }], 680, { e: 'cubic-bezier(.6,0,.2,1)' });
+    [['dark', 0], ['glowB', 0], ['halo', 0], ['beam', 0], ['rays', 0], ['glowA', 1]].forEach(([k, v]) => { const el = this.$(k); this.a(el, [{ opacity: getComputedStyle(el).opacity }, { opacity: v }], 700); });
+    for (let j = 0; j < 5; j++) if (j !== i) this.a(this.slot(j), [{ opacity: 0.06, transform: 'translateY(50px) scale(.94)' }, { opacity: 1, transform: 'none' }], 700, { d: 150 });
+    await S(this.sleep(680));
+    this.a(cspr, [{ opacity: 0 }, { opacity: 0 }], 1);
+    this.a(simg, [{ opacity: 1, transform: 'scale(1.18)' }, { opacity: 1, transform: 'none' }], 360, { e: 'cubic-bezier(.2,1.5,.4,1)' });
+    this.a(this.slot(i, 'slabel'), [{ opacity: 0, transform: 'translateY(8px)' }, { opacity: 1, transform: 'none' }], 320);
+    const sc = this.center(simg); this.emit(sc.x, sc.y, 18, { cols: [col, '#ffffff'], sp: [1.5, 5], r: [1.2, 3], g: 0.03, drag: 0.92, life: [0.4, 0.8] });
+    this.sfx.land(i); this.frozen = false;
+    if (sp.shiny) this.sparkSlots.push(i);
+    await S(this.sleep(450));
+  }
+
+  async toSummary(S) {
+    this.mode = 'summary';
+    const d = new Date();
+    this.setState({ phase: 'summary', openedAt: `${pad(d.getHours(), 2)}:${pad(d.getMinutes(), 2)}`, openedMs: d.getTime(), now: Date.now() });
+    clearInterval(this.clock); this.clock = setInterval(() => this.setState({ now: Date.now() }), 1000);
+    await S(this.sleep(40));
+    this.sfx.summary(); this.sparkSlots = [];
+    const sum = this.$('sum'); sum.scrollTop = 0;
+    this.setS(sum, { visibility: 'visible' });
+    this.a(sum, [{ clipPath: 'circle(0% at 50% 85%)' }, { clipPath: 'circle(150% at 50% 85%)' }], 1050, { e: 'cubic-bezier(.7,0,.2,1)' });
+    this.a(this.$('sumHead'), [{ opacity: 0, transform: 'translateY(24px)' }, { opacity: 1, transform: 'none' }], 700, { d: 380, fill: 'backwards' });
+    this.root.querySelectorAll('[data-card]').forEach((c, k) => {
+      this.setS(c, { opacity: '1' });
+      this.a(c, [{ opacity: 0, transform: 'translateY(70px) rotateX(-28deg) scale(.9)' }, { opacity: 1, transform: 'none' }], 820, { d: 480 + k * 90, e: 'cubic-bezier(.2,1.3,.4,1)', fill: 'backwards' });
+    });
+    this.a(this.$('sumFoot'), [{ opacity: 0, transform: 'translateY(20px)' }, { opacity: 1, transform: 'none' }], 600, { d: 1000, fill: 'backwards' });
+  }
+
+  tapNow() {
+    if (this.tapResolve) { this.tapResolve(); return; }
+    if (this.mode === 'run' && Date.now() - (this.burstAt || 0) > 1600) this.fast = true;
+  }
+
+  replay() {
+    this.tok++; clearInterval(this.clock);
+    const root = this.root; root.getAnimations({ subtree: true }).forEach(an => an.cancel());
+    for (let k = this.touched.length - 1; k >= 0; k--) { const [el, p, v] = this.touched[k]; el.style[p] = v; }
+    this.touched = []; this.fx.ps = []; this.frozen = false; this.twinkle = null; this.sparkSlots = []; this.fast = false; this.tapResolve = null;
+    this.charge = 0; this.charging = false; this.auto = false; this.mode = 'idle';
+    root.querySelectorAll('[data-card]').forEach(c => { c.style.transform = ''; });
+    const s = this.state, nonce = s.nonce + 1, seed = toHex(crypto.getRandomValues(new Uint8Array(32))), mode = this.props.roteiro ?? 'Raro + shiny';
+    const pack = derive(seed, s.clientSeed, nonce, mode); this.preload(pack);
+    this.setState({ mode, serverSeed: seed, hash: toHex(sha256(enc.encode(seed))), nonce, pack, phase: 'idle', cer: null, ficha: null, proof: false }, () => this.introIdle());
+  }
+
+  renderVals() {
+    const s = this.state, pack = s.pack, light = s.phase === 'summary';
+    this.sfx.on = (this.props.som ?? true) && !s.muted;
+    if (!this.sfx.on) this.sfx.rumble(0);
+    const cp = s.cer != null ? pack[s.cer] : null;
+    const mintGold = p => p.mintNum <= 10;
+    const panel = p => `radial-gradient(70% 60% at 50% 55%, ${rgba(p.glow, p.tier === 'c' && !p.shiny ? 0.16 : 0.34)}, ${rgba(p.glow, 0)} 100%), #1c1f26`;
+    const holo = p => p.shiny
+      ? `linear-gradient(${p.holo.angle}deg, rgba(77,217,232,0) 18%, rgba(77,217,232,0.55) 36%, rgba(255,201,77,0.4) 50%, rgba(242,77,77,0.32) 62%, rgba(77,217,232,0) 82%)`
+      : `linear-gradient(${p.holo.angle}deg, rgba(255,255,255,0) 30%, rgba(255,255,255,${(0.42 * p.holo.inten).toFixed(2)}) 46%, rgba(255,255,255,0) 62%)`;
+    const holoPos = p => `${p.holo.off}% 50%`;
+    const best = pack.find(p => p.shiny) || pack.find(p => p.tier === 'l') || pack.find(p => p.tier === 'r') || pack[4];
+    const cnt = { c: 0, i: 0, r: 0, l: 0 }; pack.forEach(p => cnt[p.tier]++);
+    const shinyN = pack.filter(p => p.shiny).length;
+    const subParts = [`${cnt.c} ${cnt.c === 1 ? 'comum' : 'comuns'}`, cnt.i && `${cnt.i} ${cnt.i === 1 ? 'incomum' : 'incomuns'}`, cnt.r && `${cnt.r} ${cnt.r === 1 ? 'raro' : 'raros'}`, cnt.l && `${cnt.l} lendário`, shinyN && `${shinyN} shiny`].filter(Boolean);
+    const left = Math.max(0, (s.openedMs || s.now) + 864e5 - s.now), sec = Math.floor(left / 1000);
+    const fp = s.ficha != null ? pack[s.ficha] : null;
+    return {
+      root: this.ref('root'),
+      today: new Date().toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' }).replace('.', ''),
+      hint: (this.props.abertura ?? 'Segurar') === 'Tocar' ? 'Toque na bola para abrir' : 'Segure a bola para abrir',
+      hashShort: `${s.hash.slice(0, 6)}…${s.hash.slice(-4)}`, hash: s.hash, serverSeed: s.serverSeed, nonce: s.nonce, clientSeed: s.clientSeed,
+      onSeed: e => { const v = e.target.value.replace(/\s/g, '').slice(0, 24); this.setState({ clientSeed: v, pack: derive(s.serverSeed, v || 'x', s.nonce, s.mode) }); },
+      endSeed: () => this.setState(st => ({ clientSeed: st.clientSeed || 'lin-sorte', pack: derive(st.serverSeed, st.clientSeed || 'lin-sorte', st.nonce, st.mode) }), () => this.preload(this.state.pack)),
+      seedKey: e => { if (e.key === 'Enter') e.target.blur(); },
+      press: e => { e.preventDefault(); e.stopPropagation(); this.startCharge(); },
+      release: () => { this.charging = false; },
+      tap: () => this.tapNow(),
+      stop: e => e.stopPropagation(),
+      slots: pack.map(p => ({ i: p.i, src: p.src, fb: p.fb, name: p.name, bar: p.shiny ? CYAN : p.T.color === '#463C39' ? '#7d8794' : p.T.color })),
+      cerSrc: cp ? cp.src : '', cerFb: cp ? cp.fb : '',
+      cerLetters: cp ? Array.from(cp.name).map(c => ({ c })) : [],
+      cerTier: cp ? cp.T.label : '', cerTierBg: cp ? cp.T.color : '#463C39', cerTierFg: cp ? cp.T.fg : '#ffffff', cerShinyDisp: cp && cp.shiny ? 'flex' : 'none', seedSize: Math.max(6, s.clientSeed.length + 1),
+      cerMint: cp ? cp.mint : '', cerMintBg: cp && mintGold(cp) ? '#FFC94D' : 'rgba(255,255,255,0.1)', cerMintFg: cp && mintGold(cp) ? '#2b2f36' : '#c3cad4',
+      cerMeta: cp ? [cp.mintNum === 1 ? `Primeiro ${cp.name} do servidor` : null, `${cp.size}, ${cp.sizeTxt}`, `IV ${cp.ivTotal}/186`, cp.nature].filter(Boolean).join(' · ') : '',
+      openedAt: s.openedAt || '',
+      sumTitle: best.shiny ? `${best.name} shiny no pack de hoje` : best.tier === 'l' ? `${best.name} lendário no pack de hoje` : `${best.name} no pack de hoje`,
+      sumSub: `5 espécimes · ${subParts.join(' · ')}`,
+      cards: pack.map(p => ({
+        i: p.i, name: p.name, dex: p.dex, src: p.src, fb: p.fb, shiny: p.shiny, mint: p.mint, mintFg: mintGold(p) ? '#FFC94D' : '#7d8794',
+        panel: panel(p), ring: p.shiny ? 'inset 0 0 0 2px #4dd9e8' : 'none', holo: holo(p), holoPos: holoPos(p), holoOp: p.shiny ? 0.9 : 0.6,
+        tier: p.T.label, tierBg: p.T.color, tierFg: p.T.fg, size: p.size, nature: p.nature, natureCol: p.natureCol, iv: p.ivTotal, ivPct: `${Math.round(p.ivTotal / 186 * 100)}%`,
+        move: e => {
+          const c = e.currentTarget, r = c.getBoundingClientRect(), px = (e.clientX - r.left) / r.width, py = (e.clientY - r.top) / r.height;
+          c.style.transform = `perspective(800px) rotateX(${((0.5 - py) * 12).toFixed(2)}deg) rotateY(${((px - 0.5) * 14).toFixed(2)}deg) translateY(-6px)`;
+          const h = c.querySelector('[data-holo]'); if (h) h.style.backgroundPosition = `${(px * 100).toFixed(1)}% ${(py * 100).toFixed(1)}%`;
+        },
+        leave: e => { const c = e.currentTarget; c.style.transform = ''; const h = c.querySelector('[data-holo]'); if (h) h.style.backgroundPosition = holoPos(p); },
+        open: () => this.setState({ ficha: p.i }),
+      })),
+      countdown: `${pad(Math.floor(sec / 3600), 2)}:${pad(Math.floor(sec / 60) % 60, 2)}:${pad(sec % 60, 2)}`,
+      openProof: () => this.setState({ proof: true }), closeProof: () => this.setState({ proof: false }),
+      replay: () => this.replay(),
+      hasProof: s.proof, scripted: s.mode !== 'Sorteio real',
+      proofRows: pack.map(p => ({ n: p.i + 1, hmac: `${p.seedHex.slice(0, 16)}…`, name: p.shiny ? `${p.name} shiny` : p.name, col: p.shiny ? CYAN : p.T.color === '#463C39' ? '#7d8794' : p.T.color })),
+      hasFicha: !!fp, closeFicha: () => this.setState({ ficha: null }),
+      f: fp ? {
+        name: fp.name, dex: fp.dex, src: fp.src, fb: fp.fb, panel: panel(fp), holo: holo(fp), holoPos: holoPos(fp), holoOp: fp.shiny ? 0.45 : 0.4,
+        tier: fp.T.label, tierBg: fp.T.color, tierFg: fp.T.fg, shiny: fp.shiny, mint: fp.mint, mintFg: mintGold(fp) ? '#FFC94D' : '#c3cad4',
+        size: fp.size, sizeTxt: fp.sizeTxt, sizePos: `${(fp.sizeRoll * 100).toFixed(1)}%`, nature: fp.nature, natureCol: fp.natureCol, iv: fp.ivTotal,
+        ivRows: fp.ivs.map((v, k) => ({ k: STATS[k], v, pct: `${Math.round(v / 31 * 100)}%`, fg: v === 31 ? '#FFC94D' : '#ffffff' })),
+        hash: `${fp.hash.slice(0, 6)}…${fp.hash.slice(-4)}`,
+        caught: fp.caught.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric' }).replace('.', ''),
+      } : {},
+      soundOn: !s.muted, soundOff: s.muted, muteLabel: s.muted ? 'Ligar som' : 'Desligar som',
+      toggleMute: e => { e.stopPropagation(); this.sfx.init(); this.setState({ muted: !s.muted }); },
+      hudBg: light ? '#ffffff' : 'rgba(255,255,255,0.08)', hudFg: light ? '#2b2f36' : '#c3cad4', hudSh: light ? '0 2px 6px rgba(28,32,38,0.08)' : 'none',
+    };
+  }
+}
+</script>
+</body>
+</html>
