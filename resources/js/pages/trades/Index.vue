@@ -62,15 +62,20 @@ const empty = computed(
 const picking = ref(false);
 
 // A cerimônia toca quando o servidor manda (troca nova aceita, ou "Ver
-// resumo" de uma concluída). O poll não recarrega `ceremony`.
-const showCeremony = ref(props.ceremony !== null);
+// resumo" de uma concluída) e fica até fechar: o aviso de "vi" recarrega a
+// página e aí `ceremony` já vem nulo, mas isso não pode derrubar a cena.
+const playing = ref<TradeCeremonyData | null>(props.ceremony);
 watch(
-    () => props.ceremony?.tradeId,
-    (id) => (showCeremony.value = id !== undefined),
+    () => props.ceremony,
+    (next) => {
+        if (next && next.tradeId !== playing.value?.tradeId) {
+            playing.value = next;
+        }
+    },
 );
 
 function closeCeremony() {
-    showCeremony.value = false;
+    playing.value = null;
     router.get(
         tradesIndex.url({ query: { aba: 'concluidas' } }),
         {},
@@ -179,9 +184,9 @@ function go(tab: string) {
             </div>
         </div>
         <TradeCeremony
-            v-if="showCeremony && ceremony"
-            :key="ceremony.tradeId"
-            :data="ceremony"
+            v-if="playing"
+            :key="playing.tradeId"
+            :data="playing"
             @close="closeCeremony"
         />
     </GroupScreen>
