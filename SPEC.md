@@ -388,15 +388,15 @@ construir o resto.
 
 ### Fase 2, a prova
 
-- [ ] Commit e reveal de seeds
-- [ ] Página `/verificar`
-- [ ] Ficha detalhada do espécime com todos os atributos e o hash
+- [x] Commit e reveal de seeds
+- [x] Página `/verificar`
+- [x] Ficha detalhada do espécime com todos os atributos e o hash
 
 ### Fase 3, o social
 
-- [ ] Perfil público de cada jogador
-- [ ] Comparar dois espécimes da mesma espécie lado a lado
-- [ ] Ranking: mais espécies, mais shinies, maior IV, menor mint
+- [x] Perfil público de cada jogador
+- [x] Comparar dois espécimes da mesma espécie lado a lado
+- [x] Ranking: mais espécies, mais shinies, maior IV, menor mint (virou "Primeiros": quantos mint #1)
 
 ### Fase 4, as trocas
 

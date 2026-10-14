@@ -16,7 +16,7 @@ use Illuminate\Database\Eloquent\Builder;
 class BuildGroupFeed
 {
     /**
-     * @return array<int, array{id: int, isShiny: bool, trainerNickname: string, trainerAvatarSpritePath: string|null, speciesName: string, rarityTier: string, spritePath: string, mintNumber: int, caughtAgo: string}>
+     * @return array<int, array{id: int, isShiny: bool, trainerId: int, trainerNickname: string, trainerAvatarSpritePath: string|null, speciesName: string, rarityTier: string, spritePath: string, mintNumber: int, caughtAgo: string}>
      */
     public function handle(int $limit): array
     {
@@ -34,6 +34,7 @@ class BuildGroupFeed
             ->map(fn (Specimen $specimen): array => [
                 'id' => $specimen->id,
                 'isShiny' => $specimen->is_shiny,
+                'trainerId' => $specimen->opening->user->id,
                 'trainerNickname' => (string) $specimen->opening->user->nickname,
                 'trainerAvatarSpritePath' => $specimen->opening->user->avatarSpritePath(),
                 'speciesName' => $specimen->species->name,

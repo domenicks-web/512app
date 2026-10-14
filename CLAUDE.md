@@ -404,8 +404,7 @@ pushado pro `main`.
     - Conferir no Gmail o email real do "esqueci a senha" (disparado pro
       usuário em 14/10, 16h50; o SMTP aceitou).
     - `ResetUnownedAvatar` precisa ser chamado no `AcceptTrade` (fase 4).
-    - Fase 3 (próxima, primeira em dupla com o Kimi): perfil público,
-      comparar espécimes, rankings de shinies/IV/mint. Fase 4: trocas,
+    - Fase 4: trocas,
       Reverb, banimento. Fase 5: polimento (giroscópio, apelido no
       espécime).
     - PWA por último (pedido do usuário).
@@ -438,3 +437,27 @@ pushado pro `main`.
   `-p` aprova tudo sozinho, por isso o Kimi só trabalha na worktree. Tudo
   dele passa pela revisão do Claude e pelo `composer ci:check` antes de
   juntar.
+- **Fase 3 pronta (14/10, primeira em dupla com o Kimi)**: spec em
+  `docs/superpowers/specs/2026-10-14-fase-3-social-design.md`, plano em
+  `docs/superpowers/plans/2026-10-14-fase-3-social.md`.
+    - **Rankings (Kimi)**: `/ranking?por=especies|shinies|iv|primeiros`
+      (`RankingTab`, `BuildRanking` + uma Action por aba em
+      `app/Actions/Ranking/`, posição pelo `RankPositions`). "Menor mint"
+      do SPEC virou **Primeiros** (quantos mint #1,
+      `game.ranking.first_mint`). A Home continua no `BuildSpeciesRanking`.
+    - **Cartão de Treinador**: `/treinador/{user}` (`BuildTrainerCard`):
+      números, Pokédex, amizade (adicionar/aceitar pelos endpoints que já
+      existiam), Time (`FindTopSpecimens`, `game.profile.team_size` 6;
+      o `FindBestSpecimen` da Home usa ele) e coleção. Grade e ficha da
+      Coleção viraram `PokedexGrid` e `useSpecimenSheet`; a ficha ganhou o
+      slot `actions`.
+    - **Comparar**: `/comparar/{mine}/{theirs}` (`BuildComparison` valida e
+      dá 404; `CompareSpecimens` puro decide quem ganha). Botão "Comparar
+      com o meu" na ficha do cartão de outro jogador.
+    - Ranking, Amigos e Feed (`trainerId`) linkam pro cartão; `/perfil`
+      tem "Ver meu Cartão de Treinador".
+    - Conta de teste agora tem 6 packs abertos (30 espécimes) pra testar.
+- **Lições da dupla com o Kimi**: o K3 seguiu o plano à risca, rodou TDD
+  e o CI e relatou as decisões. Plano com código pronto funciona bem pra
+  ele. Tipo genérico de PHPStan com interseção (`T&array{...}`) não
+  resolve: não pôr isso em plano.

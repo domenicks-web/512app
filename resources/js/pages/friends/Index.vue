@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Form, usePoll } from '@inertiajs/vue3';
+import { Form, Link, usePoll } from '@inertiajs/vue3';
 import { computed, ref } from 'vue';
 import GroupScreen from '@/components/group/GroupScreen.vue';
 import TrainerAvatar from '@/components/group/TrainerAvatar.vue';
@@ -8,6 +8,7 @@ import GroupLayout from '@/layouts/GroupLayout.vue';
 import { formatFriendsOnline } from '@/lib/format';
 import { destroy } from '@/routes/friends';
 import { accept, store } from '@/routes/friends/requests';
+import { show as trainerShow } from '@/routes/trainer';
 
 defineOptions({ layout: [EntryLayout, GroupLayout] });
 
@@ -273,39 +274,50 @@ const cardShadow =
                             </Form>
                         </template>
                         <template v-else>
-                            <div class="relative">
-                                <TrainerAvatar
-                                    :sprite-path="friend.avatarSpritePath"
-                                />
-                                <span
-                                    v-if="friend.isOnline"
-                                    class="bg-online absolute -right-0.5 -bottom-0.5 size-3.5 rounded-full shadow-[0_0_0_2.5px_#fff]"
-                                    aria-hidden="true"
-                                />
-                            </div>
-                            <div class="flex min-w-0 flex-1 flex-col gap-px">
-                                <span
-                                    class="text-ink truncate text-[15.5px] font-black"
-                                >
-                                    {{ friend.nickname
-                                    }}<span class="text-faint-2"
-                                        >#{{ friend.tag }}</span
-                                    >
-                                </span>
-                                <span class="text-soft text-xs font-semibold">
-                                    {{ friend.ownedSpecies }} espécies ·
+                            <Link
+                                :href="trainerShow(friend.userId)"
+                                class="flex min-w-0 flex-1 items-center gap-3.5"
+                            >
+                                <div class="relative">
+                                    <TrainerAvatar
+                                        :sprite-path="friend.avatarSpritePath"
+                                    />
                                     <span
-                                        :class="
-                                            friend.isOnline ? 'text-online' : ''
-                                        "
-                                        >{{
-                                            friend.isOnline
-                                                ? 'online'
-                                                : 'offline'
-                                        }}</span
+                                        v-if="friend.isOnline"
+                                        class="bg-online absolute -right-0.5 -bottom-0.5 size-3.5 rounded-full shadow-[0_0_0_2.5px_#fff]"
+                                        aria-hidden="true"
+                                    />
+                                </div>
+                                <div
+                                    class="flex min-w-0 flex-1 flex-col gap-px"
+                                >
+                                    <span
+                                        class="text-ink truncate text-[15.5px] font-black"
                                     >
-                                </span>
-                            </div>
+                                        {{ friend.nickname
+                                        }}<span class="text-faint-2"
+                                            >#{{ friend.tag }}</span
+                                        >
+                                    </span>
+                                    <span
+                                        class="text-soft text-xs font-semibold"
+                                    >
+                                        {{ friend.ownedSpecies }} espécies ·
+                                        <span
+                                            :class="
+                                                friend.isOnline
+                                                    ? 'text-online'
+                                                    : ''
+                                            "
+                                            >{{
+                                                friend.isOnline
+                                                    ? 'online'
+                                                    : 'offline'
+                                            }}</span
+                                        >
+                                    </span>
+                                </div>
+                            </Link>
                             <button
                                 type="button"
                                 :aria-label="`Desfazer amizade com ${friend.nickname}`"

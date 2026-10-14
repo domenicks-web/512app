@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { useForm, usePage } from '@inertiajs/vue3';
+import { Link, useForm, usePage } from '@inertiajs/vue3';
 import { computed, ref } from 'vue';
 import BirthdateWheels from '@/components/entry/BirthdateWheels.vue';
 import EntryField from '@/components/entry/EntryField.vue';
@@ -14,6 +14,7 @@ import EntryLayout from '@/layouts/EntryLayout.vue';
 import GroupLayout from '@/layouts/GroupLayout.vue';
 import { update as updateAvatar } from '@/routes/profile/avatar';
 import { show as settingsShow } from '@/routes/settings';
+import { show as trainerShow } from '@/routes/trainer';
 import { update as updateBirthdate } from '@/routes/profile/birthdate';
 import {
     destroy as cancelEmailChange,
@@ -51,7 +52,10 @@ const props = defineProps<{
     emailChangeLinkMinutes: number;
 }>();
 
-const page = usePage<{ flash: { profile_status: string | null } }>();
+const page = usePage<{
+    flash: { profile_status: string | null };
+    auth: { user: { id: number } | null };
+}>();
 const status = computed(() => page.props.flash.profile_status);
 
 // O avatar do cartão só troca quando o sprite escolhido pousa nele.
@@ -200,6 +204,14 @@ const primaryButton =
 <template>
     <GroupScreen title="Editar perfil" :back="settingsShow()">
         <div class="mx-auto flex w-full max-w-[560px] flex-col gap-5">
+            <Link
+                v-if="page.props.auth.user"
+                data-enter
+                :href="trainerShow(page.props.auth.user.id)"
+                class="text-brand-ink self-start rounded-full bg-white px-4 py-2 text-[13px] font-extrabold shadow-[0_1px_3px_rgba(28,32,38,0.1)] transition-transform active:scale-[0.98]"
+            >
+                Ver meu Cartão de Treinador →
+            </Link>
             <p
                 v-if="status"
                 role="status"

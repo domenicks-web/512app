@@ -172,6 +172,7 @@ it('lista no feed só as aberturas boas, mais recentes primeiro, com quem abriu'
             ->where('entries.0.speciesName', 'Rattata')
             ->where('entries.0.isShiny', true)
             ->where('entries.0.spritePath', 'species/19/shiny.png')
+            ->where('entries.0.trainerId', $opener->id)
             ->where('entries.0.trainerNickname', 'Ramon')
             ->where('entries.0.caughtAgo', 'há 12 minutos')
             ->where('entries.1.speciesName', 'Mewtwo')

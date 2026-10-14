@@ -8,6 +8,7 @@ import EntryLayout from '@/layouts/EntryLayout.vue';
 import GroupLayout from '@/layouts/GroupLayout.vue';
 import { CYAN } from '@/lib/pack/meta';
 import { show as rankingShow } from '@/routes/ranking';
+import { show as trainerShow } from '@/routes/trainer';
 
 defineOptions({ layout: [EntryLayout, GroupLayout] });
 
@@ -56,11 +57,15 @@ const viewerRow = computed(() =>
 
 const subtitle = computed(() => {
     if (viewerRow.value?.position) {
-        return `Você está em ${viewerRow.value.position}º em ${current.value.label.toLowerCase()}`;
+        return `Você está em ${viewerRow.value.position}º em ${current.value.key === 'iv' ? 'maior IV' : current.value.label.toLowerCase()}`;
     }
 
-    return props.tab === 'primeiros'
-        ? 'Seja o primeiro a abrir uma espécie pra entrar'
+    if (props.tab === 'primeiros') {
+        return 'Seja o primeiro a abrir uma espécie pra entrar';
+    }
+
+    return props.tab === 'shinies'
+        ? 'Tire um shiny pra entrar nesse ranking'
         : 'Abra um pack pra entrar no ranking';
 });
 
@@ -82,7 +87,7 @@ const valueUnit = (row: RankingRow): string =>
                     :href="rankingShow.url({ query: { por: tab.key } })"
                     preserve-scroll
                     :aria-current="tab.key === props.tab ? 'page' : undefined"
-                    class="rounded-full px-4 py-2 text-[13px] font-extrabold whitespace-nowrap transition-colors"
+                    class="rounded-full px-3 py-2 text-[13px] font-extrabold whitespace-nowrap transition-colors sm:px-4"
                     :class="
                         tab.key === props.tab
                             ? 'text-ink bg-white shadow-[0_1px_3px_rgba(28,32,38,0.1)]'
@@ -94,96 +99,96 @@ const valueUnit = (row: RankingRow): string =>
             </nav>
 
             <ol class="flex flex-col gap-2.5">
-                <li
-                    v-for="row in rows"
-                    :key="row.userId"
-                    data-enter
-                    class="flex items-center gap-3.5 rounded-[22px] p-3 pr-5"
-                    :class="
-                        row.position === 1
-                            ? 'bg-ink text-white shadow-[0_2px_4px_rgba(28,32,38,0.06),0_14px_30px_rgba(28,32,38,0.16)]'
-                            : 'text-ink bg-white shadow-[0_2px_4px_rgba(28,32,38,0.05),0_8px_18px_rgba(28,32,38,0.07)]'
-                    "
-                >
-                    <span
-                        class="w-11 shrink-0 text-center text-[26px] leading-none font-black tracking-[-0.03em]"
+                <li v-for="row in rows" :key="row.userId" data-enter>
+                    <Link
+                        :href="trainerShow(row.userId)"
+                        class="flex items-center gap-3.5 rounded-[22px] p-3 pr-5 transition-transform active:scale-[0.98]"
                         :class="
-                            row.position === null
-                                ? 'text-placeholder'
-                                : row.position === 1
-                                  ? 'text-white'
-                                  : ''
+                            row.position === 1
+                                ? 'bg-ink text-white shadow-[0_2px_4px_rgba(28,32,38,0.06),0_14px_30px_rgba(28,32,38,0.16)]'
+                                : 'text-ink bg-white shadow-[0_2px_4px_rgba(28,32,38,0.05),0_8px_18px_rgba(28,32,38,0.07)]'
                         "
-                        >{{
-                            row.position === null ? '—' : `${row.position}º`
-                        }}</span
                     >
-                    <TrainerAvatar
-                        :sprite-path="row.avatarSpritePath"
-                        size="sm"
-                        :highlighted="row.userId === viewerId"
-                    />
-                    <div class="flex min-w-0 flex-col">
-                        <span class="truncate text-[15.5px] font-black">
-                            {{ row.nickname }}
-                            <span
-                                v-if="row.userId === viewerId"
-                                class="text-brand text-xs font-black"
-                                >você</span
-                            >
-                        </span>
-                    </div>
-                    <div class="ml-auto flex items-baseline gap-1">
                         <span
-                            v-if="tab === 'iv'"
-                            class="text-xs font-extrabold"
+                            class="w-11 shrink-0 text-center text-[26px] leading-none font-black tracking-[-0.03em]"
                             :class="
-                                row.position === 1
-                                    ? 'text-[#c3cad4]'
-                                    : 'text-soft'
+                                row.position === null
+                                    ? 'text-placeholder'
+                                    : row.position === 1
+                                      ? 'text-white'
+                                      : ''
                             "
-                            >IV</span
+                            >{{
+                                row.position === null ? '—' : `${row.position}º`
+                            }}</span
                         >
-                        <span
-                            class="text-[28px] leading-none font-black tracking-[-0.03em]"
-                            >{{ row.value }}</span
-                        >
-                        <span
-                            v-if="tab !== 'iv'"
-                            class="text-xs font-extrabold"
-                            :class="
-                                row.position === 1
-                                    ? 'text-[#c3cad4]'
-                                    : 'text-soft'
-                            "
-                            >{{ valueUnit(row) }}</span
-                        >
-                    </div>
-                    <div
-                        v-if="tab === 'iv' && row.specimen"
-                        class="flex w-12 shrink-0 flex-col items-center gap-0.5"
-                    >
-                        <FittedSprite
-                            :src="`/storage/${row.specimen.spritePath}`"
-                            :size="40"
-                            :alt="row.specimen.speciesName"
+                        <TrainerAvatar
+                            :sprite-path="row.avatarSpritePath"
+                            size="sm"
+                            :highlighted="row.userId === viewerId"
                         />
-                        <span
-                            class="max-w-full truncate text-[10px] leading-tight font-extrabold"
-                            :class="
-                                row.position === 1
-                                    ? 'text-[#c3cad4]'
-                                    : 'text-soft'
-                            "
-                            >{{ row.specimen.speciesName
-                            }}<span
-                                v-if="row.specimen.isShiny"
-                                :style="{ color: CYAN }"
+                        <div class="flex min-w-0 flex-col">
+                            <span class="truncate text-[15.5px] font-black">
+                                {{ row.nickname }}
+                                <span
+                                    v-if="row.userId === viewerId"
+                                    class="text-brand text-xs font-black"
+                                    >você</span
+                                >
+                            </span>
+                        </div>
+                        <div class="ml-auto flex items-baseline gap-1">
+                            <span
+                                v-if="tab === 'iv'"
+                                class="text-xs font-extrabold"
+                                :class="
+                                    row.position === 1
+                                        ? 'text-[#c3cad4]'
+                                        : 'text-soft'
+                                "
+                                >IV</span
                             >
-                                shiny</span
-                            ></span
+                            <span
+                                class="text-[28px] leading-none font-black tracking-[-0.03em]"
+                                >{{ row.value }}</span
+                            >
+                            <span
+                                v-if="tab !== 'iv'"
+                                class="text-xs font-extrabold"
+                                :class="
+                                    row.position === 1
+                                        ? 'text-[#c3cad4]'
+                                        : 'text-soft'
+                                "
+                                >{{ valueUnit(row) }}</span
+                            >
+                        </div>
+                        <div
+                            v-if="tab === 'iv' && row.specimen"
+                            class="flex w-12 shrink-0 flex-col items-center gap-0.5"
                         >
-                    </div>
+                            <FittedSprite
+                                :src="`/storage/${row.specimen.spritePath}`"
+                                :size="40"
+                                :alt="row.specimen.speciesName"
+                            />
+                            <span
+                                class="max-w-full truncate text-[10px] leading-tight font-extrabold"
+                                :class="
+                                    row.position === 1
+                                        ? 'text-[#c3cad4]'
+                                        : 'text-soft'
+                                "
+                                >{{ row.specimen.speciesName
+                                }}<span
+                                    v-if="row.specimen.isShiny"
+                                    :style="{ color: CYAN }"
+                                >
+                                    shiny</span
+                                ></span
+                            >
+                        </div>
+                    </Link>
                 </li>
             </ol>
         </div>
