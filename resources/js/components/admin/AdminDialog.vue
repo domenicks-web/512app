@@ -87,7 +87,7 @@ onBeforeUnmount(() => document.removeEventListener('keydown', onKeydown));
                     role="dialog"
                     aria-modal="true"
                     :aria-labelledby="labelledBy"
-                    class="admin-dialog-panel flex w-full max-w-[420px] flex-col items-center gap-[18px] rounded-[32px] bg-white px-7 pt-[30px] pb-[26px] text-center font-sans shadow-[0_30px_80px_rgba(28,31,38,0.35)]"
+                    class="admin-dialog-panel entry-light text-ink flex w-full max-w-[420px] flex-col items-center gap-[18px] rounded-[32px] bg-white px-7 pt-[30px] pb-[26px] text-center font-sans shadow-[0_30px_80px_rgba(28,31,38,0.35)]"
                 >
                     <slot />
                 </div>

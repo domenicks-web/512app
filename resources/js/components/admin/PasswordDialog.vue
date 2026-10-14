@@ -79,8 +79,8 @@ function submit() {
                 <p
                     class="text-soft text-[14.5px] leading-relaxed font-semibold"
                 >
-                    Sai de todos os aparelhos e recebe um email avisando. Passe
-                    a senha nova pra ele por fora.
+                    A conta sai de todos os aparelhos e recebe um email
+                    avisando. Passe a senha nova por fora.
                 </p>
             </div>
             <form

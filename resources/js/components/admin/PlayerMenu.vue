@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { router } from '@inertiajs/vue3';
-import { onBeforeUnmount, onMounted, ref } from 'vue';
+import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
 import { birthdate, verification } from '@/routes/admin/players';
 import AdminIcon from './AdminIcon.vue';
 import { showToast } from './toast';
@@ -81,6 +81,34 @@ function post(url: string, errorKey: string) {
     );
 }
 
+/**
+ * Item desabilitado mostra o motivo embaixo (no celular não tem tooltip).
+ */
+const items = computed(() => [
+    {
+        label: 'Liberar correção da data',
+        disabledReason: props.player.is_birthdate_locked
+            ? null
+            : 'Ainda não usou a correção que tem',
+        danger: false,
+        run: () => post(birthdate.url(props.player.id), 'birthdate'),
+    },
+    {
+        label: 'Reenviar email de confirmação',
+        disabledReason: props.player.is_email_verified
+            ? 'Email já confirmado'
+            : null,
+        danger: false,
+        run: () => post(verification.url(props.player.id), 'verification'),
+    },
+    {
+        label: 'Trocar senha',
+        disabledReason: props.isSelf ? 'A sua se troca no editar perfil' : null,
+        danger: true,
+        run: changePassword,
+    },
+]);
+
 function changePassword() {
     open.value = false;
     emit('changePassword', props.player);
@@ -108,49 +136,30 @@ function changePassword() {
                     top: `${position.top}px`,
                     right: `${position.right}px`,
                 }"
-                class="fixed z-40 flex w-max flex-col rounded-2xl bg-white p-1.5 text-left font-sans whitespace-nowrap shadow-[0_2px_4px_rgba(28,32,38,0.06),0_16px_40px_rgba(28,32,38,0.16)]"
+                class="entry-light text-ink fixed z-40 flex w-max flex-col rounded-2xl bg-white p-1.5 text-left font-sans whitespace-nowrap shadow-[0_2px_4px_rgba(28,32,38,0.06),0_16px_40px_rgba(28,32,38,0.16)]"
             >
                 <button
+                    v-for="item in items"
+                    :key="item.label"
                     type="button"
                     role="menuitem"
-                    class="hover:bg-field cursor-pointer rounded-xl px-3 py-2.5 text-left text-sm font-extrabold disabled:cursor-default disabled:opacity-40 disabled:hover:bg-transparent"
-                    :disabled="!player.is_birthdate_locked"
-                    :title="
-                        player.is_birthdate_locked
-                            ? undefined
-                            : 'Ainda não usou a correção que tem'
-                    "
-                    @click="post(birthdate.url(player.id), 'birthdate')"
+                    class="hover:bg-field flex cursor-pointer flex-col gap-0.5 rounded-xl px-3 py-2.5 text-left disabled:cursor-default disabled:hover:bg-transparent"
+                    :disabled="item.disabledReason !== null"
+                    @click="item.run"
                 >
-                    Liberar correção da data
-                </button>
-                <button
-                    type="button"
-                    role="menuitem"
-                    class="hover:bg-field cursor-pointer rounded-xl px-3 py-2.5 text-left text-sm font-extrabold disabled:cursor-default disabled:opacity-40 disabled:hover:bg-transparent"
-                    :disabled="player.is_email_verified"
-                    :title="
-                        player.is_email_verified
-                            ? 'Email já confirmado'
-                            : undefined
-                    "
-                    @click="post(verification.url(player.id), 'verification')"
-                >
-                    Reenviar email de confirmação
-                </button>
-                <button
-                    type="button"
-                    role="menuitem"
-                    class="hover:bg-field text-brand-ink cursor-pointer rounded-xl px-3 py-2.5 text-left text-sm font-extrabold disabled:cursor-default disabled:opacity-40 disabled:hover:bg-transparent"
-                    :disabled="isSelf"
-                    :title="
-                        isSelf
-                            ? 'Sua senha se troca no editar perfil'
-                            : undefined
-                    "
-                    @click="changePassword"
-                >
-                    Trocar senha
+                    <span
+                        class="text-sm font-extrabold"
+                        :class="[
+                            item.danger ? 'text-brand-ink' : 'text-ink',
+                            item.disabledReason ? 'opacity-40' : '',
+                        ]"
+                        >{{ item.label }}</span
+                    >
+                    <span
+                        v-if="item.disabledReason"
+                        class="text-faint-2 text-xs font-semibold"
+                        >{{ item.disabledReason }}</span
+                    >
                 </button>
             </div>
         </Teleport>
