@@ -288,6 +288,26 @@ pushado pro `main`.
   PHPStan com 1G). `composer ci:check` local reproduz o CI inteiro.
   Formatador ignora handoff, `docs/superpowers/` e `CLAUDE.md`.
 
+- **Estado do git ao pausar (13/10, 22h50)**: o branch `perfil` (editar
+  perfil, emails estilizados, sprites uniformes, voo do parceiro, sprites
+  sem seguir o mouse) **não foi mergeado nem enviado** — o usuário ainda não
+  decidiu. `main` está em dia com o `origin`. Gmail SMTP já configurado no
+  `.env` local (`512jogo@gmail.com`) e testado com envio real.
+
+- **Próxima sessão — combinado com o usuário** (cada item com brainstorm
+  antes de codar):
+    1. **Avatar da Pokédex no perfil**: além das 15 opções fixas, escolher
+       qualquer espécie que o jogador tem na coleção, com sprite shiny se
+       tiver shiny dela. Duas perguntas em aberto, a fazer de novo:
+       (a) se trocar/perder o espécime, o avatar continua (sugestão do
+       Claude) ou volta pro padrão? (b) tudo bem a seção "Da sua Pokédex"
+       ficar vazia até existir abertura de pack?
+    2. **Admin de verdade**: o usuário vai mandar um layout pra aplicar no
+       admin (hoje é `AdminShell` provisório). Funções novas: reenviar o
+       email de confirmação de um usuário e trocar a senha de outro
+       usuário.
+    3. **Subprojeto C — abertura de pack** (detalhe abaixo).
+
 - **Próximo subprojeto** (com brainstorm antes de codar):
     - **C — Tela de abertura de pack** (fundo escuro): a maior. Envolve criar a
       action `OpenPack` (transação + lock em `mint_number`, chamando
