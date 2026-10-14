@@ -294,11 +294,11 @@ defineExpose({ play, flyTo, vanish, cancel });
         </div>
         <div
             ref="counterWrap"
-            class="fixed right-0 left-0 flex justify-center opacity-0"
-            style="top: calc(50% + 136px)"
+            class="fixed right-0 left-0 flex -translate-y-1/2 justify-center opacity-0"
+            style="top: 50%"
         >
             <div
-                class="text-[15px] font-black tracking-[0.1em] tabular-nums"
+                class="bg-base rounded-full px-5 py-2.5 text-[15px] font-black tracking-[0.1em] tabular-nums shadow-[0_0_0_10px_var(--color-base),0_10px_30px_rgba(28,32,38,0.12)]"
                 :class="isCounterComplete ? 'text-brand' : 'text-faint'"
             >
                 {{ counter }}

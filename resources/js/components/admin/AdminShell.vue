@@ -164,10 +164,10 @@ onBeforeUnmount(() => document.removeEventListener('click', closeOnOutside));
                 v-if="toastMessage"
                 :key="toastKey"
                 role="status"
-                class="bg-ink fixed bottom-7 left-1/2 z-50 flex h-[46px] -translate-x-1/2 items-center gap-2.5 rounded-full pr-5 pl-3 text-sm font-extrabold whitespace-nowrap text-white shadow-[0_12px_30px_rgba(28,31,38,0.3)]"
+                class="admin-toast bg-ink fixed top-4 left-1/2 z-50 flex w-max max-w-[min(440px,calc(100vw-32px))] -translate-x-1/2 items-center gap-2.5 rounded-[22px] py-3 pr-5 pl-3 text-sm leading-snug font-extrabold text-white shadow-[0_12px_30px_rgba(28,31,38,0.3)] sm:top-auto sm:bottom-7"
             >
                 <span
-                    class="bg-online flex size-[22px] items-center justify-center rounded-full"
+                    class="bg-online flex size-[22px] shrink-0 items-center justify-center rounded-full"
                 >
                     <AdminIcon name="check" :size="12" />
                 </span>
@@ -185,10 +185,18 @@ onBeforeUnmount(() => document.removeEventListener('click', closeOnOutside));
         transform 0.3s cubic-bezier(0.2, 1.4, 0.4, 1);
 }
 
+/* No celular o aviso desce do topo; no desktop sobe do rodapé (handoff). */
 .admin-toast-enter-from,
 .admin-toast-leave-to {
     opacity: 0;
-    transform: translate(-50%, 12px);
+    transform: translate(-50%, -12px);
+}
+
+@media (min-width: 640px) {
+    .admin-toast-enter-from,
+    .admin-toast-leave-to {
+        transform: translate(-50%, 12px);
+    }
 }
 
 @media (prefers-reduced-motion: reduce) {

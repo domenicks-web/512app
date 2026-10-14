@@ -1,7 +1,8 @@
 import { prefersReducedMotion } from '@/lib/motion';
 
 /**
- * Campo de 512 pontos que fica atrás de todo o fluxo de entrada. Vive num
+ * Campo de 512 pontos que fica atrás de todo o fluxo de entrada (na
+ * abertura, cada ponto é uma pokébola e a grade cobre a tela inteira). Vive num
  * módulo (estado único) porque o canvas mora no layout persistente e
  * sobrevive às visitas do Inertia: login, cadastro, onboarding e home
  * conversam com o mesmo campo. Puramente decorativo.
@@ -29,7 +30,12 @@ type FieldMode = 'grid' | 'ambient' | 'point' | 'hide';
 const DOT_COUNT = 512;
 const COLUMNS = 32;
 const ROWS = 16;
-const GRID_SPACING = 13;
+/** Na abertura cada ponto é uma pokébola com esse tanto da célula de diâmetro. */
+const GRID_FILL = 0.84;
+/** Abaixo desse raio a pokébola não se lê: desenha só o ponto. */
+const POKEBALL_MIN_RADIUS = 3.5;
+const INK = '#2b2f36';
+const RED = '#f24d4d';
 /** O ponto vermelho, maior, que vira a onda que dá origem à cápsula. */
 export const SPECIAL_DOT = 245;
 
@@ -58,17 +64,71 @@ let canvas: HTMLCanvasElement | null = null;
 let frame = 0;
 let onGridCount: ((born: number) => void) | null = null;
 let disabled = false;
+let gridRadius = 2.1;
+let pokeballSprites: { ink: HTMLCanvasElement; red: HTMLCanvasElement } | null =
+    null;
+
+/**
+ * Pokébola de uma cor só (a mesma máscara do `PokeballMark`: disco menos a
+ * faixa e o anel, com o botão no meio), desenhada uma vez num canvas fora
+ * da tela e carimbada com `drawImage` em cada ponto.
+ */
+function pokeballSprite(color: string): HTMLCanvasElement {
+    const size = 96;
+    const sprite = document.createElement('canvas');
+    sprite.width = sprite.height = size;
+    const ctx = sprite.getContext('2d');
+
+    if (!ctx) {
+        return sprite;
+    }
+
+    const c = size / 2;
+    const unit = size / 20;
+    ctx.fillStyle = color;
+    ctx.beginPath();
+    ctx.arc(c, c, 10 * unit, 0, 6.2832);
+    ctx.fill();
+    ctx.globalCompositeOperation = 'destination-out';
+    ctx.fillRect(0, c - 1.1 * unit, size, 2.2 * unit);
+    ctx.beginPath();
+    ctx.arc(c, c, 4.6 * unit, 0, 6.2832);
+    ctx.fill();
+    ctx.globalCompositeOperation = 'source-over';
+    ctx.beginPath();
+    ctx.arc(c, c, 2.4 * unit, 0, 6.2832);
+    ctx.fill();
+
+    return sprite;
+}
+
+/** Grade da abertura: a tela inteira, deitada no PC e em pé no celular. */
+function gridShape(): { columns: number; rows: number; spacing: number } {
+    const isPortrait = height > width;
+    const columns = isPortrait ? ROWS : COLUMNS;
+    const rows = isPortrait ? COLUMNS : ROWS;
+
+    return { columns, rows, spacing: Math.min(width / columns, height / rows) };
+}
 
 function layout(target: 'grid' | 'ambient', snap: boolean) {
     mode = target;
-    dots.forEach((dot, i) => {
-        const col = i % COLUMNS;
-        const row = Math.floor(i / COLUMNS);
+    const grid = gridShape();
+    gridRadius = (grid.spacing * GRID_FILL) / 2;
 
+    dots.forEach((dot, i) => {
         if (target === 'grid') {
-            dot.tx = width / 2 + (col - 15.5) * GRID_SPACING;
-            dot.ty = height / 2 + (row - 7.5) * GRID_SPACING;
+            const col = i % grid.columns;
+            const row = Math.floor(i / grid.columns);
+            dot.tx = width / 2 + (col - (grid.columns - 1) / 2) * grid.spacing;
+            dot.ty = height / 2 + (row - (grid.rows - 1) / 2) * grid.spacing;
+
+            if (!dot.spawn && dot.tr > 0) {
+                dot.tr = gridDotRadius(i);
+            }
         } else {
+            const col = i % COLUMNS;
+            const row = Math.floor(i / COLUMNS);
             dot.tx = ((col + 0.5) * width) / COLUMNS;
             dot.ty = ((row + 0.5) * height) / ROWS;
         }
@@ -80,6 +140,10 @@ function layout(target: 'grid' | 'ambient', snap: boolean) {
             dot.vy = 0;
         }
     });
+}
+
+function gridDotRadius(index: number): number {
+    return index === SPECIAL_DOT ? gridRadius * 1.15 : gridRadius;
 }
 
 function resize() {
@@ -122,7 +186,7 @@ function tick(now: number) {
         if (dot.spawn) {
             if (now >= dot.spawn) {
                 dot.spawn = 0;
-                dot.tr = i === SPECIAL_DOT ? 3.4 : 2.1;
+                dot.tr = gridDotRadius(i);
                 dot.ta = i === SPECIAL_DOT ? 1 : 0.55;
                 dot.vr = 1.4;
             }
@@ -175,6 +239,17 @@ function tick(now: number) {
             continue;
         }
 
+        if (pokeballSprites && r >= POKEBALL_MIN_RADIUS) {
+            // Cinza → vermelho onde a onda passa, como a cor do ponto.
+            const size = r * 2;
+            context.globalAlpha = alpha * (1 - heat);
+            context.drawImage(pokeballSprites.ink, x - r, y - r, size, size);
+            context.globalAlpha = alpha * heat;
+            context.drawImage(pokeballSprites.red, x - r, y - r, size, size);
+            context.globalAlpha = 1;
+            continue;
+        }
+
         context.fillStyle = `rgba(${Math.round(43 + 199 * heat)},${Math.round(47 + 30 * heat)},${Math.round(54 + 23 * heat)},${alpha})`;
         context.beginPath();
         context.arc(x, y, r, 0, 6.2832);
@@ -197,6 +272,7 @@ export function mountDotField(element: HTMLCanvasElement): () => void {
     canvas = element;
     context = element.getContext('2d');
     disabled = prefersReducedMotion();
+    pokeballSprites ??= { ink: pokeballSprite(INK), red: pokeballSprite(RED) };
     resize();
     window.addEventListener('pointermove', handlePointerMove);
     document.addEventListener('pointerleave', handlePointerLeave);
@@ -214,7 +290,7 @@ export function mountDotField(element: HTMLCanvasElement): () => void {
 }
 
 export function useDotField() {
-    /** Acende os 512 pontos em ordem aleatória (curva rank^0.8) em 1.4s. */
+    /** Acende as 512 pokébolas em ordem aleatória (curva rank^0.8) em 1.4s, cobrindo a tela. */
     function grid(countCallback: (born: number) => void) {
         onGridCount = countCallback;
         layout('grid', true);
