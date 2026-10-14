@@ -52,7 +52,7 @@ class CompareSpecimens
             ],
             'info' => [
                 ['key' => 'size', 'mine' => strtoupper($mine->size_class->value), 'theirs' => strtoupper($theirs->size_class->value)],
-                ['key' => 'nature', 'mine' => ucfirst($mine->nature->value), 'theirs' => ucfirst($theirs->nature->value)],
+                ['key' => 'nature', 'mine' => $mine->nature->label(), 'theirs' => $theirs->nature->label()],
             ],
             'score' => [
                 'mine' => $winners['mine'] ?? 0,

@@ -62,7 +62,7 @@ it('refaz a conta e chega nos mesmos espécimes que o pack gravou', function () 
             ->speciesId->toBe($specimen->species_id)
             ->isShiny->toBe($specimen->is_shiny)
             ->sizeClass->toBe($specimen->size_class->value)
-            ->nature->toBe(ucfirst($specimen->nature->value))
+            ->nature->toBe($specimen->nature->label())
             ->ivs->toBe([$specimen->iv_hp, $specimen->iv_atk, $specimen->iv_def, $specimen->iv_spa, $specimen->iv_spd, $specimen->iv_spe]);
     }
 });
