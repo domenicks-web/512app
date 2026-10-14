@@ -60,6 +60,8 @@ const props = defineProps<{
         ownedSpecies: number;
         totalSpecimens: number;
     };
+    /** Espécies de quem vê (vazio no próprio cartão), pro "Em comum". */
+    viewerSpeciesIds: number[];
 }>();
 
 const percent = computed(() =>
@@ -325,6 +327,8 @@ const pill =
                     :species="collection.species"
                     :loading-id="sheet.loadingId.value"
                     :of-other="!trainer.isViewer"
+                    :common-ids="trainer.isViewer ? null : viewerSpeciesIds"
+                    :empty-common="`Você e ${trainer.nickname} ainda não têm nenhuma espécie em comum.`"
                     :empty-owned="
                         trainer.isViewer
                             ? 'Nenhuma espécie ainda. O pack de hoje te espera.'

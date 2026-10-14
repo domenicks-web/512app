@@ -24,8 +24,8 @@ class BuildFriendList
     /**
      * @return array{
      *     friends: array<int, array{friendshipId: int, userId: int, nickname: string, tag: string, avatarSpritePath: string|null, ownedSpecies: int, isOnline: bool}>,
-     *     incoming: array<int, array{friendshipId: int, nickname: string, tag: string, avatarSpritePath: string|null, sentAgo: string}>,
-     *     outgoing: array<int, array{friendshipId: int, nickname: string, tag: string, avatarSpritePath: string|null, sentAgo: string}>,
+     *     incoming: array<int, array{friendshipId: int, userId: int, nickname: string, tag: string, avatarSpritePath: string|null, sentAgo: string}>,
+     *     outgoing: array<int, array{friendshipId: int, userId: int, nickname: string, tag: string, avatarSpritePath: string|null, sentAgo: string}>,
      * }
      */
     public function handle(User $viewer, CarbonInterface $now): array
@@ -66,6 +66,7 @@ class BuildFriendList
 
         $present = fn (Friendship $friendship): array => [
             'friendshipId' => $friendship->id,
+            'userId' => $friendship->otherThan($viewer)->id,
             'nickname' => (string) $friendship->otherThan($viewer)->nickname,
             'tag' => (string) $friendship->otherThan($viewer)->tag,
             'avatarSpritePath' => $friendship->otherThan($viewer)->avatarSpritePath(),

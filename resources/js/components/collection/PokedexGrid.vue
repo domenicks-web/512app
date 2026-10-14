@@ -5,7 +5,8 @@ import CollectionCard from '@/components/collection/CollectionCard.vue';
 /**
  * As 151 em ordem de dex com o filtro Todas/Tenho/Faltam (Coleção e
  * Cartão de Treinador). Só a que tem espécime abre a ficha. O filtro só
- * muda o que é exibido.
+ * muda o que é exibido. No cartão de outro, `commonIds` (as espécies de
+ * quem vê) liga o "Em comum": as que os dois têm, pra comparar.
  */
 export type SpeciesEntry = {
     id: number;
@@ -27,17 +28,30 @@ const props = withDefaults(
         emptyMissing: string;
         /** Coleção de outro jogador: o filtro fala dele ("Tem"), não de mim. */
         ofOther?: boolean;
+        commonIds?: number[] | null;
+        emptyCommon?: string;
     }>(),
-    { ofOther: false },
+    {
+        ofOther: false,
+        commonIds: null,
+        emptyCommon: 'Nenhuma espécie em comum.',
+    },
 );
 const emit = defineEmits<{ open: [speciesId: number] }>();
 
-type Filter = 'all' | 'owned' | 'missing';
+type Filter = 'all' | 'owned' | 'missing' | 'common';
+
+const common = computed(() =>
+    props.commonIds === null ? null : new Set(props.commonIds),
+);
 
 const FILTERS = computed<{ key: Filter; label: string }[]>(() => [
     { key: 'all', label: 'Todas' },
     { key: 'owned', label: props.ofOther ? 'Tem' : 'Tenho' },
     { key: 'missing', label: props.ofOther ? 'Não tem' : 'Faltam' },
+    ...(common.value === null
+        ? []
+        : [{ key: 'common' as const, label: 'Em comum' }]),
 ]);
 
 const filter = ref<Filter>('all');
@@ -50,6 +64,10 @@ const visibleSpecies = computed(() =>
 
         if (filter.value === 'missing') {
             return entry.specimenCount === 0;
+        }
+
+        if (filter.value === 'common') {
+            return entry.specimenCount > 0 && !!common.value?.has(entry.id);
         }
 
         return true;
@@ -76,7 +94,7 @@ function open(entry: SpeciesEntry) {
             type="button"
             role="radio"
             :aria-checked="filter === option.key"
-            class="cursor-pointer rounded-full px-4 py-2 text-[13px] font-extrabold transition-colors"
+            class="cursor-pointer rounded-full px-3 py-2 text-[13px] font-extrabold whitespace-nowrap transition-colors sm:px-4"
             :class="
                 filter === option.key
                     ? 'text-ink bg-white shadow-[0_1px_3px_rgba(28,32,38,0.1)]'
@@ -105,6 +123,12 @@ function open(entry: SpeciesEntry) {
         v-if="visibleSpecies.length === 0"
         class="text-soft py-10 text-center text-sm font-semibold"
     >
-        {{ filter === 'owned' ? emptyOwned : emptyMissing }}
+        {{
+            filter === 'owned'
+                ? emptyOwned
+                : filter === 'common'
+                  ? emptyCommon
+                  : emptyMissing
+        }}
     </p>
 </template>

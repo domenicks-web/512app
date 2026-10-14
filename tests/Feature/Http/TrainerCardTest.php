@@ -116,3 +116,19 @@ it('a ficha traz só os espécimes do dono e o melhor de quem vê', function () 
     $this->actingAs($viewer)->getJson("/treinador/{$owner->id}/colecao/{$other->id}")
         ->assertJsonPath('viewerSpecimenId', null);
 });
+
+it('manda as espécies de quem vê pra filtrar as em comum, só no cartão de outro', function () {
+    [$a, $b, $c] = Species::factory()->count(3)->create();
+    $owner = User::factory()->create();
+    $viewer = User::factory()->create();
+    trainerSpecimen($viewer, ['species_id' => $b->id]);
+    trainerSpecimen($viewer, ['species_id' => $b->id]);
+    trainerSpecimen($viewer, ['species_id' => $a->id]);
+    trainerSpecimen($viewer, ['species_id' => $c->id])->forceFill(['revealed_at' => null])->save();
+
+    $this->actingAs($viewer)->get("/treinador/{$owner->id}")
+        ->assertInertia(fn (Assert $page) => $page->where('viewerSpeciesIds', [$a->id, $b->id]));
+
+    $this->actingAs($viewer)->get("/treinador/{$viewer->id}")
+        ->assertInertia(fn (Assert $page) => $page->where('viewerSpeciesIds', []));
+});

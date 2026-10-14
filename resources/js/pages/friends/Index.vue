@@ -30,6 +30,7 @@ type Friend = {
 
 type PendingRequest = {
     friendshipId: number;
+    userId: number;
     nickname: string;
     tag: string;
     avatarSpritePath: string | null;
@@ -123,24 +124,28 @@ const cardShadow =
                     class="flex flex-wrap items-center gap-3.5 rounded-[22px] bg-white p-3 pr-4"
                     :class="cardShadow"
                 >
-                    <TrainerAvatar
-                        :sprite-path="request.avatarSpritePath"
-                        size="sm"
-                    />
-                    <div
+                    <Link
                         v-if="confirmingRequest !== request.friendshipId"
-                        class="flex min-w-0 flex-1 flex-col"
+                        :href="trainerShow(request.userId)"
+                        class="flex min-w-0 flex-1 items-center gap-3.5"
                     >
-                        <span class="text-ink truncate text-[15px] font-black"
-                            >{{ request.nickname
-                            }}<span class="text-faint-2"
-                                >#{{ request.tag }}</span
-                            ></span
-                        >
-                        <span class="text-faint text-xs font-semibold">{{
-                            request.sentAgo
-                        }}</span>
-                    </div>
+                        <TrainerAvatar
+                            :sprite-path="request.avatarSpritePath"
+                            size="sm"
+                        />
+                        <div class="flex min-w-0 flex-1 flex-col">
+                            <span
+                                class="text-ink truncate text-[15px] font-black"
+                                >{{ request.nickname
+                                }}<span class="text-faint-2"
+                                    >#{{ request.tag }}</span
+                                ></span
+                            >
+                            <span class="text-faint text-xs font-semibold">{{
+                                request.sentAgo
+                            }}</span>
+                        </div>
+                    </Link>
                     <div
                         v-if="confirmingRequest === request.friendshipId"
                         class="flex min-w-0 flex-1 items-center gap-2"
@@ -216,24 +221,28 @@ const cardShadow =
                     data-enter
                     class="flex items-center gap-3.5 rounded-[22px] bg-white/70 p-3 pr-4"
                 >
-                    <TrainerAvatar
-                        :sprite-path="request.avatarSpritePath"
-                        size="sm"
-                    />
-                    <div
+                    <Link
                         v-if="confirmingRequest !== request.friendshipId"
-                        class="flex min-w-0 flex-1 flex-col"
+                        :href="trainerShow(request.userId)"
+                        class="flex min-w-0 flex-1 items-center gap-3.5"
                     >
-                        <span class="text-ink truncate text-[15px] font-black"
-                            >{{ request.nickname
-                            }}<span class="text-faint-2"
-                                >#{{ request.tag }}</span
-                            ></span
-                        >
-                        <span class="text-faint text-xs font-semibold"
-                            >enviado {{ request.sentAgo }}</span
-                        >
-                    </div>
+                        <TrainerAvatar
+                            :sprite-path="request.avatarSpritePath"
+                            size="sm"
+                        />
+                        <div class="flex min-w-0 flex-1 flex-col">
+                            <span
+                                class="text-ink truncate text-[15px] font-black"
+                                >{{ request.nickname
+                                }}<span class="text-faint-2"
+                                    >#{{ request.tag }}</span
+                                ></span
+                            >
+                            <span class="text-faint text-xs font-semibold"
+                                >enviado {{ request.sentAgo }}</span
+                            >
+                        </div>
+                    </Link>
                     <div
                         v-if="confirmingRequest === request.friendshipId"
                         class="flex min-w-0 flex-1 items-center gap-2"

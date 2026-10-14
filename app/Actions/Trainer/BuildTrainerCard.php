@@ -14,7 +14,8 @@ use App\Models\User;
 /**
  * Cartão de Treinador (o Trainer Card dos jogos): quem é o jogador, os
  * números dele, como quem vê está com ele na amizade, o Time (os melhores
- * espécimes) e a Pokédex.
+ * espécimes) e a Pokédex. No cartão de outro, vão junto as espécies de
+ * quem vê, pro filtro "Em comum".
  */
 class BuildTrainerCard
 {
@@ -48,7 +49,22 @@ class BuildTrainerCard
             'friendship' => $this->friendship($owner, $viewer),
             'team' => $this->topSpecimens->handle($owner, (int) config('game.profile.team_size')),
             'collection' => $this->collection->handle($owner),
+            'viewerSpeciesIds' => $owner->is($viewer) ? [] : $this->speciesIdsOf($viewer),
         ];
+    }
+
+    /**
+     * @return array<int, int>
+     */
+    private function speciesIdsOf(User $user): array
+    {
+        return $user->specimens()
+            ->distinct()
+            ->orderBy('species_id')
+            ->pluck('species_id')
+            ->map(fn (mixed $id): int => (int) $id)
+            ->values()
+            ->all();
     }
 
     /**

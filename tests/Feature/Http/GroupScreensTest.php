@@ -142,8 +142,10 @@ it('lista só os amigos, online primeiro, e separa os pedidos', function () {
             ->where('friends.1.ownedSpecies', 1)
             ->has('incoming', 1)
             ->where('incoming.0.nickname', 'Bia')
+            ->where('incoming.0.userId', $asking->id)
             ->has('outgoing', 1)
             ->where('outgoing.0.nickname', 'Caio')
+            ->where('outgoing.0.userId', $asked->id)
             ->where('presencePollSeconds', config('game.group.presence_poll_seconds')));
 });
 
