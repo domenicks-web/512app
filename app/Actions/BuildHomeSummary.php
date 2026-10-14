@@ -14,7 +14,7 @@ use Carbon\CarbonInterface;
 /**
  * Monta os números da Home: treinador, coleção, posição no ranking de
  * espécies, propostas de troca recebidas, destaque do feed e quantos
- * outros jogadores estão online.
+ * amigos estão online.
  */
 class BuildHomeSummary
 {
@@ -33,6 +33,7 @@ class BuildHomeSummary
      *     pendingTrades: int,
      *     feedHighlight: array{isShiny: bool, trainerNickname: string, speciesName: string, mintNumber: int, caughtAgo: string}|null,
      *     friendsOnline: int,
+     *     presencePollSeconds: int,
      * }
      */
     public function handle(User $user, CarbonInterface $today): array
@@ -57,7 +58,8 @@ class BuildHomeSummary
                 ->where('status', TradeStatus::Pending)
                 ->count(),
             'feedHighlight' => $this->feed->handle(),
-            'friendsOnline' => count(array_diff($this->presence->onlineUserIds($today), [$user->id])),
+            'friendsOnline' => count(array_intersect($this->presence->onlineUserIds($today), $user->friendIds())),
+            'presencePollSeconds' => (int) config('game.group.presence_poll_seconds'),
         ];
     }
 }
