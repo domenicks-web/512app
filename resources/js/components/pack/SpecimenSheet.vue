@@ -95,7 +95,9 @@ const tone = computed(() =>
             <div
                 class="relative flex min-h-[190px] flex-[1_1_300px] items-center justify-center overflow-hidden sm:min-h-[340px]"
                 :style="{
-                    background: light ? look.panel : panelBackground(specimen),
+                    background: light
+                        ? (look.card.panel ?? look.panel)
+                        : panelBackground(specimen),
                 }"
             >
                 <div
@@ -112,8 +114,24 @@ const tone = computed(() =>
                     }"
                 />
                 <div
+                    v-if="light && look.card.foil === 'holo'"
+                    class="card-foil card-foil-holo"
+                />
+                <div
+                    v-if="
+                        light &&
+                        (look.card.foil === 'holo' || look.card.foil === 'gold')
+                    "
+                    class="card-foil card-foil-stars"
+                />
+                <div
+                    v-if="light && look.card.foil === 'rainbow'"
+                    class="card-foil card-foil-rainbow opacity-60"
+                />
+                <div
                     v-if="light"
-                    class="absolute bottom-[18%] left-1/2 h-4 w-40 -translate-x-1/2 rounded-[50%] bg-black/12 blur-[5px]"
+                    class="absolute bottom-[18%] left-1/2 h-4 w-40 -translate-x-1/2 rounded-[50%] blur-[5px]"
+                    :class="specimen.isShiny ? 'bg-black/40' : 'bg-black/12'"
                 />
                 <img
                     v-pixel-fit="{
@@ -127,6 +145,30 @@ const tone = computed(() =>
                     draggable="false"
                     class="relative block [image-rendering:pixelated]"
                 />
+                <template v-if="light && look.card.foil === 'rainbow'">
+                    <span
+                        v-for="spark in 3"
+                        :key="spark"
+                        class="card-sparkle [--spark:20px]"
+                        :class="`card-sparkle-${spark}`"
+                        aria-hidden="true"
+                        >✦</span
+                    >
+                </template>
+                <span
+                    v-if="light && specimen.mint === 1"
+                    class="absolute top-4 left-4 flex size-[46px] -rotate-12 flex-col items-center justify-center rounded-full border-2 leading-none font-black shadow-[0_2px_5px_rgba(0,0,0,0.25)]"
+                    :class="
+                        specimen.isShiny
+                            ? 'border-white bg-black/45 text-white'
+                            : 'border-[#2b2f36] bg-white/90 text-[#2b2f36]'
+                    "
+                    title="Primeiro do servidor"
+                    aria-label="Primeiro do servidor"
+                >
+                    <span class="text-[9px] tracking-[0.06em]">Nº</span>
+                    <span class="-mt-px text-[20px]">1</span>
+                </span>
                 <div
                     v-if="!light"
                     class="pointer-events-none absolute inset-0 bg-[length:240%_240%] mix-blend-screen"

@@ -52,6 +52,7 @@
     --animate-online-pulse: online-pulse 2s ease-in-out infinite;
     --animate-foil-sweep: foil-sweep 3.6s ease-in-out infinite;
     --animate-foil-drift: foil-drift 8s linear infinite;
+    --animate-pack-wave: pack-wave 3.2s linear infinite;
 
     @keyframes spin-ring {
         to {
@@ -68,6 +69,13 @@
 
         100% {
             background-position: -60% 0;
+        }
+    }
+
+    /* Onda no topo do vermelho que enche o tile do pack. */
+    @keyframes pack-wave {
+        to {
+            transform: translateX(-50%);
         }
     }
 
@@ -234,6 +242,179 @@
             transition-property: background-color, border-color, color, fill;
             transition-duration: 200ms;
             transition-timing-function: ease-out;
+        }
+    }
+}
+
+@layer components {
+    /*
+     * Camadas de foil da carta da coleção e da ficha clara. `--mx`/`--my` vêm do `v-card-tilt` (mouse no
+     * desktop, só com `.card-foil-interactive`); no resto o foil corre
+     * sozinho, devagar.
+     */
+    .card-foil {
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+        background-position:
+            0 0,
+            6px 7px,
+            var(--mx, 50%) var(--my, 50%);
+        animation: card-foil-pan 7s ease-in-out infinite alternate;
+    }
+
+    /* Raro: faixas iridescentes (multiply, pra aparecerem no fundo claro)… */
+    .card-foil-holo {
+        background-image:
+            none, none,
+            repeating-linear-gradient(
+                115deg,
+                #ffb3c7 0%,
+                #ffe08a 7%,
+                #a8f0cf 14%,
+                #9fd3ff 21%,
+                #d5b8ff 28%,
+                #ffb3c7 35%
+            );
+        background-size:
+            auto,
+            auto,
+            260% 260%;
+        mix-blend-mode: multiply;
+        opacity: 0.6;
+    }
+
+    /* …e estrelinhas brancas por cima, que acompanham o mesmo movimento. */
+    .card-foil-stars {
+        background-image:
+            radial-gradient(
+                circle,
+                rgb(255 255 255 / 0.95) 0 1.1px,
+                transparent 1.7px
+            ),
+            radial-gradient(
+                circle,
+                rgb(255 255 255 / 0.8) 0 0.8px,
+                transparent 1.3px
+            ),
+            none;
+        background-size:
+            13px 13px,
+            19px 17px,
+            auto;
+    }
+
+    /* Shiny: faixas de arco-íris saturadas e purpurina, na carta escura. */
+    .card-foil-rainbow {
+        background-image:
+            radial-gradient(
+                circle,
+                rgb(255 255 255 / 0.9) 0 0.9px,
+                transparent 1.4px
+            ),
+            radial-gradient(
+                circle,
+                rgb(255 255 255 / 0.6) 0 0.7px,
+                transparent 1.2px
+            ),
+            repeating-linear-gradient(
+                115deg,
+                #ff5f9e 0%,
+                #ffd34d 8%,
+                #5dffb0 16%,
+                #4dd9e8 24%,
+                #a77bff 32%,
+                #ff5f9e 40%
+            );
+        background-size:
+            11px 11px,
+            17px 15px,
+            250% 250%;
+        mix-blend-mode: screen;
+    }
+
+    .card-glare {
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+        background: radial-gradient(
+            circle at var(--mx, 50%) var(--my, 50%),
+            rgb(255 255 255 / 0.6),
+            rgb(255 255 255 / 0) 55%
+        );
+        opacity: var(--tilt, 0);
+        transition: opacity 0.3s ease-out;
+    }
+
+    .card-sparkle {
+        position: absolute;
+        color: #ffffff;
+        font-size: var(--spark, 11px);
+        line-height: 1;
+        text-shadow: 0 0 6px #4dd9e8;
+        pointer-events: none;
+        animation: card-twinkle 2.4s ease-in-out infinite;
+    }
+
+    .card-sparkle-1 {
+        top: 22%;
+        left: 16%;
+    }
+
+    .card-sparkle-2 {
+        top: 36%;
+        right: 14%;
+        font-size: calc(var(--spark, 11px) * 0.7);
+        animation-delay: -0.8s;
+    }
+
+    .card-sparkle-3 {
+        bottom: 16%;
+        right: 24%;
+        font-size: calc(var(--spark, 11px) * 0.8);
+        animation-delay: -1.6s;
+    }
+
+    @keyframes card-foil-pan {
+        from {
+            background-position:
+                0 0,
+                6px 7px,
+                0% 30%;
+        }
+
+        to {
+            background-position:
+                0 0,
+                6px 7px,
+                100% 70%;
+        }
+    }
+
+    @keyframes card-twinkle {
+        0%,
+        100% {
+            opacity: 0.15;
+            transform: scale(0.6);
+        }
+
+        50% {
+            opacity: 1;
+            transform: scale(1);
+        }
+    }
+
+    /* Com mouse, quem move o foil é o cursor. */
+    @media (hover: hover) and (pointer: fine) {
+        .card-foil-interactive {
+            animation: none;
+        }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .card-foil,
+        .card-sparkle {
+            animation: none;
         }
     }
 }

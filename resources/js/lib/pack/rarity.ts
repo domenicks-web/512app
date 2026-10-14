@@ -4,7 +4,8 @@ import type { Tier } from './types';
 /**
  * A "força" visual de cada raridade, compartilhada pela carta da coleção e
  * pela ficha clara: moldura metálica, fundo com brilho e padrão, reflexo
- * que corre (só raro, lendário e shiny) e as gemas de raridade.
+ * que corre (só raro, lendário e shiny) e as gemas de raridade. O `card`
+ * é o tratamento extra só da carta da coleção.
  */
 type RarityLook = {
     /** Moldura de 2–3px em gradiente (prata, bronze, cobre, ouro, holo). */
@@ -21,6 +22,32 @@ type RarityLook = {
     gems: number;
     sheen: boolean;
     label: string;
+    /** Só a carta da coleção: o tratamento de carta real de cada tier. */
+    card: CardSkin;
+};
+
+/**
+ * `foil`: nenhum (comum, incomum chapada), holo de estrelas (raro), ouro
+ * escovado na carta inteira (lendário) ou arco-íris na carta escura
+ * "full art" (shiny). `tilt` liga a inclinação com o mouse no desktop.
+ */
+export type CardSkin = {
+    foil: 'none' | 'holo' | 'gold' | 'rainbow';
+    /** Espessura da moldura, em px: cresce com a raridade. */
+    frameWidth: number;
+    /** Fundo da área do sprite, quando troca o `panel` (shiny escuro). */
+    panel: string | null;
+    /** Fundo da área de baixo (nome, selo, mint). */
+    body: string;
+    nameInk: string;
+    mutedInk: string;
+    tilt: boolean;
+};
+
+const LIGHT_BODY = {
+    body: '#ffffff',
+    nameInk: '#2b2f36',
+    mutedInk: '#8a9099',
 };
 
 const DOTS = (color: string) =>
@@ -38,6 +65,15 @@ export function rarityLook(tier: Tier, shiny: boolean): RarityLook {
             gems: 4,
             sheen: true,
             label: 'Shiny',
+            card: {
+                foil: 'rainbow',
+                frameWidth: 3.5,
+                panel: 'radial-gradient(70% 65% at 50% 50%, rgba(77,217,232,0.38), rgba(77,217,232,0) 100%), linear-gradient(160deg, #222a40, #12151e)',
+                body: 'linear-gradient(180deg, #1b1e27, #12141b)',
+                nameInk: '#ffffff',
+                mutedInk: '#8f97a6',
+                tilt: true,
+            },
         };
     }
 
@@ -53,6 +89,15 @@ export function rarityLook(tier: Tier, shiny: boolean): RarityLook {
                 gems: 4,
                 sheen: true,
                 label: TIER_META.lendario.label,
+                card: {
+                    foil: 'gold',
+                    frameWidth: 3.5,
+                    panel: null,
+                    body: `repeating-linear-gradient(100deg, rgba(255,255,255,0.18) 0 2px, rgba(255,255,255,0) 2px 5px), linear-gradient(160deg, #ffe9a8, ${GOLD} 45%, #e0a92e)`,
+                    nameInk: '#3b2a00',
+                    mutedInk: '#7a5a12',
+                    tilt: true,
+                },
             };
         case 'raro':
             return {
@@ -65,6 +110,13 @@ export function rarityLook(tier: Tier, shiny: boolean): RarityLook {
                 gems: 3,
                 sheen: true,
                 label: TIER_META.raro.label,
+                card: {
+                    foil: 'holo',
+                    frameWidth: 3,
+                    panel: null,
+                    ...LIGHT_BODY,
+                    tilt: true,
+                },
             };
         case 'incomum':
             return {
@@ -77,6 +129,13 @@ export function rarityLook(tier: Tier, shiny: boolean): RarityLook {
                 gems: 2,
                 sheen: false,
                 label: TIER_META.incomum.label,
+                card: {
+                    foil: 'none',
+                    panel: null,
+                    frameWidth: 2.5,
+                    ...LIGHT_BODY,
+                    tilt: false,
+                },
             };
         default:
             return {
@@ -89,6 +148,13 @@ export function rarityLook(tier: Tier, shiny: boolean): RarityLook {
                 gems: 1,
                 sheen: false,
                 label: TIER_META.comum.label,
+                card: {
+                    foil: 'none',
+                    panel: null,
+                    frameWidth: 1.5,
+                    ...LIGHT_BODY,
+                    tilt: false,
+                },
             };
     }
 }

@@ -1,14 +1,17 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import FittedSprite from '@/components/FittedSprite.vue';
-import { pad } from '@/lib/pack/meta';
+import { vCardTilt } from '@/lib/cardTilt';
+import { GOLD, pad } from '@/lib/pack/meta';
 import { rarityLook } from '@/lib/pack/rarity';
 import type { Tier } from '@/lib/pack/types';
 
 /**
- * Carta da coleção. Com espécime: moldura metálica da raridade, fundo com
- * brilho e padrão, reflexo correndo nas raras, gemas, selo, melhor mint e
- * maior IV. Sem espécime: silhueta e "???".
+ * Carta da coleção, no tratamento das cartas reais: comum fosca, incomum
+ * chapada, raro holo, lendário toda dourada e shiny "full art" escura com
+ * foil arco-íris. Moldura engrossa com a raridade, o #0001 leva o selo de
+ * primeira edição e, no desktop, raro pra cima inclina com o mouse
+ * (`v-card-tilt`). Sem espécime: silhueta e "???".
  */
 const props = defineProps<{
     entry: {
@@ -33,18 +36,36 @@ const look = computed(() =>
     rarityLook(props.entry.rarityTier as Tier, shiny.value),
 );
 const dex = computed(() => `#${pad(props.entry.id, 3)}`);
+const skin = computed(() => look.value.card);
+const isFirst = computed(() => props.entry.bestMint === 1);
+
+/** Selo e mint de destaque precisam contrastar com o fundo da carta. */
+const badgeStyle = computed(() =>
+    skin.value.foil === 'gold'
+        ? { background: '#3b2a00', color: GOLD }
+        : { background: look.value.badge, color: look.value.badgeInk },
+);
+const mintHighlight = computed(() =>
+    skin.value.foil === 'gold'
+        ? '#3b2a00'
+        : skin.value.foil === 'rainbow'
+          ? GOLD
+          : '#a87700',
+);
 </script>
 
 <template>
     <button
         v-if="owned"
+        v-card-tilt="skin.tilt"
         type="button"
-        class="group relative w-full cursor-pointer rounded-[20px] p-[2.5px] text-left transition-transform duration-200 hover:-translate-y-1 active:scale-[0.97]"
+        class="group relative w-full cursor-pointer rounded-[20px] text-left transition-transform duration-200 hover:-translate-y-1 active:scale-[0.97]"
         :class="[
             shiny ? 'motion-safe:animate-foil-drift' : '',
             loading ? 'opacity-60' : '',
         ]"
         :style="{
+            padding: `${skin.frameWidth}px`,
             background: look.frame,
             backgroundSize: shiny ? '300% 100%' : undefined,
             boxShadow: look.shadow,
@@ -53,15 +74,35 @@ const dex = computed(() => `#${pad(props.entry.id, 3)}`);
         @click="$emit('open')"
     >
         <div
-            class="relative flex flex-col overflow-hidden rounded-[17.5px] bg-white"
+            class="relative flex flex-col overflow-hidden"
+            :style="{
+                borderRadius: `${20 - skin.frameWidth}px`,
+                background: skin.body,
+            }"
         >
             <div
+                v-if="skin.foil === 'rainbow'"
+                class="card-foil card-foil-rainbow card-foil-interactive opacity-25"
+            />
+            <div
                 class="relative flex h-[94px] items-end justify-center overflow-hidden"
-                :style="{ background: look.panel }"
+                :style="{ background: skin.panel ?? look.panel }"
             >
+                <div
+                    v-if="skin.foil === 'holo'"
+                    class="card-foil card-foil-holo card-foil-interactive"
+                />
+                <div
+                    v-if="skin.foil === 'holo' || skin.foil === 'gold'"
+                    class="card-foil card-foil-stars card-foil-interactive"
+                />
+                <div
+                    v-if="skin.foil === 'rainbow'"
+                    class="card-foil card-foil-rainbow card-foil-interactive opacity-60"
+                />
                 <span
                     class="absolute top-2 left-2.5 text-[10px] font-black tracking-[0.04em]"
-                    :style="{ color: look.ink }"
+                    :style="{ color: shiny ? '#9eeef6' : look.ink }"
                     >{{ dex }}</span
                 >
                 <span
@@ -76,7 +117,8 @@ const dex = computed(() => `#${pad(props.entry.id, 3)}`);
                     />
                 </span>
                 <div
-                    class="absolute bottom-2 left-1/2 h-2.5 w-14 -translate-x-1/2 rounded-[50%] bg-black/15 blur-[3px]"
+                    class="absolute bottom-2 left-1/2 h-2.5 w-14 -translate-x-1/2 rounded-[50%] blur-[3px]"
+                    :class="shiny ? 'bg-black/40' : 'bg-black/15'"
                 />
                 <FittedSprite
                     :src="`/storage/${shiny ? entry.spriteShinyPath : entry.spritePath}`"
@@ -85,37 +127,71 @@ const dex = computed(() => `#${pad(props.entry.id, 3)}`);
                     :padding="5"
                     class="relative mb-1 transition-transform duration-300 group-hover:scale-110"
                 />
+                <template v-if="shiny">
+                    <span
+                        v-for="spark in 3"
+                        :key="spark"
+                        class="card-sparkle"
+                        :class="`card-sparkle-${spark}`"
+                        aria-hidden="true"
+                        >✦</span
+                    >
+                </template>
+                <span
+                    v-if="isFirst"
+                    class="absolute bottom-1.5 left-2 flex size-[27px] -rotate-12 flex-col items-center justify-center rounded-full border-[1.5px] leading-none font-black shadow-[0_1px_3px_rgba(0,0,0,0.25)]"
+                    :class="
+                        shiny
+                            ? 'border-white bg-black/45 text-white'
+                            : 'border-[#2b2f36] bg-white/90 text-[#2b2f36]'
+                    "
+                    title="Primeiro do servidor"
+                    aria-label="Primeiro do servidor"
+                >
+                    <span class="text-[6px] tracking-[0.06em]">Nº</span>
+                    <span class="-mt-px text-[12px]">1</span>
+                </span>
                 <div
                     v-if="look.sheen"
                     class="motion-safe:animate-foil-sweep pointer-events-none absolute inset-0 bg-[linear-gradient(115deg,rgba(255,255,255,0)_38%,rgba(255,255,255,0.7)_50%,rgba(255,255,255,0)_62%)] bg-[length:250%_100%] bg-[position:160%_0] mix-blend-overlay"
                 />
             </div>
 
-            <div class="flex flex-col items-center gap-1.5 px-2 pt-2 pb-2.5">
+            <div
+                class="relative flex flex-col items-center gap-1.5 px-2 pt-2 pb-2.5"
+            >
                 <span
-                    class="w-full truncate text-center text-[13px] leading-tight font-black text-[#2b2f36]"
+                    class="w-full truncate text-center text-[13px] leading-tight font-black"
+                    :style="{ color: skin.nameInk }"
                     >{{ entry.name }}</span
                 >
                 <span
                     class="flex h-[18px] items-center rounded-full px-2 text-[9.5px] font-black tracking-[0.08em] uppercase"
-                    :style="{ background: look.badge, color: look.badgeInk }"
+                    :style="badgeStyle"
                     >{{ look.label }}</span
                 >
                 <div
-                    class="flex w-full items-center justify-between gap-1 pt-0.5 text-[10px] font-extrabold text-[#8a9099]"
+                    class="flex w-full items-center justify-between gap-1 pt-0.5 text-[10px] font-extrabold"
+                    :style="{ color: skin.mutedInk }"
                 >
                     <span
                         class="font-mono"
-                        :class="
+                        :style="
                             entry.bestMint !== null && entry.bestMint <= 10
-                                ? 'text-[#a87700]'
-                                : ''
+                                ? { color: mintHighlight }
+                                : undefined
                         "
                         >Nº {{ pad(entry.bestMint ?? 0, 4) }}</span
                     >
                     <span>IV {{ entry.bestIv }}</span>
                 </div>
             </div>
+
+            <div
+                v-if="skin.tilt"
+                class="card-glare"
+                :class="shiny ? 'mix-blend-screen' : 'mix-blend-overlay'"
+            />
         </div>
 
         <span
