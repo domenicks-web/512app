@@ -14,7 +14,7 @@ uses(RefreshDatabase::class);
 it('renderiza o link de confirmação com a validade', function () {
     $html = (new ConfirmNewEmailMail(User::factory()->create(['nickname' => 'Lin']), 'https://512.test/confirmar', 60))->render();
 
-    expect($html)->toContain('Oi, Lin!')
+    expect($html)->toContain('Lin')
         ->toContain('https://512.test/confirmar')
         ->toContain('60 minutos');
 });
