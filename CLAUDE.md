@@ -332,7 +332,26 @@ pushado pro `main`.
   `lib/pack/director.ts`, `fx.ts`, `sfx.ts`, `v-pixel-fit`. Mobile no
   formato "5 do dado" (decidido com o usuário, substitui o 4+1 do
   handoff). `pokedex:sync` agora baixa os GIFs animados (já rodado).
-  A conta de teste abriu 2 packs locais.
+- **Depois da abertura (14/10, madrugada)**:
+    - **Bug do celular resolvido de vez**: o SSR do Inertia punha o CSS
+      dos componentes com `localhost:5173` no HTML; no celular isso não
+      carrega. Plugin `lanSsrOrigin` no `vite.config.ts` troca pela URL da
+      rede quando `DEV_LAN_HOST` existe. Layout crítico do pack e das
+      tabelas do admin foi pro Tailwind (sem depender de `<style>`).
+    - Coleção: carta clicável abre a ficha (clara, com "1 de N" quando há
+      vários espécimes; `GET colecao/{species}` em JSON) e cartas com
+      moldura/brilho por raridade (`lib/pack/rarity.ts`, `CollectionCard`).
+    - Admin: "Liberar próximo pack" no menu ⋯ (zera `next_pack_at`).
+    - Cerimônia: meta em blocos (Tamanho/IV/Natureza) e selo "Primeiro X
+      do servidor"; resumo em 2 colunas no celular.
+    - **Dados do jogo zerados** a pedido do usuário (specimens, openings,
+      trades, nonce, cooldown e seeds comprometidas). Contas e convites
+      mantidos.
+- **Estado do git**: `perfil` → `admin` → `pack` (um em cima do outro),
+  `pack` enviado pro `origin`, **nada mergeado no `main`** — perguntar.
+- **Pendências novas**: banimento (sugestão do Claude: fase 4, junto das
+  trocas — usuário ainda não respondeu); avatar da Pokédex (pergunta do
+  shiny ainda aberta); tile "Pack de hoje" da Home não mostra contagem.
 
 ===
 
