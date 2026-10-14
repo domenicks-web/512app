@@ -224,12 +224,16 @@
 /*
  * Troca de tema suave em vez de piscar: qualquer elemento que use os
  * tokens de cor acima transiciona junto quando o `.dark` entra ou sai.
- * Respeita prefers-reduced-motion.
+ * Respeita prefers-reduced-motion. Fica no `base` pra que `transition-*`
+ * das utilities ganhe dela: fora de layer, ela anulava toda transição de
+ * transform do app.
  */
-@media (prefers-reduced-motion: no-preference) {
-    * {
-        transition-property: background-color, border-color, color, fill;
-        transition-duration: 200ms;
-        transition-timing-function: ease-out;
+@layer base {
+    @media (prefers-reduced-motion: no-preference) {
+        * {
+            transition-property: background-color, border-color, color, fill;
+            transition-duration: 200ms;
+            transition-timing-function: ease-out;
+        }
     }
 }
