@@ -17,6 +17,9 @@ import GroupLayout from '@/layouts/GroupLayout.vue';
 import { groupNavigationKey } from '@/layouts/groupNavigation';
 import { formatCountdown, formatFriendsOnline, formatMint } from '@/lib/format';
 import { animate, spring } from '@/lib/motion';
+import { rarityLook } from '@/lib/pack/rarity';
+import type { Tier } from '@/lib/pack/types';
+import TrainerAvatar from '@/components/group/TrainerAvatar.vue';
 import { edit as profileEdit } from '@/routes/profile';
 import { show as collectionShow } from '@/routes/collection';
 import { show as feedShow } from '@/routes/feed';
@@ -39,7 +42,27 @@ const props = defineProps<{
         avatarSpritePath: string | null;
         isAdmin: boolean;
     };
-    collection: { ownedSpecies: number; totalSpecies: number };
+    collection: {
+        ownedSpecies: number;
+        totalSpecies: number;
+        shinyCount: number;
+    };
+    bestSpecimen: {
+        speciesName: string;
+        spritePath: string;
+        isShiny: boolean;
+        rarityTier: string;
+        mintNumber: number;
+    } | null;
+    silhouetteSpritePath: string | null;
+    rankingTop: {
+        nickname: string;
+        avatarSpritePath: string | null;
+        ownedSpecies: number;
+        position: number | null;
+        isViewer: boolean;
+    }[];
+    sentTrades: number;
     nextPackAt: string | null;
     rankingPosition: number | null;
     pendingTrades: number;
@@ -105,6 +128,15 @@ const packStatus = computed(() =>
     isPackAvailable.value || props.nextPackAt === null
         ? 'Disponível'
         : `Próximo em ${formatCountdown(props.nextPackAt, now.value)}`,
+);
+
+const bestLook = computed(() =>
+    props.bestSpecimen
+        ? rarityLook(
+              props.bestSpecimen.rarityTier as Tier,
+              props.bestSpecimen.isShiny,
+          )
+        : null,
 );
 
 const collectionPercent = computed(() =>
@@ -529,6 +561,52 @@ const compactLabel =
                     @click="selectTile(1)"
                 >
                     <span :class="compactLabel" class="text-soft">Coleção</span>
+                    <span
+                        class="absolute top-3 right-3 flex flex-col items-center gap-1 sm:inset-x-5 sm:top-5 sm:bottom-[118px]"
+                    >
+                        <span
+                            class="flex size-14 items-center justify-center rounded-[16px] sm:size-auto sm:min-h-0 sm:w-full sm:flex-1"
+                            :style="
+                                bestLook
+                                    ? { background: bestLook.panel }
+                                    : undefined
+                            "
+                        >
+                            <FittedSprite
+                                v-if="bestSpecimen"
+                                :src="`/storage/${bestSpecimen.spritePath}`"
+                                :size="isCompact ? 56 : 120"
+                                :padding="isCompact ? 6 : 10"
+                            />
+                            <FittedSprite
+                                v-else-if="silhouetteSpritePath"
+                                :src="`/storage/${silhouetteSpritePath}`"
+                                :size="isCompact ? 56 : 120"
+                                :padding="isCompact ? 6 : 10"
+                                class="opacity-[0.09] brightness-0"
+                            />
+                        </span>
+                        <span
+                            class="hidden items-center gap-1.5 text-[13px] font-black sm:flex"
+                        >
+                            <template v-if="bestSpecimen && bestLook">
+                                <span class="text-ink">{{
+                                    bestSpecimen.speciesName
+                                }}</span>
+                                <span
+                                    class="rounded-full px-2 py-0.5 text-[10px] tracking-[0.06em] uppercase"
+                                    :style="{
+                                        background: bestLook.badge,
+                                        color: bestLook.badgeInk,
+                                    }"
+                                    >{{ bestLook.label }}</span
+                                >
+                            </template>
+                            <span v-else class="text-faint-2"
+                                >??? · abra um pack</span
+                            >
+                        </span>
+                    </span>
                     <span class="flex items-baseline gap-1">
                         <span
                             class="text-ink text-[40px] leading-[0.9] font-black tracking-[-0.03em] sm:text-[64px]"
@@ -537,6 +615,16 @@ const compactLabel =
                         <span
                             class="text-faint-2 text-[16px] font-black sm:text-[22px]"
                             >/{{ collection.totalSpecies }}</span
+                        >
+                        <span
+                            v-if="collection.shinyCount > 0"
+                            class="text-shiny ml-auto hidden text-xs font-black sm:inline"
+                            >✦ {{ collection.shinyCount }}
+                            {{
+                                collection.shinyCount === 1
+                                    ? 'shiny'
+                                    : 'shinies'
+                            }}</span
                         >
                     </span>
                     <span
@@ -566,6 +654,38 @@ const compactLabel =
                     <span :class="compactLabel" class="text-[#c3cad4]"
                         >Ranking</span
                     >
+                    <span
+                        class="absolute inset-x-5 top-5 hidden flex-col gap-2 sm:flex"
+                    >
+                        <span
+                            v-for="(row, index) in rankingTop"
+                            :key="index"
+                            class="flex items-center gap-2.5 rounded-full py-1 pr-3 pl-1"
+                            :class="row.isViewer ? 'bg-white/12' : ''"
+                        >
+                            <span
+                                class="w-5 text-center text-[13px] font-black text-[#7d8794]"
+                                >{{
+                                    row.position === null
+                                        ? '—'
+                                        : `${row.position}º`
+                                }}</span
+                            >
+                            <TrainerAvatar
+                                :sprite-path="row.avatarSpritePath"
+                                size="sm"
+                                class="!size-8"
+                            />
+                            <span
+                                class="min-w-0 flex-1 truncate text-[13.5px] font-black text-white"
+                                >{{ row.nickname }}</span
+                            >
+                            <span
+                                class="text-[13px] font-black text-[#c3cad4]"
+                                >{{ row.ownedSpecies }}</span
+                            >
+                        </span>
+                    </span>
                     <span
                         class="text-[44px] leading-[0.9] font-black tracking-[-0.03em] text-white sm:text-[72px]"
                         >{{
@@ -600,6 +720,34 @@ const compactLabel =
                 >
                     <span :class="compactLabel" class="text-soft">Trocas</span>
                     <span
+                        class="absolute inset-x-5 top-5 bottom-[110px] hidden items-center justify-center sm:flex"
+                        aria-hidden="true"
+                    >
+                        <span class="relative block h-[92px] w-[130px]">
+                            <span
+                                class="absolute top-0 left-0 block h-[84px] w-[62px] -rotate-[8deg] rounded-[12px] border-2 border-dashed border-[#dfe2e6] bg-[#f7f8f9]"
+                            />
+                            <span
+                                class="absolute top-1.5 right-0 block h-[84px] w-[62px] rotate-[8deg] rounded-[12px] border-2 border-dashed border-[#dfe2e6] bg-[#f7f8f9]"
+                            />
+                            <svg
+                                class="absolute top-1/2 left-1/2 -translate-1/2"
+                                width="44"
+                                height="44"
+                                viewBox="0 0 24 24"
+                                fill="#ffffff"
+                                stroke="#f24d4d"
+                                stroke-width="2.2"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                            >
+                                <circle cx="12" cy="12" r="10.5" />
+                                <path d="M7 9.5h9.5M14 7l2.5 2.5L14 12" />
+                                <path d="M17 14.5H7.5M10 12l-2.5 2.5L10 17" />
+                            </svg>
+                        </span>
+                    </span>
+                    <span
                         class="text-ink text-[44px] leading-[0.9] font-black tracking-[-0.03em] sm:text-[72px]"
                         >{{ pendingTrades }}</span
                     >
@@ -607,9 +755,14 @@ const compactLabel =
                         class="text-soft text-xs leading-tight font-extrabold sm:text-sm"
                         >{{
                             pendingTrades === 1
-                                ? 'proposta de troca'
-                                : 'propostas de troca'
-                        }}</span
+                                ? 'proposta recebida'
+                                : 'propostas recebidas'
+                        }}<span class="hidden sm:inline">
+                            · {{ sentTrades }}
+                            {{
+                                sentTrades === 1 ? 'enviada' : 'enviadas'
+                            }}</span
+                        ></span
                     >
                 </button>
 

@@ -141,3 +141,54 @@ it('mostra quando sai o próximo pack ou deixa vazio se já está disponível', 
     $this->actingAs($ready)->get('/')
         ->assertInertia(fn (Assert $page) => $page->where('nextPackAt', null));
 });
+
+it('destaca o espécime de maior valor: shiny antes de raridade, raridade antes de IV', function () {
+    $user = User::factory()->create();
+    $opening = Opening::factory()->for($user)->create();
+    $rattata = Species::factory()->create(['name' => 'Rattata', 'sprite_shiny_path' => 'species/19/shiny.png']);
+    $mewtwo = Species::factory()->legendary()->create(['name' => 'Mewtwo']);
+    Specimen::factory()->for($user)->for($opening)->create(['species_id' => $mewtwo->id, ...ivs(30)]);
+    Specimen::factory()->for($user)->for($opening)->create(['species_id' => $rattata->id, ...ivs(1), 'is_shiny' => true, 'mint_number' => 7]);
+    Specimen::factory()->for($user)->for($opening)->create(['species_id' => $rattata->id, ...ivs(31)]);
+
+    $this->actingAs($user)->get('/')
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('bestSpecimen.speciesName', 'Rattata')
+            ->where('bestSpecimen.isShiny', true)
+            ->where('bestSpecimen.spritePath', 'species/19/shiny.png')
+            ->where('bestSpecimen.mintNumber', 7)
+            ->where('collection.shinyCount', 1));
+});
+
+it('sem espécime, manda a silhueta do primeiro parceiro do config', function () {
+    Species::factory()->create(['id' => config('game.onboarding.avatar_species_ids')[0], 'sprite_path' => 'species/25/sprite.png']);
+
+    $this->actingAs(User::factory()->create())->get('/')
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('bestSpecimen', null)
+            ->where('silhouetteSpritePath', 'species/25/sprite.png'));
+});
+
+it('manda o top 3 do ranking marcando o jogador e conta as trocas enviadas', function () {
+    $viewer = User::factory()->create(['nickname' => 'Lin']);
+    User::factory()->count(3)->create();
+    Trade::factory()->create(['from_user_id' => $viewer->id, 'status' => TradeStatus::Pending]);
+
+    $this->actingAs($viewer)->get('/')
+        ->assertInertia(fn (Assert $page) => $page
+            ->has('rankingTop', 3)
+            ->where('rankingTop.0.nickname', 'Lin')
+            ->where('rankingTop.0.isViewer', true)
+            ->where('rankingTop.1.isViewer', false)
+            ->where('sentTrades', 1));
+});
+
+/**
+ * Os seis IVs iguais (o `iv_total` é coluna gerada).
+ *
+ * @return array<string, int>
+ */
+function ivs(int $value): array
+{
+    return array_fill_keys(['iv_hp', 'iv_atk', 'iv_def', 'iv_spa', 'iv_spd', 'iv_spe'], $value);
+}
