@@ -435,25 +435,6 @@ const compactLabel =
                     </div>
                 </div>
             </Link>
-            <div
-                data-enter="rise"
-                data-delay="120"
-                class="flex items-center gap-[9px] sm:pl-[150px]"
-            >
-                <div class="relative size-[9px]" aria-hidden="true">
-                    <div
-                        v-if="friendsOnline > 0"
-                        class="bg-online animate-online-pulse absolute inset-0 rounded-full"
-                    />
-                    <div
-                        class="absolute inset-0 rounded-full"
-                        :class="friendsOnline > 0 ? 'bg-online' : 'bg-faint-2'"
-                    />
-                </div>
-                <div class="text-muted text-[12.5px] font-extrabold">
-                    {{ formatFriendsOnline(friendsOnline) }}
-                </div>
-            </div>
         </header>
 
         <div
@@ -822,5 +803,26 @@ const compactLabel =
                 </button>
             </div>
         </div>
+        <footer class="flex items-center px-5 pt-1 pb-2 sm:px-7">
+            <div
+                data-enter="rise"
+                data-delay="120"
+                class="flex items-center gap-[9px]"
+            >
+                <div class="relative size-[9px]" aria-hidden="true">
+                    <div
+                        v-if="friendsOnline > 0"
+                        class="bg-online animate-online-pulse absolute inset-0 rounded-full"
+                    />
+                    <div
+                        class="absolute inset-0 rounded-full"
+                        :class="friendsOnline > 0 ? 'bg-online' : 'bg-faint-2'"
+                    />
+                </div>
+                <div class="text-muted text-[12.5px] font-extrabold">
+                    {{ formatFriendsOnline(friendsOnline) }}
+                </div>
+            </div>
+        </footer>
     </div>
 </template>
