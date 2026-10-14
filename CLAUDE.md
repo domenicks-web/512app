@@ -245,8 +245,6 @@ pushado pro `main`.
         - Configurar o Gmail SMTP no `.env` (conta e senha de app do
           usuário). Sem isso os emails do perfil vão só pro log.
         - "Esqueci a senha" (recuperação por email) ainda não existe.
-        - O email de verificação do cadastro ainda é o padrão do Laravel
-          (sem o visual do jogo).
         - Mensagens da regra de senha forte (produção) saem em inglês — o
           projeto não tem `lang/pt_BR`.
     - **Fase 2 — a prova (provably fair):** commit e reveal de seeds

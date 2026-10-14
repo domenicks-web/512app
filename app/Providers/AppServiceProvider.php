@@ -2,8 +2,10 @@
 
 namespace App\Providers;
 
+use App\Mail\VerifyEmailMail;
 use App\Models\User;
 use Carbon\CarbonImmutable;
+use Illuminate\Auth\Notifications\VerifyEmail;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
@@ -28,6 +30,12 @@ class AppServiceProvider extends ServiceProvider
         $this->configureDefaults();
 
         Gate::define('admin', fn (User $user): bool => $user->is_admin === true);
+
+        VerifyEmail::toMailUsing(fn (User $user, string $url): VerifyEmailMail => (new VerifyEmailMail(
+            $user,
+            $url,
+            (int) config('auth.verification.expire', 60),
+        ))->to($user->email));
     }
 
     /**
