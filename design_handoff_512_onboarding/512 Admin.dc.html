@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@600;800;900&family=JetBrains+Mono:wght@800&display=swap" rel="stylesheet">
+<style>
+  html, body { margin: 0; background: #eff0f2; color: #2b2f36; -webkit-font-smoothing: antialiased; }
+  a { color: #f24d4d; text-decoration: none; }
+  a:hover { color: #c93838; }
+  button { font-family: inherit; }
+  input::placeholder { color: #a3a8b0; }
+  @keyframes rowIn { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: none; } }
+  @keyframes popIn { from { opacity: 0; transform: translateY(14px) scale(.96); } to { opacity: 1; transform: none; } }
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+</style>
+</helmet>
+
+<div style="min-height: 100vh; font-family: 'Inter', sans-serif; display: flex; flex-direction: column;">
+
+  <header style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px; padding: 20px 28px; max-width: 1180px; width: 100%; box-sizing: border-box; margin: 0 auto;">
+    <div style="display: flex; align-items: center; gap: 12px;">
+      <div style="background: #f24d4d; border-radius: 12px; padding: 7px 12px 8px; display: flex; align-items: center; gap: 7px; box-shadow: 0 6px 14px rgba(242,77,77,0.28);">
+        <svg width="20" height="20" viewBox="0 0 36 36" fill="none"><rect x="3" y="5" width="30" height="26" rx="11" fill="#ffffff"></rect><rect x="3" y="16.2" width="30" height="3.6" fill="#f24d4d"></rect><rect x="7.5" y="9" width="9" height="4" rx="2" fill="#ffd9d9"></rect></svg>
+        <div style="font-weight: 900; font-size: 20px; line-height: 1; letter-spacing: -0.03em; color: #ffffff;">512</div>
+      </div>
+      <div style="font-size: 11px; font-weight: 800; letter-spacing: 0.18em; text-transform: uppercase; color: #767c85;">Admin</div>
+    </div>
+
+    <nav style="display: flex; gap: 4px; padding: 4px; border-radius: 999px; background: #ffffff; box-shadow: 0 2px 3px rgba(28,32,38,0.05), 0 8px 20px rgba(28,32,38,0.06);">
+      <button onClick="{{ goInvites }}" style="height: 40px; padding: 0 18px; border: 0; border-radius: 999px; background: {{ tabInvBg }}; color: {{ tabInvFg }}; font-weight: 800; font-size: 14px; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: background .2s, color .2s;">Convites <span style="font-size: 12px; opacity: .7;">{{ activeCount }}</span></button>
+      <button onClick="{{ goUsers }}" style="height: 40px; padding: 0 18px; border: 0; border-radius: 999px; background: {{ tabUsrBg }}; color: {{ tabUsrFg }}; font-weight: 800; font-size: 14px; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: background .2s, color .2s;">Jogadores <span style="font-size: 12px; opacity: .7;">{{ userCount }}</span></button>
+    </nav>
+
+    <div style="display: flex; align-items: center; gap: 10px;">
+      <div style="text-align: right;">
+        <div style="font-weight: 800; font-size: 14px;">Ramon</div>
+        <div style="font-weight: 600; font-size: 12px; color: #767c85;">Admin</div>
+      </div>
+      <div style="width: 38px; height: 38px; border-radius: 999px; background: #2b2f36; color: #ffffff; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 15px;">R</div>
+    </div>
+  </header>
+
+  <main style="flex: 1; max-width: 1180px; width: 100%; box-sizing: border-box; margin: 0 auto; padding: 12px 28px 80px; display: flex; flex-direction: column; gap: 22px;">
+
+    <sc-if value="{{ isInvites }}" hint-placeholder-val="{{ true }}">
+      <div style="display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 16px;">
+        <div style="display: flex; flex-direction: column; gap: 6px;">
+          <div style="font-weight: 900; font-size: 34px; letter-spacing: -0.03em; line-height: 1.05;">Convites</div>
+          <div style="font-weight: 600; font-size: 14px; color: #6c737c; text-wrap: pretty;">Cada código libera um cadastro. Revogar não afeta quem já entrou.</div>
+        </div>
+        <button onClick="{{ toggleGen }}" style="height: 50px; padding: 0 22px 0 18px; border: 0; border-radius: 999px; background: #f24d4d; color: #ffffff; font-weight: 800; font-size: 15px; cursor: pointer; display: flex; align-items: center; gap: 10px; box-shadow: 0 10px 22px rgba(242,77,77,0.42);" style-active="transform: scale(.97);">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><mask id="pbA"><rect width="24" height="24" fill="#ffffff"></rect><rect x="0" y="10.9" width="24" height="2.2" fill="#000000"></rect><circle cx="12" cy="12" r="4.6" fill="#000000"></circle><circle cx="12" cy="12" r="2.4" fill="#ffffff"></circle></mask><circle cx="12" cy="12" r="10" fill="currentColor" mask="url(#pbA)"></circle></svg>
+          {{ genLabel }}
+        </button>
+      </div>
+
+      <sc-if value="{{ gen }}" hint-placeholder-val="{{ false }}">
+        <div style="background: #ffffff; border-radius: 28px; box-shadow: 0 2px 3px rgba(28,32,38,0.05), 0 18px 40px rgba(28,32,38,0.09); padding: 26px; display: flex; flex-wrap: wrap; gap: 28px; animation: popIn .32s cubic-bezier(.2,1.4,.4,1);">
+          <div style="flex: 1 1 340px; min-width: 0; border-radius: 20px; background: #1c1f26; background-image: radial-gradient(70% 45% at 50% 46%, rgba(242,77,77,0.16), transparent); padding: 30px 20px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px;">
+            <div style="font-size: 11px; font-weight: 800; letter-spacing: 0.18em; text-transform: uppercase; color: #7d8794;">Novo código</div>
+            <div style="display: flex; gap: 3px; flex-wrap: wrap; justify-content: center;">
+              <sc-for list="{{ codeChars }}" as="ch" hint-placeholder-count="10">
+                <div style="min-width: 26px; height: 50px; padding: 0 2px; border-radius: 8px; background: {{ ch.bg }}; color: {{ ch.fg }}; font-family: 'JetBrains Mono', monospace; font-weight: 800; font-size: 30px; display: flex; align-items: center; justify-content: center; transition: background .2s, color .2s;">{{ ch.c }}</div>
+              </sc-for>
+            </div>
+            <button onClick="{{ reroll }}" style="height: 34px; padding: 0 14px; border: 0; border-radius: 999px; background: rgba(255,255,255,0.08); color: #c3cad4; font-weight: 800; font-size: 13px; cursor: pointer; display: flex; align-items: center; gap: 7px;" style-hover="background: rgba(255,255,255,0.14);">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12a8 8 0 1 0 2.4-5.7"></path><path d="M4 4v4h4"></path></svg>
+              Sortear outro
+            </button>
+          </div>
+
+          <div style="flex: 1 1 300px; min-width: 0; display: flex; flex-direction: column; gap: 20px;">
+            <div style="display: flex; flex-direction: column; gap: 8px;">
+              <div style="font-size: 12px; font-weight: 800; color: #767c85;">Prefixo</div>
+              <input value="{{ prefix }}" onChange="{{ onPrefix }}" maxlength="8" spellcheck="false" style="height: 48px; border-radius: 999px; border: 0; background: #f4f5f6; padding: 0 20px; font-family: 'JetBrains Mono', monospace; font-weight: 800; font-size: 16px; color: #2b2f36; outline: none; text-transform: uppercase;" style-focus="box-shadow: inset 0 0 0 2px #f24d4d; background: #ffffff;">
+            </div>
+            <div style="display: flex; flex-wrap: wrap; gap: 20px;">
+              <div style="display: flex; flex-direction: column; gap: 8px;">
+                <div style="font-size: 12px; font-weight: 800; color: #767c85;">Usos</div>
+                <div style="display: flex; align-items: center; gap: 4px; height: 48px; padding: 0 4px; border-radius: 999px; background: #f4f5f6;">
+                  <button onClick="{{ usesDown }}" style="width: 40px; height: 40px; border: 0; border-radius: 999px; background: #ffffff; color: #2b2f36; font-weight: 900; font-size: 18px; cursor: pointer; box-shadow: 0 1px 2px rgba(28,32,38,0.08);">−</button>
+                  <div style="min-width: 36px; text-align: center; font-weight: 900; font-size: 18px;">{{ uses }}</div>
+                  <button onClick="{{ usesUp }}" style="width: 40px; height: 40px; border: 0; border-radius: 999px; background: #ffffff; color: #2b2f36; font-weight: 900; font-size: 18px; cursor: pointer; box-shadow: 0 1px 2px rgba(28,32,38,0.08);">+</button>
+                </div>
+              </div>
+              <div style="display: flex; flex-direction: column; gap: 8px; flex: 1 1 220px;">
+                <div style="font-size: 12px; font-weight: 800; color: #767c85;">Validade</div>
+                <div style="display: flex; gap: 4px; height: 48px; padding: 4px; box-sizing: border-box; border-radius: 999px; background: #f4f5f6;">
+                  <sc-for list="{{ validityOpts }}" as="v" hint-placeholder-count="3">
+                    <button onClick="{{ v.pick }}" style="flex: 1; border: 0; border-radius: 999px; background: {{ v.bg }}; color: {{ v.fg }}; box-shadow: {{ v.sh }}; font-weight: 800; font-size: 13px; cursor: pointer; white-space: nowrap; padding: 0 10px;">{{ v.label }}</button>
+                  </sc-for>
+                </div>
+              </div>
+            </div>
+            <div style="display: flex; gap: 10px; margin-top: auto;">
+              <button onClick="{{ copyGen }}" style="flex: 1; height: 52px; border: 0; border-radius: 999px; background: #ffffff; box-shadow: inset 0 0 0 2px #e4e6ea; color: #2b2f36; font-weight: 800; font-size: 15px; cursor: pointer;">{{ copyGenLabel }}</button>
+              <button onClick="{{ createInvite }}" style="flex: 1.4; height: 52px; border: 0; border-radius: 999px; background: #f24d4d; color: #ffffff; font-weight: 800; font-size: 15px; cursor: pointer; box-shadow: 0 10px 22px rgba(242,77,77,0.42);" style-active="transform: scale(.97);">Criar convite</button>
+            </div>
+          </div>
+        </div>
+      </sc-if>
+
+      <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+        <sc-for list="{{ invFilters }}" as="f" hint-placeholder-count="5">
+          <button onClick="{{ f.pick }}" style="height: 36px; padding: 0 14px; border: 0; border-radius: 999px; background: {{ f.bg }}; color: {{ f.fg }}; box-shadow: {{ f.sh }}; font-weight: 800; font-size: 13px; cursor: pointer; display: flex; align-items: center; gap: 7px;">{{ f.label }} <span style="opacity: .6;">{{ f.n }}</span></button>
+        </sc-for>
+      </div>
+
+      <div style="background: #ffffff; border-radius: 24px; box-shadow: 0 2px 3px rgba(28,32,38,0.05), 0 10px 24px rgba(28,32,38,0.07); overflow-x: auto;">
+        <div style="min-width: 750px;">
+          <div style="display: grid; grid-template-columns: minmax(150px,1.4fr) minmax(120px,1.2fr) 96px 84px 100px 80px; gap: 14px; padding: 16px 24px; border-bottom: 1px solid #eef0f2; font-size: 11px; font-weight: 800; letter-spacing: 0.12em; text-transform: uppercase; color: #8a9099;">
+            <div>Código</div><div>Usado por</div><div>Usos</div><div>Expira</div><div>Status</div><div></div>
+          </div>
+          <sc-for list="{{ invRows }}" as="r" hint-placeholder-count="6">
+            <div style="display: grid; grid-template-columns: minmax(150px,1.4fr) minmax(120px,1.2fr) 96px 84px 100px 80px; gap: 14px; align-items: center; padding: {{ rowPad }}; border-bottom: 1px solid #f2f3f5; opacity: {{ r.op }}; animation: {{ r.anim }};" style-hover="background: #fafafb;">
+              <div style="display: flex; flex-direction: column; gap: 3px; min-width: 0;">
+                <div style="font-family: 'JetBrains Mono', monospace; font-weight: 800; font-size: 15px; color: #2b2f36; text-decoration: {{ r.strike }};">{{ r.code }}</div>
+                <div style="font-size: 12px; font-weight: 600; color: #8a9099;">por {{ r.by }} · {{ r.created }}</div>
+              </div>
+              <div style="display: flex; align-items: center; gap: 8px; min-width: 0;">
+                <sc-if value="{{ r.hasUsers }}" hint-placeholder-val="{{ true }}">
+                  <div style="display: flex;">
+                    <sc-for list="{{ r.usedBy }}" as="u" hint-placeholder-count="1">
+                      <div title="{{ u.full }}" style="width: 28px; height: 28px; margin-right: -6px; border-radius: 999px; background: {{ u.color }}; color: #ffffff; box-shadow: 0 0 0 2px #ffffff; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 12px;">{{ u.ini }}</div>
+                    </sc-for>
+                  </div>
+                  <div style="font-size: 13px; font-weight: 800; padding-left: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ r.usedLabel }}</div>
+                </sc-if>
+                <sc-if value="{{ r.noUsers }}" hint-placeholder-val="{{ false }}">
+                  <div style="font-size: 13px; font-weight: 600; color: #a3a8b0;">Ninguém ainda</div>
+                </sc-if>
+              </div>
+              <div style="display: flex; flex-direction: column; gap: 6px;">
+                <div style="font-weight: 800; font-size: 13px;">{{ r.usesTxt }}</div>
+                <div style="width: 84px; height: 6px; border-radius: 999px; background: #eef0f2; overflow: hidden;"><div style="height: 100%; width: {{ r.pct }}; border-radius: 999px; background: {{ r.barColor }}; transition: width .4s;"></div></div>
+              </div>
+              <div style="font-size: 13px; font-weight: 600; color: #565d66;">{{ r.expires }}</div>
+              <div><span style="display: inline-flex; align-items: center; gap: 6px; height: 26px; padding: 0 10px; border-radius: 999px; background: {{ r.stBg }}; color: {{ r.stFg }}; font-size: 12px; font-weight: 800;"><span style="width: 6px; height: 6px; border-radius: 999px; background: currentColor;"></span>{{ r.status }}</span></div>
+              <div style="display: flex; justify-content: flex-end; gap: 6px;">
+                <button onClick="{{ r.copy }}" title="Copiar código" style="width: 36px; height: 36px; border: 0; border-radius: 999px; background: {{ r.copyBg }}; color: {{ r.copyFg }}; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background .2s;" style-hover="background: #e8eaee;">
+                  <sc-if value="{{ r.isCopied }}" hint-placeholder-val="{{ false }}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg></sc-if>
+                  <sc-if value="{{ r.notCopied }}" hint-placeholder-val="{{ true }}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="8" width="12" height="12" rx="3"></rect><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"></path></svg></sc-if>
+                </button>
+                <sc-if value="{{ r.canRevoke }}" hint-placeholder-val="{{ true }}">
+                  <button onClick="{{ r.revoke }}" title="Revogar" style="width: 36px; height: 36px; border: 0; border-radius: 999px; background: #f4f5f6; color: #8a9099; cursor: pointer; display: flex; align-items: center; justify-content: center;" style-hover="background: #ffe6e6; color: #f24d4d;">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><circle cx="12" cy="12" r="8.5"></circle><path d="M6 18L18 6"></path></svg>
+                  </button>
+                </sc-if>
+              </div>
+            </div>
+          </sc-for>
+          <sc-if value="{{ invEmpty }}" hint-placeholder-val="{{ false }}">
+            <div style="padding: 48px 24px; text-align: center; font-weight: 600; font-size: 14px; color: #8a9099;">Nenhum convite nesse filtro.</div>
+          </sc-if>
+        </div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ isUsers }}" hint-placeholder-val="{{ false }}">
+      <div style="display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 16px;">
+        <div style="display: flex; flex-direction: column; gap: 6px;">
+          <div style="font-weight: 900; font-size: 34px; letter-spacing: -0.03em; line-height: 1.05;">Jogadores</div>
+          <div style="font-weight: 600; font-size: 14px; color: #6c737c; text-wrap: pretty;">Admins geram convites sem cota, revogam códigos e promovem outros jogadores.</div>
+        </div>
+        <div style="position: relative; flex: 0 1 300px; min-width: 220px;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#8a9099" stroke-width="2.6" stroke-linecap="round" style="position: absolute; left: 18px; top: 17px;"><circle cx="11" cy="11" r="6.5"></circle><path d="M16 16l4 4"></path></svg>
+          <input value="{{ q }}" onChange="{{ onQ }}" placeholder="Buscar nickname ou email" spellcheck="false" style="width: 100%; box-sizing: border-box; height: 50px; border-radius: 999px; border: 0; background: #ffffff; padding: 0 20px 0 44px; font-family: 'Inter', sans-serif; font-weight: 600; font-size: 14px; color: #2b2f36; outline: none; box-shadow: 0 2px 3px rgba(28,32,38,0.05), 0 8px 20px rgba(28,32,38,0.06);" style-focus="box-shadow: inset 0 0 0 2px #f24d4d;">
+        </div>
+      </div>
+
+      <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+        <sc-for list="{{ usrFilters }}" as="f" hint-placeholder-count="2">
+          <button onClick="{{ f.pick }}" style="height: 36px; padding: 0 14px; border: 0; border-radius: 999px; background: {{ f.bg }}; color: {{ f.fg }}; box-shadow: {{ f.sh }}; font-weight: 800; font-size: 13px; cursor: pointer; display: flex; align-items: center; gap: 7px;">{{ f.label }} <span style="opacity: .6;">{{ f.n }}</span></button>
+        </sc-for>
+      </div>
+
+      <div style="background: #ffffff; border-radius: 24px; box-shadow: 0 2px 3px rgba(28,32,38,0.05), 0 10px 24px rgba(28,32,38,0.07); overflow-x: auto;">
+        <div style="min-width: 800px;">
+          <div style="display: grid; grid-template-columns: minmax(190px,1.6fr) minmax(110px,1fr) 64px 72px 116px 134px; gap: 14px; padding: 16px 24px; border-bottom: 1px solid #eef0f2; font-size: 11px; font-weight: 800; letter-spacing: 0.12em; text-transform: uppercase; color: #8a9099;">
+            <div>Jogador</div><div>Entrou com</div><div>Desde</div><div>Espécimes</div><div>Cota de convites</div><div style="text-align: right;">Papel</div>
+          </div>
+          <sc-for list="{{ userRows }}" as="u" hint-placeholder-count="8">
+            <div style="display: grid; grid-template-columns: minmax(190px,1.6fr) minmax(110px,1fr) 64px 72px 116px 134px; gap: 14px; align-items: center; padding: {{ rowPad }}; border-bottom: 1px solid #f2f3f5;" style-hover="background: #fafafb;">
+              <div style="display: flex; align-items: center; gap: 12px; min-width: 0;">
+                <div style="position: relative; flex: 0 0 auto; width: 40px; height: 40px; border-radius: 999px; background: {{ u.color }}; color: #ffffff; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 16px;">
+                  {{ u.ini }}
+                  <sc-if value="{{ u.isAdmin }}" hint-placeholder-val="{{ false }}">
+                    <div style="position: absolute; right: -3px; bottom: -3px; width: 18px; height: 18px; border-radius: 999px; background: #f24d4d; box-shadow: 0 0 0 2px #ffffff; display: flex; align-items: center; justify-content: center;"><svg width="10" height="10" viewBox="0 0 24 24" fill="#ffffff"><path d="M12 2l2.9 6.6 7.1.6-5.4 4.7 1.6 7L12 17.3 5.8 20.9l1.6-7L2 9.2l7.1-.6z"></path></svg></div>
+                  </sc-if>
+                </div>
+                <div style="display: flex; flex-direction: column; gap: 2px; min-width: 0;">
+                  <div style="display: flex; align-items: baseline; gap: 4px;">
+                    <span style="font-weight: 900; font-size: 15px;">{{ u.nick }}</span>
+                    <span style="font-weight: 600; font-size: 13px; color: #a3a8b0;">#{{ u.tag }}</span>
+                    <sc-if value="{{ u.isMe }}" hint-placeholder-val="{{ false }}"><span style="margin-left: 4px; font-size: 11px; font-weight: 800; color: #767c85; background: #eff0f2; padding: 2px 7px; border-radius: 999px;">você</span></sc-if>
+                  </div>
+                  <div style="font-weight: 600; font-size: 12px; color: #8a9099; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ u.email }}</div>
+                </div>
+              </div>
+              <div style="display: flex; flex-direction: column; gap: 2px; min-width: 0;">
+                <div style="font-family: 'JetBrains Mono', monospace; font-weight: 800; font-size: 13px;">{{ u.code }}</div>
+                <div style="font-size: 12px; font-weight: 600; color: #8a9099;">{{ u.inviter }}</div>
+              </div>
+              <div style="font-size: 13px; font-weight: 600; color: #565d66;">{{ u.joined }}</div>
+              <div style="font-size: 15px; font-weight: 900;">{{ u.specimens }}</div>
+              <div style="display: flex; align-items: center; gap: 2px; width: fit-content; height: 36px; padding: 0 3px; border-radius: 999px; background: #f4f5f6;">
+                <sc-if value="{{ u.isAdmin }}" hint-placeholder-val="{{ false }}">
+                  <div style="padding: 0 12px; font-size: 13px; font-weight: 800; color: #767c85;">Sem limite</div>
+                </sc-if>
+                <sc-if value="{{ u.notAdmin }}" hint-placeholder-val="{{ true }}">
+                  <button onClick="{{ u.quotaDown }}" style="width: 30px; height: 30px; border: 0; border-radius: 999px; background: #ffffff; color: #2b2f36; font-weight: 900; font-size: 15px; cursor: pointer; box-shadow: 0 1px 2px rgba(28,32,38,0.08);">−</button>
+                  <div style="min-width: 30px; text-align: center; font-weight: 900; font-size: 14px;">{{ u.quota }}</div>
+                  <button onClick="{{ u.quotaUp }}" style="width: 30px; height: 30px; border: 0; border-radius: 999px; background: #ffffff; color: #2b2f36; font-weight: 900; font-size: 15px; cursor: pointer; box-shadow: 0 1px 2px rgba(28,32,38,0.08);">+</button>
+                </sc-if>
+              </div>
+              <div style="display: flex; justify-content: flex-end;">
+                <button onClick="{{ u.roleClick }}" disabled="{{ u.lockRole }}" title="{{ u.roleTitle }}" style="height: 36px; padding: 0 14px; border: 0; border-radius: 999px; background: {{ u.roleBg }}; color: {{ u.roleFg }}; box-shadow: {{ u.roleSh }}; font-weight: 800; font-size: 13px; cursor: {{ u.roleCursor }}; white-space: nowrap; opacity: {{ u.roleOp }};">{{ u.roleLabel }}</button>
+              </div>
+            </div>
+          </sc-for>
+          <sc-if value="{{ usrEmpty }}" hint-placeholder-val="{{ false }}">
+            <div style="padding: 48px 24px; text-align: center; font-weight: 600; font-size: 14px; color: #8a9099;">Ninguém encontrado.</div>
+          </sc-if>
+        </div>
+      </div>
+    </sc-if>
+  </main>
+
+  <sc-if value="{{ hasConfirm }}" hint-placeholder-val="{{ false }}">
+    <div onClick="{{ closeConfirm }}" style="position: fixed; inset: 0; z-index: 30; background: rgba(28,31,38,0.55); display: flex; align-items: center; justify-content: center; padding: 20px; animation: fadeIn .2s;">
+      <div onClick="{{ stop }}" style="width: 100%; max-width: 420px; background: #ffffff; border-radius: 32px; padding: 30px 28px 26px; box-sizing: border-box; display: flex; flex-direction: column; align-items: center; gap: 18px; box-shadow: 0 30px 80px rgba(28,31,38,0.35); animation: popIn .34s cubic-bezier(.2,1.4,.4,1);">
+        <div style="position: relative; width: 72px; height: 72px; border-radius: 999px; background: {{ cf.color }}; color: #ffffff; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 28px;">
+          {{ cf.ini }}
+          <div style="position: absolute; right: -2px; bottom: -2px; width: 28px; height: 28px; border-radius: 999px; background: {{ cf.badgeBg }}; box-shadow: 0 0 0 3px #ffffff; display: flex; align-items: center; justify-content: center;"><svg width="14" height="14" viewBox="0 0 24 24" fill="#ffffff"><path d="M12 2l2.9 6.6 7.1.6-5.4 4.7 1.6 7L12 17.3 5.8 20.9l1.6-7L2 9.2l7.1-.6z"></path></svg></div>
+        </div>
+        <div style="display: flex; flex-direction: column; align-items: center; gap: 8px; text-align: center;">
+          <div style="font-weight: 900; font-size: 24px; letter-spacing: -0.02em;">{{ cf.title }}</div>
+          <div style="font-weight: 600; font-size: 14px; line-height: 1.5; color: #6c737c; text-wrap: pretty;">{{ cf.body }}</div>
+        </div>
+        <sc-if value="{{ cf.typed }}" hint-placeholder-val="{{ false }}">
+          <div style="width: 100%; display: flex; flex-direction: column; gap: 8px;">
+            <div style="font-size: 12px; font-weight: 800; color: #767c85; text-align: center;">Digite <span style="font-family: 'JetBrains Mono', monospace; color: #2b2f36;">{{ cf.full }}</span> para confirmar</div>
+            <input value="{{ confirmText }}" onChange="{{ onConfirmText }}" spellcheck="false" autofocus="{{ true }}" style="height: 50px; border-radius: 999px; border: 0; background: #f4f5f6; padding: 0 20px; text-align: center; font-family: 'JetBrains Mono', monospace; font-weight: 800; font-size: 16px; color: #2b2f36; outline: none;" style-focus="box-shadow: inset 0 0 0 2px #f24d4d; background: #ffffff;">
+          </div>
+        </sc-if>
+        <div style="width: 100%; display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+          <button onClick="{{ closeConfirm }}" style="height: 52px; border: 0; border-radius: 999px; background: #ffffff; box-shadow: inset 0 0 0 2px #e4e6ea; color: #2b2f36; font-weight: 800; font-size: 15px; cursor: pointer;">Cancelar</button>
+          <button onClick="{{ doConfirm }}" style="height: 52px; border: 0; border-radius: 999px; background: {{ cf.okBg }}; color: #ffffff; font-weight: 800; font-size: 15px; cursor: {{ cf.okCursor }}; box-shadow: {{ cf.okSh }}; transition: background .2s, box-shadow .2s;">{{ cf.ok }}</button>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ hasToast }}" hint-placeholder-val="{{ false }}">
+    <div style="position: fixed; left: 50%; bottom: 28px; z-index: 40; transform: translateX(-50%); animation: popIn .3s cubic-bezier(.2,1.4,.4,1);">
+      <div style="height: 46px; padding: 0 20px 0 14px; border-radius: 999px; background: #2b2f36; color: #ffffff; display: flex; align-items: center; gap: 10px; font-weight: 800; font-size: 14px; white-space: nowrap; box-shadow: 0 14px 30px rgba(28,31,38,0.3);">
+        <div style="width: 22px; height: 22px; border-radius: 999px; background: #3f8f6b; display: flex; align-items: center; justify-content: center;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg></div>
+        {{ toast }}
+      </div>
+    </div>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;confirmMode&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Digitar nickname&quot;,&quot;Simples&quot;],&quot;default&quot;:&quot;Digitar nickname&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Comportamento&quot;},&quot;density&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Confortável&quot;,&quot;Compacta&quot;],&quot;default&quot;:&quot;Confortável&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Layout&quot;},&quot;startTab&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Convites&quot;,&quot;Jogadores&quot;],&quot;default&quot;:&quot;Convites&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Layout&quot;}}">
+const ALPH = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+const rnd = n => Array.from({ length: n }, () => ALPH[Math.floor(Math.random() * ALPH.length)]).join('');
+const COLORS = ['#f24d4d', '#2b2f36', '#8f5735', '#e07c55', '#3f8f6b', '#5b6b8c', '#c9932b', '#7a4f8f'];
+const TODAY = new Date(2026, 9, 13);
+const MES = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez'];
+const d = (m, day) => new Date(2026, m - 1, day);
+const fmt = dt => `${String(dt.getDate()).padStart(2, '0')} ${MES[dt.getMonth()]}`;
+
+const USERS = [
+  { id: 1, nick: 'Ramon', tag: '0001', email: 'ramon@gmail.com', admin: true, code: '—', inviter: 'Fundador', joined: d(8, 2), specimens: 365, quota: 0 },
+  { id: 2, nick: 'Lin', tag: '4821', email: 'lin.yamada@gmail.com', admin: false, code: 'RAMON-7X2K', inviter: 'Ramon', joined: d(8, 4), specimens: 342, quota: 2 },
+  { id: 3, nick: 'Duda', tag: '1190', email: 'duda.m@outlook.com', admin: true, code: 'RAMON-7X2K', inviter: 'Ramon', joined: d(8, 4), specimens: 330, quota: 0 },
+  { id: 4, nick: 'Caio', tag: '3307', email: 'caiolima@gmail.com', admin: false, code: 'LIN-Q8PD', inviter: 'Lin', joined: d(8, 19), specimens: 251, quota: 1 },
+  { id: 5, nick: 'Bia', tag: '6401', email: 'bia.rocha@gmail.com', admin: false, code: 'DUDA-M4TZ', inviter: 'Duda', joined: d(9, 1), specimens: 210, quota: 2 },
+  { id: 6, nick: 'Lin', tag: '0772', email: 'lindsey.p@icloud.com', admin: false, code: 'DUDA-M4TZ', inviter: 'Duda', joined: d(9, 3), specimens: 198, quota: 1 },
+  { id: 7, nick: 'Tavinho', tag: '8815', email: 'otavio.s@gmail.com', admin: false, code: 'CAIO-H2WN', inviter: 'Caio', joined: d(9, 22), specimens: 104, quota: 0 },
+  { id: 8, nick: 'Mari', tag: '2048', email: 'mari.costa@gmail.com', admin: false, code: 'RAMON-B9RE', inviter: 'Ramon', joined: d(10, 9), specimens: 20, quota: 2 },
+];
+const INVITES = [
+  { id: 1, code: 'RAMON-B9RE', by: 'Ramon', created: d(10, 7), max: 3, used: [8], exp: d(11, 6), revoked: false },
+  { id: 2, code: 'BIA-K7VQ', by: 'Bia', created: d(10, 2), max: 1, used: [], exp: d(11, 1), revoked: false },
+  { id: 3, code: 'CAIO-H2WN', by: 'Caio', created: d(9, 20), max: 1, used: [7], exp: d(10, 20), revoked: false },
+  { id: 4, code: 'LIN-X3ZA', by: 'Lin', created: d(9, 10), max: 1, used: [], exp: d(10, 10), revoked: false },
+  { id: 5, code: 'DUDA-M4TZ', by: 'Duda', created: d(8, 28), max: 2, used: [5, 6], exp: null, revoked: false },
+  { id: 6, code: 'TAVI-P6GU', by: 'Tavinho', created: d(9, 25), max: 1, used: [], exp: d(10, 25), revoked: true },
+  { id: 7, code: 'LIN-Q8PD', by: 'Lin', created: d(8, 15), max: 1, used: [4], exp: null, revoked: false },
+  { id: 8, code: 'RAMON-7X2K', by: 'Ramon', created: d(8, 2), max: 2, used: [2, 3], exp: null, revoked: false },
+];
+const ST = {
+  ativo: { label: 'Ativo', bg: '#e3f1ea', fg: '#2f7556' },
+  esgotado: { label: 'Esgotado', bg: '#eceef1', fg: '#656b74' },
+  expirado: { label: 'Expirado', bg: '#f6e9df', fg: '#8f5735' },
+  revogado: { label: 'Revogado', bg: '#ffe6e6', fg: '#d63c3c' },
+};
+
+class Component extends DCLogic {
+  state = {
+    tab: this.props.startTab === 'Jogadores' ? 'users' : 'invites',
+    invites: INVITES, users: USERS, filter: 'todos', ufilter: 'todos', q: '',
+    gen: false, uses: 1, validity: '30', prefix: 'RAMON', suffix: 'Q4NT', spin: null,
+    confirm: null, confirmText: '', toast: null, copied: null, fresh: null,
+  };
+  componentWillUnmount() { clearInterval(this.spinT); clearTimeout(this.toastT); clearTimeout(this.copyT); }
+
+  status(inv) {
+    if (inv.revoked) return 'revogado';
+    if (inv.used.length >= inv.max) return 'esgotado';
+    if (inv.exp && inv.exp < TODAY) return 'expirado';
+    return 'ativo';
+  }
+  flash(msg) { clearTimeout(this.toastT); this.setState({ toast: msg }); this.toastT = setTimeout(() => this.setState({ toast: null }), 2200); }
+  copy(code, key) {
+    try { navigator.clipboard && navigator.clipboard.writeText(code); } catch (e) {}
+    clearTimeout(this.copyT); this.setState({ copied: key }); this.copyT = setTimeout(() => this.setState({ copied: null }), 1400);
+    this.flash(`${code} copiado`);
+  }
+  roll() {
+    const final = rnd(4); let t = 0; clearInterval(this.spinT);
+    this.setState({ spin: [rnd(4), 0] });
+    this.spinT = setInterval(() => {
+      t++; const locked = Math.min(4, Math.floor(t / 4));
+      if (locked >= 4) { clearInterval(this.spinT); this.setState({ suffix: final, spin: null }); return; }
+      this.setState({ spin: [final.slice(0, locked) + rnd(4 - locked), locked] });
+    }, 45);
+  }
+  code() { return `${(this.state.prefix || 'X').toUpperCase()}-${this.state.suffix}`; }
+  create() {
+    if (this.state.spin) return;
+    const s = this.state, code = this.code();
+    const exp = s.validity === 'never' ? null : new Date(TODAY.getTime() + Number(s.validity) * 864e5);
+    const inv = { id: Date.now(), code, by: 'Ramon', created: TODAY, max: s.uses, used: [], exp, revoked: false };
+    this.setState({ invites: [inv, ...s.invites], fresh: inv.id, filter: 'todos', gen: false });
+    this.flash(`${code} criado`);
+  }
+  promptRole(u) { this.setState({ confirm: u.id, confirmText: '' }); }
+  applyRole() {
+    const s = this.state, u = s.users.find(x => x.id === s.confirm); if (!u) return;
+    const full = `${u.nick}#${u.tag}`;
+    if (this.typed() && s.confirmText.trim().toLowerCase() !== full.toLowerCase()) return;
+    this.setState({ users: s.users.map(x => x.id === u.id ? { ...x, admin: !x.admin } : x), confirm: null });
+    this.flash(u.admin ? `${u.nick} voltou a ser jogador` : `${u.nick} agora é admin`);
+  }
+  typed() { return (this.props.confirmMode ?? 'Digitar nickname') === 'Digitar nickname'; }
+
+  renderVals() {
+    const s = this.state;
+    const pad = (this.props.density ?? 'Confortável') === 'Compacta' ? '10px 24px' : '16px 24px';
+    const byId = Object.fromEntries(s.users.map(u => [u.id, u]));
+    const colorOf = u => COLORS[(u.id * 3) % COLORS.length];
+    const pill = on => ({ bg: on ? '#2b2f36' : '#ffffff', fg: on ? '#ffffff' : '#2b2f36', sh: on ? 'none' : '0 1px 2px rgba(28,32,38,0.06)' });
+
+    const counts = { todos: s.invites.length, ativo: 0, esgotado: 0, expirado: 0, revogado: 0 };
+    s.invites.forEach(i => counts[this.status(i)]++);
+    const invFilters = [['todos', 'Todos'], ['ativo', 'Ativos'], ['esgotado', 'Esgotados'], ['expirado', 'Expirados'], ['revogado', 'Revogados']]
+      .map(([k, label]) => ({ label, n: counts[k], ...pill(s.filter === k), pick: () => this.setState({ filter: k }) }));
+
+    const invRows = s.invites.filter(i => s.filter === 'todos' || this.status(i) === s.filter).map(i => {
+      const st = this.status(i), m = ST[st], used = i.used.map(id => byId[id]).filter(Boolean);
+      const dead = st === 'revogado' || st === 'expirado';
+      return {
+        code: i.code, by: i.by, created: fmt(i.created), strike: st === 'revogado' ? 'line-through' : 'none', op: dead ? 0.6 : 1,
+        anim: s.fresh === i.id ? 'rowIn .45s cubic-bezier(.2,1.4,.4,1)' : 'none',
+        hasUsers: used.length > 0, noUsers: used.length === 0,
+        usedBy: used.map(u => ({ ini: u.nick[0], color: colorOf(u), full: `${u.nick}#${u.tag}` })),
+        usedLabel: used.length === 1 ? `${used[0].nick}#${used[0].tag}` : used.map(u => u.nick).join(', '),
+        usesTxt: `${i.used.length} de ${i.max}`, pct: `${Math.round(i.used.length / i.max * 100)}%`, barColor: st === 'ativo' ? '#f24d4d' : '#c3c7cd',
+        expires: i.exp ? fmt(i.exp) : 'Nunca',
+        status: m.label, stBg: m.bg, stFg: m.fg,
+        isCopied: s.copied === i.id, notCopied: s.copied !== i.id,
+        copyBg: s.copied === i.id ? '#e3f1ea' : '#f4f5f6', copyFg: s.copied === i.id ? '#2f7556' : '#565d66',
+        copy: () => this.copy(i.code, i.id),
+        canRevoke: st === 'ativo',
+        revoke: () => { this.setState({ invites: s.invites.map(x => x.id === i.id ? { ...x, revoked: true } : x) }); this.flash(`${i.code} revogado`); },
+      };
+    });
+
+    const genStr = this.code(), spinning = !!s.spin, pre = (s.prefix || 'X').toUpperCase();
+    const suf = spinning ? s.spin[0] : s.suffix, locked = spinning ? s.spin[1] : 4;
+    const codeChars = [...pre.split('').map(c => ({ c, bg: 'transparent', fg: '#ffffff' })), { c: '-', bg: 'transparent', fg: '#7d8794' },
+      ...suf.split('').map((c, k) => ({ c, bg: k < locked ? 'rgba(242,77,77,0.18)' : 'rgba(255,255,255,0.06)', fg: k < locked ? '#ff8a8a' : '#7d8794' }))];
+
+    const validityOpts = [['7', '7 dias'], ['30', '30 dias'], ['never', 'Sem validade']].map(([k, label]) => {
+      const on = s.validity === k;
+      return { label, bg: on ? '#ffffff' : 'transparent', fg: on ? '#2b2f36' : '#767c85', sh: on ? '0 1px 3px rgba(28,32,38,0.1)' : 'none', pick: () => this.setState({ validity: k }) };
+    });
+
+    const admins = s.users.filter(u => u.admin).length;
+    const q = s.q.trim().toLowerCase();
+    const usrFilters = [['todos', 'Todos', s.users.length], ['admin', 'Admins', admins]]
+      .map(([k, label, n]) => ({ label, n, ...pill(s.ufilter === k), pick: () => this.setState({ ufilter: k }) }));
+    const userRows = s.users.filter(u => (s.ufilter === 'todos' || u.admin) && (!q || `${u.nick}#${u.tag} ${u.email}`.toLowerCase().includes(q))).map(u => {
+      const isMe = u.id === 1, lock = isMe || (u.admin && admins <= 1);
+      return {
+        nick: u.nick, tag: u.tag, email: u.email, ini: u.nick[0], color: colorOf(u), isAdmin: u.admin, notAdmin: !u.admin, isMe,
+        code: u.code, inviter: u.inviter === 'Fundador' ? 'Fundador' : `convite de ${u.inviter}`, joined: fmt(u.joined), specimens: u.specimens, quota: u.quota,
+        quotaDown: () => this.setState({ users: s.users.map(x => x.id === u.id ? { ...x, quota: Math.max(0, x.quota - 1) } : x) }),
+        quotaUp: () => this.setState({ users: s.users.map(x => x.id === u.id ? { ...x, quota: Math.min(9, x.quota + 1) } : x) }),
+        roleLabel: u.admin ? (isMe ? 'Admin' : 'Remover admin') : 'Tornar admin',
+        roleBg: u.admin ? '#ffffff' : '#2b2f36', roleFg: u.admin ? '#2b2f36' : '#ffffff', roleSh: u.admin ? 'inset 0 0 0 2px #e4e6ea' : 'none',
+        roleCursor: lock ? 'default' : 'pointer', roleOp: lock ? 0.5 : 1, lockRole: lock,
+        roleTitle: isMe ? 'Você não pode remover seu próprio acesso' : '',
+        roleClick: () => !lock && this.promptRole(u),
+      };
+    });
+
+    const cu = s.users.find(x => x.id === s.confirm);
+    let cf = {};
+    if (cu) {
+      const full = `${cu.nick}#${cu.tag}`, typed = this.typed();
+      const ok = !typed || s.confirmText.trim().toLowerCase() === full.toLowerCase();
+      const promote = !cu.admin;
+      cf = {
+        ini: cu.nick[0], color: colorOf(cu), full, typed,
+        badgeBg: promote ? '#f24d4d' : '#a3a8b0',
+        title: promote ? `Tornar ${cu.nick} admin?` : `Remover admin de ${cu.nick}?`,
+        body: promote ? 'Vai poder gerar convites sem cota, revogar códigos e promover ou rebaixar outros jogadores.' : 'Volta a ser jogador comum, com cota de convites normal. A coleção não muda.',
+        ok: promote ? 'Tornar admin' : 'Remover',
+        okBg: ok ? '#f24d4d' : '#f5b3b3', okSh: ok ? '0 10px 22px rgba(242,77,77,0.42)' : 'none', okCursor: ok ? 'pointer' : 'not-allowed',
+      };
+    }
+
+    return {
+      isInvites: s.tab === 'invites', isUsers: s.tab === 'users',
+      goInvites: () => this.setState({ tab: 'invites' }), goUsers: () => this.setState({ tab: 'users' }),
+      tabInvBg: s.tab === 'invites' ? '#2b2f36' : 'transparent', tabInvFg: s.tab === 'invites' ? '#ffffff' : '#565d66',
+      tabUsrBg: s.tab === 'users' ? '#2b2f36' : 'transparent', tabUsrFg: s.tab === 'users' ? '#ffffff' : '#565d66',
+      activeCount: counts.ativo, userCount: s.users.length, rowPad: pad,
+      gen: s.gen, genLabel: s.gen ? 'Fechar' : 'Gerar convite',
+      toggleGen: () => { const open = !s.gen; this.setState({ gen: open }); if (open) this.roll(); },
+      reroll: () => this.roll(), codeChars, validityOpts, uses: s.uses, prefix: s.prefix,
+      onPrefix: e => this.setState({ prefix: e.target.value.replace(/[^a-z0-9]/gi, '').toUpperCase().slice(0, 8) }),
+      usesDown: () => this.setState({ uses: Math.max(1, s.uses - 1) }), usesUp: () => this.setState({ uses: Math.min(10, s.uses + 1) }),
+      copyGen: () => this.copy(genStr, 'gen'), copyGenLabel: s.copied === 'gen' ? 'Copiado' : 'Copiar',
+      createInvite: () => this.create(),
+      invFilters, invRows, invEmpty: invRows.length === 0,
+      q: s.q, onQ: e => this.setState({ q: e.target.value }), usrFilters, userRows, usrEmpty: userRows.length === 0,
+      hasConfirm: !!cu, cf, confirmText: s.confirmText, onConfirmText: e => this.setState({ confirmText: e.target.value }),
+      closeConfirm: () => this.setState({ confirm: null }), stop: e => e.stopPropagation(), doConfirm: () => this.applyRole(),
+      hasToast: !!s.toast, toast: s.toast,
+    };
+  }
+}
+</script>
+</body>
+</html>
