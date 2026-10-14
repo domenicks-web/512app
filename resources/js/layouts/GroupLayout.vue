@@ -18,7 +18,6 @@ import { groupNavigationKey } from '@/layouts/groupNavigation';
 const SCREENS: Record<string, { order: number; dock?: DockKey }> = {
     Home: { order: -1, dock: 'home' },
     'collection/Show': { order: 0, dock: 'collection' },
-    'packs/Index': { order: 1, dock: 'packs' },
     'ranking/Show': { order: 2, dock: 'ranking' },
     'trades/Index': { order: 3, dock: 'trades' },
     'friends/Index': { order: 4, dock: 'friends' },

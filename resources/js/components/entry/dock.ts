@@ -2,7 +2,6 @@
 export type DockKey =
     | 'home'
     | 'collection'
-    | 'packs'
     | 'ranking'
     | 'trades'
     | 'friends'

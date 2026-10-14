@@ -28,7 +28,6 @@ Route::middleware(['auth', 'onboarded'])->group(function () {
     Route::get('amigos', ShowFriendsController::class)->name('friends.index');
     Route::get('feed', ShowFeedController::class)->name('feed.show');
 
-    Route::inertia('packs', 'packs/Index')->name('packs.index');
     Route::get('pack', [PackController::class, 'show'])->name('pack.show');
     Route::post('pack/abrir', [PackController::class, 'open'])->name('pack.open');
     Route::post('pack/{opening}/bolas/{slot}', [PackController::class, 'reveal'])->whereNumber('slot')->name('pack.reveal');

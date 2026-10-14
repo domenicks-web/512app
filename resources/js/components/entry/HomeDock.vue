@@ -5,7 +5,6 @@ import type { DockKey } from '@/components/entry/dock';
 import { animate } from '@/lib/motion';
 import { home } from '@/routes';
 import { show as packShow } from '@/routes/pack';
-import { index as packsIndex } from '@/routes/packs';
 import { show as settingsShow } from '@/routes/settings';
 import { show as collectionShow } from '@/routes/collection';
 import { index as friendsIndex } from '@/routes/friends';
@@ -15,10 +14,10 @@ import type { RouteDefinition } from '@/wayfinder';
 
 /**
  * Dock de vidro da home. Cada ícone tem uma micro-animação no hover
- * (cartas em leque, cápsula abre, barras sobem, setas trocam, mão acena,
+ * (cartas em leque, barras sobem, setas trocam, mão acena,
  * sliders correm). A casa volta pra Home; a pokébola vermelha abre o pack
  * do dia e se enche de vermelho conforme ele fica disponível; Coleção,
- * Packs, Ranking, Trocas, Amigos e Ajustes navegam (o painel de admin
+ * Ranking, Trocas, Amigos e Ajustes navegam (o painel de admin
  * não tem atalho: quem é admin entra por `/admin`).
  * `active` marca o item da tela atual. Amigos mostra um contador vermelho
  * com os pedidos de amizade recebidos.
@@ -35,7 +34,6 @@ type DockItem = {
 
 const items: DockItem[] = [
     { key: 'collection', label: 'Coleção', href: collectionShow },
-    { key: 'packs', label: 'Packs', href: packsIndex },
     { key: 'ranking', label: 'Ranking', href: rankingShow },
     { key: 'trades', label: 'Trocas', href: tradesIndex },
     { key: 'friends', label: 'Amigos', href: friendsIndex },
@@ -45,8 +43,6 @@ const items: DockItem[] = [
 const MICRO: Record<string, string[]> = {
     cardBack: ['none', 'rotate(-16deg) translateX(-1px)', 'none'],
     cardFront: ['none', 'rotate(12deg) translateX(1px)', 'none'],
-    capTop: ['none', 'translateY(-3px) rotate(-16deg)', 'none'],
-    capBot: ['none', 'translateY(2px)', 'none'],
     b1: ['scaleY(1)', 'scaleY(1.45)', 'scaleY(.85)', 'scaleY(1)'],
     b2: ['scaleY(1)', 'scaleY(1.25)', 'scaleY(.9)', 'scaleY(1)'],
     b3: ['scaleY(1)', 'scaleY(1.5)', 'scaleY(.85)', 'scaleY(1)'],
@@ -278,27 +274,6 @@ function onFocus(key: string, event: FocusEvent) {
                     rx="2.5"
                     fill="#ffffff"
                     style="transform-box: fill-box; transform-origin: 100% 100%"
-                />
-            </svg>
-            <svg
-                v-else-if="item.key === 'packs'"
-                width="26"
-                height="26"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="#2b2f36"
-                stroke-width="2.2"
-                stroke-linejoin="round"
-            >
-                <path
-                    data-a="capTop"
-                    d="M4 10.5a8 6.5 0 0 1 16 0z"
-                    style="transform-box: fill-box; transform-origin: 0% 100%"
-                />
-                <path
-                    data-a="capBot"
-                    d="M4 13.5a8 6.5 0 0 0 16 0z"
-                    style="transform-box: fill-box; transform-origin: 50% 0%"
                 />
             </svg>
             <svg
