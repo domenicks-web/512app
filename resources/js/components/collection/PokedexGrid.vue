@@ -18,6 +18,8 @@ export type SpeciesEntry = {
     shinyCount: number;
     bestMint: number | null;
     bestIv: number | null;
+    /** Algum espécime atual desta espécie chegou por troca. */
+    fromTrade?: boolean;
 };
 
 const props = withDefaults(

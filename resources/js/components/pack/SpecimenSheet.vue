@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import { useMediaQuery } from '@/composables/useMediaQuery';
+import { formatDayMonth } from '@/lib/format';
 import {
     holoBackground,
     holoPosition,
@@ -396,6 +397,33 @@ const tone = computed(() =>
                         </div>
                         <div class="text-sm font-extrabold">{{ caught }}</div>
                     </div>
+                </div>
+
+                <div
+                    v-if="light && specimen.history?.length"
+                    class="flex flex-col gap-2"
+                >
+                    <div class="text-[11px] font-extrabold" :class="tone.muted">
+                        Histórico
+                    </div>
+                    <ol
+                        class="flex flex-col gap-1.5 border-l-2 border-[#e4e7eb] pl-3"
+                    >
+                        <li
+                            v-for="(step, k) in specimen.history"
+                            :key="k"
+                            class="text-[13px] font-bold"
+                        >
+                            <span class="text-ink">{{
+                                step.kind === 'caught'
+                                    ? `Capturado por ${step.nickname}`
+                                    : `Trocado: ${step.fromNickname} → ${step.nickname}`
+                            }}</span>
+                            <span class="text-soft">
+                                · {{ formatDayMonth(step.at) }}</span
+                            >
+                        </li>
+                    </ol>
                 </div>
 
                 <div

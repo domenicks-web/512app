@@ -16,6 +16,7 @@ import type { Tier } from '@/lib/pack/types';
 import { show as compareShow } from '@/routes/compare';
 import { accept, store } from '@/routes/friends/requests';
 import { edit as profileEdit } from '@/routes/profile';
+import { create as tradeCreate } from '@/routes/trades';
 import { species as trainerSpecies } from '@/routes/trainer';
 
 defineOptions({ layout: [EntryLayout, GroupLayout] });
@@ -258,11 +259,18 @@ const pill =
                         class="text-soft text-sm font-extrabold"
                         >Pedido de amizade enviado</span
                     >
-                    <span
-                        v-else
-                        class="flex items-center gap-1.5 rounded-full bg-[rgba(63,143,107,0.14)] px-3 py-1.5 text-[13px] font-extrabold text-[#2f7a57]"
-                        >✓ Amigos</span
-                    >
+                    <template v-else>
+                        <span
+                            class="flex items-center gap-1.5 rounded-full bg-[rgba(63,143,107,0.14)] px-3 py-1.5 text-[13px] font-extrabold text-[#2f7a57]"
+                            >✓ Amigos</span
+                        >
+                        <Link
+                            :href="tradeCreate(trainer.id)"
+                            :class="pill"
+                            class="bg-brand flex items-center text-white shadow-[0_8px_20px_rgba(242,77,77,0.3)]"
+                            >Propor troca</Link
+                        >
+                    </template>
                     <span
                         v-if="friendError"
                         role="alert"
@@ -367,6 +375,17 @@ const pill =
                     class="bg-brand flex h-12 items-center justify-center rounded-full text-[15px] font-black text-white shadow-[0_8px_20px_rgba(242,77,77,0.3)] transition-transform active:scale-[0.98]"
                 >
                     Comparar com o meu
+                </Link>
+                <Link
+                    v-if="friendship.state === 'friends'"
+                    :href="
+                        tradeCreate(trainer.id, {
+                            query: { pedir: specimen.id },
+                        })
+                    "
+                    class="text-ink flex h-12 items-center justify-center rounded-full bg-[#eef0f2] text-[15px] font-black transition-transform active:scale-[0.98]"
+                >
+                    Pedir este
                 </Link>
             </template>
         </SpecimenSheet>

@@ -22,6 +22,14 @@ export type PackSpecimen = {
     natureIndex: number;
     ivs: number[];
     ivTotal: number;
+    /** Linha do tempo de donos (só na ficha da coleção). */
+    history?: {
+        kind: 'caught' | 'traded';
+        trainerId: number;
+        nickname: string;
+        fromNickname: string | null;
+        at: string;
+    }[];
     seed: string;
     hash: string;
     caughtAt: string;

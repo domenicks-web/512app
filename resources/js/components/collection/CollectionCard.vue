@@ -24,6 +24,7 @@ const props = defineProps<{
         shinyCount: number;
         bestMint: number | null;
         bestIv: number | null;
+        fromTrade?: boolean;
     };
     loading?: boolean;
 }>();
@@ -116,6 +117,13 @@ const mintHighlight = computed(() =>
                         :style="{ background: look.badge }"
                     />
                 </span>
+                <span
+                    v-if="entry.fromTrade"
+                    class="absolute top-[26px] right-2.5 rounded-full bg-white/90 px-1.5 text-[10px] leading-[16px] font-black text-[#2b2f36] shadow-[0_1px_2px_rgba(0,0,0,0.15)]"
+                    title="Veio de troca"
+                    aria-label="Veio de troca"
+                    >⇄</span
+                >
                 <div
                     class="absolute bottom-2 left-1/2 h-2.5 w-14 -translate-x-1/2 rounded-[50%] blur-[3px]"
                     :class="shiny ? 'bg-black/40' : 'bg-black/15'"

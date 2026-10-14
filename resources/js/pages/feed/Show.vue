@@ -14,20 +14,33 @@ defineOptions({ layout: [EntryLayout, GroupLayout] });
 
 /**
  * Feed do grupo: as aberturas boas mais recentes (todo shiny, mais raros e
- * lendários), de quem abriu, com a moldura da raridade no sprite.
+ * lendários), de quem abriu, e as trocas que valem a pena (com shiny,
+ * raro ou lendário), com a moldura da raridade no sprite.
  */
-type FeedEntry = {
-    id: number;
+type FeedBase = {
+    key: string;
     isShiny: boolean;
     trainerId: number;
     trainerNickname: string;
     trainerAvatarSpritePath: string | null;
-    speciesName: string;
     rarityTier: string;
     spritePath: string;
-    mintNumber: number;
     caughtAgo: string;
 };
+
+type FeedEntry =
+    | (FeedBase & {
+          kind: 'opening';
+          id: number;
+          speciesName: string;
+          mintNumber: number;
+      })
+    | (FeedBase & {
+          kind: 'trade';
+          tradeId: number;
+          partnerNickname: string;
+          summary: string;
+      });
 
 defineProps<{
     entries: FeedEntry[];
@@ -38,7 +51,7 @@ const look = (entry: FeedEntry) =>
 </script>
 
 <template>
-    <GroupScreen title="Feed" subtitle="Shinies e raros do grupo">
+    <GroupScreen title="Feed" subtitle="Shinies, raros e trocas do grupo">
         <p
             v-if="entries.length === 0"
             data-enter
@@ -49,7 +62,7 @@ const look = (entry: FeedEntry) =>
         </p>
 
         <ol v-else class="flex flex-col gap-2.5">
-            <li v-for="entry in entries" :key="entry.id" data-enter>
+            <li v-for="entry in entries" :key="entry.key" data-enter>
                 <Link
                     :href="trainerShow(entry.trainerId)"
                     class="text-ink flex items-center gap-3.5 rounded-[22px] bg-white p-3 pr-4 shadow-[0_2px_4px_rgba(28,32,38,0.05),0_8px_18px_rgba(28,32,38,0.07)] transition-transform active:scale-[0.98]"
@@ -76,12 +89,22 @@ const look = (entry: FeedEntry) =>
                         <span
                             class="text-[15.5px] leading-tight font-black text-balance"
                         >
-                            {{ entry.trainerNickname }} abriu um
-                            {{ entry.speciesName }}
+                            <template v-if="entry.kind === 'trade'">
+                                {{ entry.trainerNickname }} e
+                                {{ entry.partnerNickname }} trocaram
+                            </template>
+                            <template v-else>
+                                {{ entry.trainerNickname }} abriu um
+                                {{ entry.speciesName }}
+                            </template>
                         </span>
                         <span class="text-soft text-xs font-semibold">
                             {{ entry.caughtAgo }} ·
-                            {{ formatMint(entry.mintNumber) }}
+                            {{
+                                entry.kind === 'trade'
+                                    ? entry.summary
+                                    : formatMint(entry.mintNumber)
+                            }}
                         </span>
                     </div>
                     <div class="flex shrink-0 flex-col items-end gap-1.5">
