@@ -475,3 +475,33 @@ pushado pro `main`.
   com o Claude#9805: liberar pack em `/admin/jogadores` → ⋯). Próximo
   passo combinado: Fase 4 (trocas), com brainstorm antes e dividindo com
   o Kimi de novo.
+- **Ajustes de 14/10, noite (tudo commitado e enviado no `main`)**:
+    - Pedidos de amizade (recebidos e enviados) abrem o Cartão de
+      Treinador; filtro **"Em comum"** no cartão de outro jogador
+      (`viewerSpeciesIds` do `BuildTrainerCard`). Testado pelo usuário.
+    - Natureza: nome dos jogos em inglês + efeito como curiosidade
+      (`Nature::effect()`, "+Def −AtqE" ou "Neutra"); no Comparar, nota
+      "Tamanho e natureza não contam pontos". Siglas dos atributos em
+      português: HP · Atq · Def · AtqE · DefE · Vel (`STATS` no `meta.ts`).
+    - **Regra global de transição do tema estava fora de `@layer`** e
+      anulava todo `transition-transform` das utilities: foi pro
+      `@layer base`. CSS novo sem layer ganha das utilities do Tailwind 4.
+    - Cartas da coleção e ficha clara no tratamento de carta real
+      (`rarityLook().card`, classes `card-foil-*` no `app.css`): comum
+      fosca, incomum chapada, raro holo, lendário toda dourada, shiny
+      escura "full art" com arco-íris. Selo "Nº 1" (o usuário acha feio,
+      mas aceitou). Inclinação com o mouse só no desktop (`v-card-tilt`).
+    - `v-pixel-fit` centraliza o GIF pelo desenho (Mewtwo tinha o quadro
+      largo pro rabo). O rabo descendo é da animação oficial.
+    - Tile do pack na Home enche como a pokébola do dock
+      (`usePackProgress`), com onda; pokébola com sombra. Blocos da Home
+      continuam quadrados (6:5 foi testado e recusado: passava da tela).
+    - Dock cabe a 401–440px (`max-[440px]:size-11`).
+    - Abertura: as 512 pokébolas descem num redemoinho
+      (`useDotField().swirlInto`) em vez de a grade encolher junta.
+    - Kimi: usar só até ~95% do plano; o usuário avisou que está quase
+      no fim (14/10). Sem saber o %, não delegar.
+- **Pendências (14/10, noite)**: Fase 4 (trocas, Reverb, histórico de
+  donos, `ResetUnownedAvatar` no `AcceptTrade`, banimento), Fase 5
+  (giroscópio, apelido no espécime), PWA por último. Selo Nº 1 talvez
+  repensar. Comparar e "esqueci a senha" já conferidos pelo usuário.
