@@ -420,3 +420,15 @@ pushado pro `main`.
   seed). As espécies por tier saíram do `OpenPack` pra
   `ListSpeciesIdsByTier`, usada pelos dois. Client seed aceita até 255
   na verificação (a gerada passa dos 24 da edição).
+- **Trabalho em dupla com o Kimi K3 (14/10)**: Kimi Code CLI 2.2.0
+  instalado (`npm i -g @moonshot-ai/kimi-code`), login OAuth no plano do
+  usuário (kimi.ai). Modelo: `-m kimi-code/k3` (o padrão do CLI é o K2.8
+  Preview). O Claude coordena: divide a pendência, mostra pro usuário quem
+  faz o quê, cria a worktree com `scripts/kimi-worktree.sh <branch> [base]`
+  (em `../512app-worktrees/`, vendor instalado, node_modules/Vite em
+  symlink, `.env` copiado) e chama
+  `cd <worktree> && KIMI_CODE_TRUST_WORKSPACE=1 kimi -m kimi-code/k3 -p "..."`.
+  O Kimi lê o `AGENTS.md` sozinho (que manda ler este arquivo e o SPEC).
+  `-p` aprova tudo sozinho, por isso o Kimi só trabalha na worktree. Tudo
+  dele passa pela revisão do Claude e pelo `composer ci:check` antes de
+  juntar.
