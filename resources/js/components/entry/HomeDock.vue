@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { Link, usePage } from '@inertiajs/vue3';
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
+import { usePackProgress } from '@/composables/usePackProgress';
 import type { DockKey } from '@/components/entry/dock';
 import { animate } from '@/lib/motion';
 import { home } from '@/routes';
@@ -54,30 +55,12 @@ const MICRO: Record<string, string[]> = {
     roof: ['none', 'translateY(-2.5px)', 'none'],
 };
 
-const page = usePage<{
-    pendingFriendRequests?: number;
-    packStatus?: { nextPackAt: string | null; cooldownHours: number } | null;
-}>();
+const page = usePage<{ pendingFriendRequests?: number }>();
 
-/**
- * Quanto falta pro próximo pack, de 0 (acabou de abrir) a 1 (disponível):
- * vira a altura do vermelho que enche a pokébola de baixo pra cima.
- */
+/** Relógio do enchimento da pokébola (ver `usePackProgress`). */
 const now = ref(Date.now());
 let clock = 0;
-const packProgress = computed(() => {
-    const status = page.props.packStatus;
-
-    if (!status?.nextPackAt) {
-        return 1;
-    }
-
-    const remaining = new Date(status.nextPackAt).getTime() - now.value;
-    const cooldown = status.cooldownHours * 3600 * 1000;
-
-    return Math.min(1, Math.max(0, 1 - remaining / cooldown));
-});
-const isPackReady = computed(() => packProgress.value >= 1);
+const { progress: packProgress, isReady: isPackReady } = usePackProgress(now);
 
 const pendingFriendRequests = computed(
     () => page.props.pendingFriendRequests ?? 0,

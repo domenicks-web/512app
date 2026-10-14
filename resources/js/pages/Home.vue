@@ -17,6 +17,7 @@ import GroupLayout from '@/layouts/GroupLayout.vue';
 import { groupNavigationKey } from '@/layouts/groupNavigation';
 import { formatCountdown, formatMint } from '@/lib/format';
 import { animate, spring } from '@/lib/motion';
+import { usePackProgress } from '@/composables/usePackProgress';
 import { rarityLook } from '@/lib/pack/rarity';
 import type { Tier } from '@/lib/pack/types';
 import FriendsOnline from '@/components/group/FriendsOnline.vue';
@@ -119,6 +120,14 @@ let compactQuery: MediaQueryList | null = null;
 
 const now = ref(Date.now());
 let clock = 0;
+/**
+ * O tile do pack enche de baixo pra cima como a pokébola do dock: o
+ * vermelho sobe do zero quando a Home entra e tem uma onda no topo
+ * enquanto não enche.
+ */
+const { progress: packProgress } = usePackProgress(now);
+const fillRisen = ref(false);
+const packFill = computed(() => (fillRisen.value ? packProgress.value : 0));
 
 const isPackAvailable = computed(
     () =>
@@ -303,6 +312,7 @@ onMounted(async () => {
     field.hide();
     await nextTick();
     placeRing(false);
+    window.setTimeout(() => (fillRisen.value = true), 250);
 
     // Chegou deslizando de outra aba: sem a entrada em cascata.
     if (!groupNavigation?.isSlideNavigation()) {
@@ -481,13 +491,33 @@ const compactLabel =
                     data-tile
                     data-enter="slide"
                     data-delay="0"
-                    :class="tileBase"
-                    class="bg-brand col-span-2 shadow-[0_2px_4px_rgba(28,32,38,0.06),0_14px_30px_rgba(242,77,77,0.25)]"
+                    :class="[
+                        tileBase,
+                        isPackAvailable
+                            ? 'shadow-[0_2px_4px_rgba(28,32,38,0.06),0_14px_30px_rgba(242,77,77,0.25)]'
+                            : 'shadow-[0_2px_4px_rgba(28,32,38,0.05),0_8px_18px_rgba(28,32,38,0.07)]',
+                    ]"
+                    class="col-span-2 bg-[#fbd5d5]"
                     @pointerenter="activeTile = 0"
                     @focus="activeTile = 0"
                     @click="selectTile(0)"
                 >
-                    <span :class="compactLabel" class="text-white"
+                    <span
+                        class="bg-brand absolute inset-x-0 bottom-0 transition-[height] duration-[1400ms] ease-[cubic-bezier(.22,1,.36,1)]"
+                        :style="{ height: `${packFill * 100}%` }"
+                        aria-hidden="true"
+                    >
+                        <span
+                            v-if="packFill > 0 && packFill < 1"
+                            class="motion-safe:animate-pack-wave absolute -top-[9px] left-0 h-[10px] w-[200%] bg-[url('data:image/svg+xml,%3Csvg%20xmlns=%22http://www.w3.org/2000/svg%22%20viewBox=%220%200%20120%2010%22%20preserveAspectRatio=%22none%22%3E%3Cpath%20d=%22M0%205%20Q15%200%2030%205%20T60%205%20T90%205%20T120%205%20V10%20H0Z%22%20fill=%22%23f24d4d%22/%3E%3C/svg%3E')] bg-[length:50%_100%] bg-repeat-x"
+                        />
+                    </span>
+                    <span
+                        :class="compactLabel"
+                        class="z-[1]"
+                        :style="{
+                            color: packFill > 0.88 ? '#ffffff' : '#b8302f',
+                        }"
                         >Pack de hoje</span
                     >
                     <span
@@ -495,7 +525,7 @@ const compactLabel =
                     >
                         <span
                             data-k="ptoken"
-                            class="relative block size-[104px] shrink-0"
+                            class="relative block size-[104px] shrink-0 [filter:drop-shadow(0_10px_16px_rgba(90,15,15,0.32))_drop-shadow(0_0_1.5px_rgba(60,10,10,0.45))]"
                         >
                             <span
                                 data-k="ptop"
@@ -522,7 +552,7 @@ const compactLabel =
                         :class="
                             isPackAvailable
                                 ? 'text-brand-ink bg-white'
-                                : 'bg-white/20 text-white'
+                                : 'bg-[#2b2f36]/85 text-white'
                         "
                     >
                         {{ packStatus }}
