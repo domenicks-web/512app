@@ -393,6 +393,20 @@ pushado pro `main`.
   (pedido do usuário), ou a silhueta do Pikachu se não tem nada; Ranking
   mostra o top 3 (desktop); Trocas mostra recebidas, enviadas e os
   repetidos pra trocar (desktop; o ícone solto foi rejeitado).
-- **Pendências restantes**: dock apertado no celular (8 botões; usuário
-  achou "meio apertado", mexer depois); PWA (por último, pedido do usuário); fases
-  2–5 como acima. Conta de teste voltou pro avatar Pikachu e sem dados.
+- **Onde paramos (14/10, 14h30)**: tudo commitado e enviado no `main`.
+  Usuário aprovou a Home (cards, dock, abas deslizando) e pausou.
+  Silhueta do card da Coleção em `game.onboarding.home_silhouette_species_id`
+  (Charizard). Amigos online: no desktop na linha do dock à esquerda
+  (`GroupLayout`), no celular acima do dock (Home).
+- **Pendências** (revisadas com o usuário em 14/10 à tarde):
+    - Dock apertado no celular (8 botões; "meio apertado", mexer depois).
+    - Tema escuro não existe nas telas novas (decidir se vale o projeto).
+    - `ResetUnownedAvatar` precisa ser chamado no `AcceptTrade` (fase 4).
+    - Conferir no Gmail o email real do "esqueci a senha".
+    - Arrastar com o dedo entre abas (oferecido, não pedido ainda).
+    - Fase 2: `/verificar`. Fase 3: perfil público, comparar espécimes,
+      rankings de shinies/IV/mint. Fase 4: trocas, Reverb, banimento.
+      Fase 5: polimento (giroscópio, apelido no espécime).
+    - PWA por último (pedido do usuário).
+    - Conta de teste (`claudetest@512app.com` / `claude`) sem dados,
+      avatar Pikachu, pack disponível.
