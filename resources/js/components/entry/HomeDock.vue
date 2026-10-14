@@ -5,6 +5,7 @@ import type { DockKey } from '@/components/entry/dock';
 import { animate } from '@/lib/motion';
 import { logout } from '@/routes';
 import { index as adminIndex } from '@/routes/admin';
+import { edit as profileEdit } from '@/routes/profile';
 import { show as collectionShow } from '@/routes/collection';
 import { index as friendsIndex } from '@/routes/friends';
 import { show as rankingShow } from '@/routes/ranking';
@@ -334,6 +335,13 @@ function onActivate(key: string) {
             role="menu"
             class="absolute right-0 bottom-[calc(100%+12px)] flex min-w-44 flex-col gap-1 rounded-[22px] bg-white p-2 shadow-[0_2px_4px_rgba(28,32,38,0.06),0_14px_30px_rgba(28,32,38,0.12)]"
         >
+            <Link
+                :href="profileEdit()"
+                role="menuitem"
+                class="text-ink hover:bg-field rounded-full px-4 py-2.5 text-sm font-extrabold"
+            >
+                Editar perfil
+            </Link>
             <Link
                 v-if="isAdmin"
                 :href="adminIndex()"

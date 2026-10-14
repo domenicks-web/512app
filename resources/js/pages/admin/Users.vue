@@ -6,6 +6,7 @@ import {
     store,
 } from '@/actions/App/Http/Controllers/Admin/AdminRoleController';
 import AdminShell from '@/components/AdminShell.vue';
+import { unlock as unlockBirthdate } from '@/routes/admin/users/birthdate';
 
 type AdminUser = {
     id: number;
@@ -14,6 +15,7 @@ type AdminUser = {
     email: string;
     is_admin: boolean;
     has_completed_profile: boolean;
+    is_birthdate_locked: boolean;
     invite_code: string | null;
     created_at: string | null;
 };
@@ -89,6 +91,22 @@ function confirmRevoke(user: AdminUser): boolean {
                         >
                     </p>
                 </div>
+
+                <Form
+                    v-if="user.is_birthdate_locked"
+                    :action="unlockBirthdate(user.id)"
+                    :options="{ preserveScroll: true }"
+                    #default="{ processing }"
+                >
+                    <button
+                        type="submit"
+                        :disabled="processing"
+                        title="Deixa o jogador corrigir a data de nascimento mais uma vez"
+                        class="text-ink/70 ring-ink/20 hover:bg-ink/5 cursor-pointer rounded-full px-3 py-1 text-xs font-bold ring-1 ring-inset disabled:opacity-50"
+                    >
+                        Liberar correção de data
+                    </button>
+                </Form>
 
                 <Form
                     v-if="!user.is_admin"

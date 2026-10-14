@@ -25,6 +25,7 @@ class UserResource extends JsonResource
             'email' => $this->email,
             'is_admin' => $this->is_admin,
             'has_completed_profile' => $this->hasCompletedProfile(),
+            'is_birthdate_locked' => $this->birthdate_corrected_at !== null,
             'invite_code' => $this->invitedBy?->code,
             'created_at' => $this->created_at?->toIso8601String(),
         ];

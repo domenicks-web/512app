@@ -242,6 +242,13 @@ pushado pro `main`.
         - A confirmação "Desfazer amizade com X?" fica apertada no cartão
           (quebra em 3 linhas).
         - Tile do Feed na Home não abre tela (feed completo é fase 5).
+        - Configurar o Gmail SMTP no `.env` (conta e senha de app do
+          usuário). Sem isso os emails do perfil vão só pro log.
+        - "Esqueci a senha" (recuperação por email) ainda não existe.
+        - O email de verificação do cadastro ainda é o padrão do Laravel
+          (sem o visual do jogo).
+        - Mensagens da regra de senha forte (produção) saem em inglês — o
+          projeto não tem `lang/pt_BR`.
     - **Fase 2 — a prova (provably fair):** commit e reveal de seeds
       (hash mostrado antes, seed revelada depois), página `/verificar`,
       ficha detalhada do espécime (IVs, natureza, tamanho, hash). Decidir
@@ -255,6 +262,18 @@ pushado pro `main`.
       histórico de donos anteriores de cada espécime.
     - **Fase 5 — o polimento:** tilt com giroscópio, som de abertura,
       apelido no espécime e feed completo do grupo.
+- **Editar perfil (13/10)**: `/perfil` (menu Ajustes → "Editar perfil"),
+  design em `docs/superpowers/specs/2026-10-13-editar-perfil-design.md`.
+  Avatar livre; nickname a cada `game.profile.nickname_cooldown_days` (15),
+  mantendo a tag se der; data de nascimento corrigível uma vez (admin
+  libera outra em `/admin/usuarios`); email por link assinado pro endereço
+  novo (60 min) + aviso pro antigo; senha com senha atual, confirmação,
+  popup próprio (`ConfirmDialog`), derruba as outras sessões e avisa por
+  email. Emails estilizados em `resources/views/mail/` com o layout
+  `<x-mail-layout>`. `.env.example` já traz o bloco do Gmail SMTP — falta o
+  usuário criar a conta e a senha de app e preencher o `.env`.
+    - `ConfirmDialog` só monta o `Teleport` depois do `onMounted`: o SSR do
+      Inertia não injeta teleports no `<body>` e a hidratação quebrava.
 - **CI (13/10)**: voltou a rodar no `main` (PHP 8.4, SQLite no setup,
   PHPStan com 1G). `composer ci:check` local reproduz o CI inteiro.
   Formatador ignora handoff, `docs/superpowers/` e `CLAUDE.md`.
