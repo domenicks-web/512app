@@ -298,10 +298,11 @@ pushado pro `main`.
   antes de codar):
     1. **Avatar da Pokédex no perfil**: além das 15 opções fixas, escolher
        qualquer espécie que o jogador tem na coleção, com sprite shiny se
-       tiver shiny dela. Duas perguntas em aberto, a fazer de novo:
-       (a) se trocar/perder o espécime, o avatar continua (sugestão do
-       Claude) ou volta pro padrão? (b) tudo bem a seção "Da sua Pokédex"
-       ficar vazia até existir abertura de pack?
+       tiver shiny dela. **Decidido (14/10):** perdeu/trocou o espécime,
+       o avatar volta pro Pikachu (primeiro do config). Em aberto: shiny e
+       normal da mesma espécie como opções separadas (sugestão do Claude)
+       ou uma só mostrando o shiny se tiver; e a seção vazia até existir
+       abertura de pack.
     2. ~~Admin de verdade~~ — feito em 14/10 (ver abaixo).
     3. **Subprojeto C — abertura de pack** (detalhe abaixo).
 
