@@ -4,9 +4,10 @@ import { computed } from 'vue';
 import GroupScreen from '@/components/group/GroupScreen.vue';
 import TrainerAvatar from '@/components/group/TrainerAvatar.vue';
 import EntryLayout from '@/layouts/EntryLayout.vue';
+import GroupLayout from '@/layouts/GroupLayout.vue';
 import { formatMint } from '@/lib/format';
 
-defineOptions({ layout: EntryLayout });
+defineOptions({ layout: [EntryLayout, GroupLayout] });
 
 /**
  * Propostas de troca pendentes, recebidas e enviadas. Só leitura por
@@ -67,7 +68,6 @@ const sections = computed(() => [
                   ? '1 proposta esperando você'
                   : `${incoming.length} propostas esperando você`
         "
-        active="trades"
     >
         <div class="flex flex-col gap-7">
             <section

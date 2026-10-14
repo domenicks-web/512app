@@ -170,6 +170,8 @@ function onActivate(key: string) {
             v-for="item in items"
             :key="item.key"
             :href="item.href?.()"
+            :prefetch="item.href ? ['hover', 'click'] : undefined"
+            :cache-for="item.href ? '10s' : undefined"
             :type="item.href ? undefined : 'button'"
             :aria-label="item.label"
             :aria-current="active === item.key ? 'page' : undefined"

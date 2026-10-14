@@ -4,10 +4,11 @@ import CollectionCard from '@/components/collection/CollectionCard.vue';
 import GroupScreen from '@/components/group/GroupScreen.vue';
 import SpecimenSheet from '@/components/pack/SpecimenSheet.vue';
 import EntryLayout from '@/layouts/EntryLayout.vue';
+import GroupLayout from '@/layouts/GroupLayout.vue';
 import type { PackSpecimen } from '@/lib/pack/types';
 import { species as speciesRoute } from '@/routes/collection';
 
-defineOptions({ layout: EntryLayout });
+defineOptions({ layout: [EntryLayout, GroupLayout] });
 
 /**
  * Pokédex do jogador: as 151 em ordem de dex. Espécie com espécime aparece
@@ -111,7 +112,6 @@ function step(delta: number) {
     <GroupScreen
         title="Coleção"
         :subtitle="`${ownedSpecies} de ${species.length} espécies · ${totalSpecimens} espécimes`"
-        active="collection"
     >
         <div class="flex flex-col gap-5">
             <section

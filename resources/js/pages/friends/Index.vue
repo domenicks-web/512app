@@ -4,11 +4,12 @@ import { computed, ref } from 'vue';
 import GroupScreen from '@/components/group/GroupScreen.vue';
 import TrainerAvatar from '@/components/group/TrainerAvatar.vue';
 import EntryLayout from '@/layouts/EntryLayout.vue';
+import GroupLayout from '@/layouts/GroupLayout.vue';
 import { formatFriendsOnline } from '@/lib/format';
 import { destroy } from '@/routes/friends';
 import { accept, store } from '@/routes/friends/requests';
 
-defineOptions({ layout: EntryLayout });
+defineOptions({ layout: [EntryLayout, GroupLayout] });
 
 /**
  * Amigos de verdade: adicionar por nickname#tag, pedidos recebidos
@@ -59,7 +60,6 @@ const cardShadow =
     <GroupScreen
         title="Amigos"
         :subtitle="`${friends.length} ${friends.length === 1 ? 'amigo' : 'amigos'} · ${formatFriendsOnline(friendsOnline)}`"
-        active="friends"
     >
         <div class="flex flex-col gap-7">
             <Form

@@ -11,6 +11,7 @@ import GroupScreen from '@/components/group/GroupScreen.vue';
 import TrainerAvatar from '@/components/group/TrainerAvatar.vue';
 import { flySpriteTo } from '@/composables/useSpriteFlight';
 import EntryLayout from '@/layouts/EntryLayout.vue';
+import GroupLayout from '@/layouts/GroupLayout.vue';
 import { update as updateAvatar } from '@/routes/profile/avatar';
 import { update as updateBirthdate } from '@/routes/profile/birthdate';
 import {
@@ -20,7 +21,7 @@ import {
 import { update as updateNickname } from '@/routes/profile/nickname';
 import { update as updatePassword } from '@/routes/profile/password';
 
-defineOptions({ layout: EntryLayout });
+defineOptions({ layout: [EntryLayout, GroupLayout] });
 
 /**
  * Editar perfil: avatar, nickname (a cada `nicknameCooldownDays`), data de
@@ -196,7 +197,7 @@ const primaryButton =
 </script>
 
 <template>
-    <GroupScreen title="Editar perfil" active="settings">
+    <GroupScreen title="Editar perfil">
         <div class="mx-auto flex w-full max-w-[560px] flex-col gap-5">
             <p
                 v-if="status"

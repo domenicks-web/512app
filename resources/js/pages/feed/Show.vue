@@ -3,11 +3,12 @@ import FittedSprite from '@/components/FittedSprite.vue';
 import GroupScreen from '@/components/group/GroupScreen.vue';
 import TrainerAvatar from '@/components/group/TrainerAvatar.vue';
 import EntryLayout from '@/layouts/EntryLayout.vue';
+import GroupLayout from '@/layouts/GroupLayout.vue';
 import { formatMint } from '@/lib/format';
 import { rarityLook } from '@/lib/pack/rarity';
 import type { Tier } from '@/lib/pack/types';
 
-defineOptions({ layout: EntryLayout });
+defineOptions({ layout: [EntryLayout, GroupLayout] });
 
 /**
  * Feed do grupo: as aberturas boas mais recentes (todo shiny, mais raros e

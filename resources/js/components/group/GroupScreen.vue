@@ -1,32 +1,33 @@
 <script setup lang="ts">
-import { Head, Link, usePage } from '@inertiajs/vue3';
-import { computed, nextTick, onMounted, ref } from 'vue';
-import HomeDock from '@/components/entry/HomeDock.vue';
-import type { DockKey } from '@/components/entry/dock';
+import { Head, Link } from '@inertiajs/vue3';
+import { inject, nextTick, onMounted, ref } from 'vue';
 import { useDotField } from '@/composables/useDotField';
 import { waitForIntro } from '@/composables/useIntro';
+import { groupNavigationKey } from '@/layouts/groupNavigation';
 import { animate, spring } from '@/lib/motion';
 import { home } from '@/routes';
 
 /**
- * Moldura das telas do grupo (Coleção, Ranking, Trocas, Amigos, Feed):
- * voltar pra Home, título, conteúdo rolável e o mesmo dock embaixo, com o
- * item da tela marcado. Os filhos com `data-enter` sobem em cascata, igual
- * à entrada da Home.
+ * Moldura das telas do grupo (Coleção, Ranking, Trocas, Amigos, Feed,
+ * Perfil): voltar pra Home, título e conteúdo rolável. O dock mora no
+ * `GroupLayout`, que fica parado entre as abas. Os filhos com `data-enter`
+ * sobem em cascata só na primeira entrada; entre abas, a tela inteira
+ * desliza (ver `GroupLayout`).
  */
 const props = defineProps<{
     title: string;
     subtitle?: string;
-    active?: DockKey;
 }>();
 
-const page = usePage<{ auth: { user: { is_admin: boolean } | null } }>();
-const isAdmin = computed(() => Boolean(page.props.auth.user?.is_admin));
-
+const groupNavigation = inject(groupNavigationKey, null);
 const field = useDotField();
 const root = ref<HTMLElement | null>(null);
 
 onMounted(async () => {
+    if (groupNavigation?.isSlideNavigation()) {
+        return;
+    }
+
     await waitForIntro();
     field.hide();
     await nextTick();
@@ -53,7 +54,7 @@ onMounted(async () => {
 <template>
     <Head :title="props.title" />
 
-    <div ref="root" class="absolute inset-0 z-[3] flex flex-col">
+    <div ref="root" class="absolute inset-0 flex flex-col">
         <header
             data-enter
             class="mx-auto flex w-full max-w-[calc(880px+2*clamp(16px,5vw,56px))] items-center gap-4 px-[clamp(16px,5vw,56px)] pt-[22px] pb-4"
@@ -99,11 +100,5 @@ onMounted(async () => {
                 <slot />
             </div>
         </main>
-
-        <div class="flex justify-center px-4 pt-2 pb-[18px]">
-            <div data-enter>
-                <HomeDock :is-admin="isAdmin" :active="active" />
-            </div>
-        </div>
     </div>
 </template>

@@ -3,8 +3,9 @@ import { computed } from 'vue';
 import GroupScreen from '@/components/group/GroupScreen.vue';
 import TrainerAvatar from '@/components/group/TrainerAvatar.vue';
 import EntryLayout from '@/layouts/EntryLayout.vue';
+import GroupLayout from '@/layouts/GroupLayout.vue';
 
-defineOptions({ layout: EntryLayout });
+defineOptions({ layout: [EntryLayout, GroupLayout] });
 
 /**
  * Ranking do grupo por espécies distintas. Empate divide a posição; quem
@@ -38,7 +39,7 @@ const subtitle = computed(() =>
 </script>
 
 <template>
-    <GroupScreen title="Ranking" :subtitle="subtitle" active="ranking">
+    <GroupScreen title="Ranking" :subtitle="subtitle">
         <ol class="flex flex-col gap-2.5">
             <li
                 v-for="row in rows"
