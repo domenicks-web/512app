@@ -23,9 +23,9 @@ class BuildFriendList
 
     /**
      * @return array{
-     *     friends: list<array{friendshipId: int, userId: int, nickname: string, tag: string, avatarSpritePath: string|null, ownedSpecies: int, isOnline: bool}>,
-     *     incoming: list<array{friendshipId: int, nickname: string, tag: string, avatarSpritePath: string|null, sentAgo: string}>,
-     *     outgoing: list<array{friendshipId: int, nickname: string, tag: string, avatarSpritePath: string|null, sentAgo: string}>,
+     *     friends: array<int, array{friendshipId: int, userId: int, nickname: string, tag: string, avatarSpritePath: string|null, ownedSpecies: int, isOnline: bool}>,
+     *     incoming: array<int, array{friendshipId: int, nickname: string, tag: string, avatarSpritePath: string|null, sentAgo: string}>,
+     *     outgoing: array<int, array{friendshipId: int, nickname: string, tag: string, avatarSpritePath: string|null, sentAgo: string}>,
      * }
      */
     public function handle(User $viewer, CarbonInterface $now): array
@@ -69,7 +69,7 @@ class BuildFriendList
             'nickname' => (string) $friendship->otherThan($viewer)->nickname,
             'tag' => (string) $friendship->otherThan($viewer)->tag,
             'avatarSpritePath' => $friendship->otherThan($viewer)->avatarSpecies?->sprite_path,
-            'sentAgo' => $friendship->created_at?->locale('pt_BR')->diffForHumans(['options' => Carbon::JUST_NOW]) ?? '',
+            'sentAgo' => $friendship->created_at?->diffForHumans(['locale' => 'pt_BR', 'options' => Carbon::JUST_NOW]) ?? '',
         ];
 
         return [

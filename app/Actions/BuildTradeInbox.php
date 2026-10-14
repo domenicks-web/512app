@@ -19,8 +19,8 @@ class BuildTradeInbox
 {
     /**
      * @return array{
-     *     incoming: list<array<string, mixed>>,
-     *     outgoing: list<array<string, mixed>>,
+     *     incoming: array<int, array<string, mixed>>,
+     *     outgoing: array<int, array<string, mixed>>,
      * }
      */
     public function handle(User $user): array
@@ -42,7 +42,7 @@ class BuildTradeInbox
     }
 
     /**
-     * @return array{id: int, otherTrainer: array{nickname: string, avatarSpritePath: string|null}, message: string|null, createdAgo: string, offered: list<array<string, mixed>>, requested: list<array<string, mixed>>}
+     * @return array{id: int, otherTrainer: array{nickname: string, avatarSpritePath: string|null}, message: string|null, createdAgo: string, offered: array<int, array<string, mixed>>, requested: array<int, array<string, mixed>>}
      */
     private function present(Trade $trade, User $otherTrainer): array
     {
@@ -65,7 +65,7 @@ class BuildTradeInbox
                 'avatarSpritePath' => $otherTrainer->avatarSpecies?->sprite_path,
             ],
             'message' => $trade->message,
-            'createdAgo' => $trade->created_at?->locale('pt_BR')->diffForHumans(['options' => Carbon::JUST_NOW]) ?? '',
+            'createdAgo' => $trade->created_at?->diffForHumans(['locale' => 'pt_BR', 'options' => Carbon::JUST_NOW]) ?? '',
             'offered' => $items(TradeItemSide::Offered),
             'requested' => $items(TradeItemSide::Requested),
         ];

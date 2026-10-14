@@ -22,13 +22,12 @@ class GroupPresence
     {
         $since = $now->copy()->subMinutes((int) config('game.group.online_window_minutes'));
 
-        return DB::table('sessions')
+        return array_values(DB::table('sessions')
             ->whereNotNull('user_id')
             ->where('last_activity', '>=', $since->getTimestamp())
             ->distinct()
             ->pluck('user_id')
             ->map(fn (mixed $id): int => (int) $id)
-            ->values()
-            ->all();
+            ->all());
     }
 }

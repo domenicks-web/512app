@@ -47,7 +47,7 @@ class PokedexSync extends Command
                 'slug' => Str::slug($pokemon['name']),
                 'type_1' => PokemonType::from($typeNames[0]),
                 'type_2' => isset($typeNames[1]) ? PokemonType::from($typeNames[1]) : null,
-                'base_stat_total' => collect($pokemon['stats'])->sum('base_stat'),
+                'base_stat_total' => collect((array) $pokemon['stats'])->sum('base_stat'),
                 'evolution_stage' => $this->resolveEvolutionStage($chain['chain'], $dexNumber) ?? 1,
                 'base_height_m' => $pokemon['height'] / 10,
                 'base_weight_kg' => $pokemon['weight'] / 10,
@@ -106,14 +106,14 @@ class PokedexSync extends Command
         $pastTypes = $pokemon['past_types'] ?? [];
 
         if ($pastTypes === []) {
-            return collect($pokemon['types'])->pluck('type.name')->all();
+            return collect((array) $pokemon['types'])->pluck('type.name')->all();
         }
 
-        $oldest = collect($pastTypes)->sortBy(
+        $oldest = collect((array) $pastTypes)->sortBy(
             fn (array $entry): int => (int) Str::afterLast(rtrim($entry['generation']['url'], '/'), '/')
         )->first();
 
-        return collect($oldest['types'])->pluck('type.name')->all();
+        return collect((array) $oldest['types'])->pluck('type.name')->all();
     }
 
     /**
@@ -145,7 +145,7 @@ class PokedexSync extends Command
 
     private function downloadSprite(string $url, int $dexNumber, string $kind): string
     {
-        $extension = pathinfo(parse_url($url, PHP_URL_PATH) ?? '', PATHINFO_EXTENSION) ?: 'png';
+        $extension = pathinfo((string) parse_url($url, PHP_URL_PATH), PATHINFO_EXTENSION) ?: 'png';
         $path = "species/{$dexNumber}/{$kind}.{$extension}";
 
         Storage::disk('public')->put($path, Http::get($url)->body());

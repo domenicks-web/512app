@@ -16,7 +16,7 @@ class BuildCollection
 {
     /**
      * @return array{
-     *     species: list<array{id: int, name: string, rarityTier: string, spritePath: string, spriteShinyPath: string, specimenCount: int, shinyCount: int}>,
+     *     species: array<int, array{id: int, name: string, rarityTier: string, spritePath: string, spriteShinyPath: string, specimenCount: int, shinyCount: int}>,
      *     ownedSpecies: int,
      *     totalSpecimens: int,
      * }

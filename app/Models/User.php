@@ -103,15 +103,14 @@ class User extends Authenticatable implements MustVerifyEmail
      */
     public function friendIds(): array
     {
-        return Friendship::query()
+        return array_values(Friendship::query()
             ->accepted()
             ->involving($this)
             ->get(['requester_id', 'addressee_id'])
             ->map(fn (Friendship $friendship): int => $friendship->requester_id === $this->id
                 ? $friendship->addressee_id
                 : $friendship->requester_id)
-            ->values()
-            ->all();
+            ->all());
     }
 
     public function hasCompletedProfile(): bool

@@ -29,7 +29,7 @@ class ShowOnboardingController extends Controller
         // ordem crua do banco por id — é a ordem da grade de parceiros.
         $avatarOptions = Species::whereIn('id', $avatarSpeciesIds)
             ->get(['id', 'name', 'sprite_path'])
-            ->sortBy(fn (Species $species): int => array_search($species->id, $avatarSpeciesIds, true))
+            ->sortBy(fn (Species $species): int => (int) array_search($species->id, $avatarSpeciesIds, true))
             ->values();
 
         return Inertia::render('onboarding/Show', [

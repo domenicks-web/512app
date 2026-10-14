@@ -40,7 +40,7 @@ class FindFeedHighlight
             'trainerNickname' => (string) $specimen->opening->user->nickname,
             'speciesName' => $specimen->species->name,
             'mintNumber' => $specimen->mint_number,
-            'caughtAgo' => $specimen->caught_at->locale('pt_BR')->diffForHumans(['options' => Carbon::JUST_NOW]),
+            'caughtAgo' => $specimen->caught_at->diffForHumans(['locale' => 'pt_BR', 'options' => Carbon::JUST_NOW]),
         ];
     }
 }
