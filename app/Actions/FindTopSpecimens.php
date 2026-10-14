@@ -27,7 +27,7 @@ class FindTopSpecimens
      */
     public function handle(User $user, int $limit): array
     {
-        return $user->specimens()
+        return array_values($user->specimens()
             ->with('species:id,name,rarity_tier,sprite_path,sprite_shiny_path')
             ->get(['id', 'species_id', 'is_shiny', 'iv_total', 'mint_number'])
             ->sort(fn (Specimen $a, Specimen $b): int => [
@@ -52,7 +52,6 @@ class FindTopSpecimens
                 'mintNumber' => $specimen->mint_number,
                 'ivTotal' => (int) $specimen->iv_total,
             ])
-            ->values()
-            ->all();
+            ->all());
     }
 }

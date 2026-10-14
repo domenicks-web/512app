@@ -37,7 +37,7 @@ class BuildTrainerCard
                 'nickname' => (string) $owner->nickname,
                 'tag' => (string) $owner->tag,
                 'avatarSpritePath' => $owner->avatarSpritePath(),
-                'memberSince' => mb_strtolower((string) $owner->created_at?->setTimezone((string) config('game.display_timezone'))->locale('pt_BR')->translatedFormat('M/Y')),
+                'memberSince' => mb_strtolower((string) $owner->created_at?->setTimezone((string) config('game.display_timezone'))->translatedFormat('M/Y')),
                 'isViewer' => $owner->is($viewer),
             ],
             'stats' => [

@@ -13,6 +13,7 @@ import { formatMint } from '@/lib/format';
 import { CYAN } from '@/lib/pack/meta';
 import { rarityLook } from '@/lib/pack/rarity';
 import type { Tier } from '@/lib/pack/types';
+import { show as compareShow } from '@/routes/compare';
 import { accept, store } from '@/routes/friends/requests';
 import { edit as profileEdit } from '@/routes/profile';
 import { species as trainerSpecies } from '@/routes/trainer';
@@ -92,6 +93,13 @@ const speciesKey = (id: number) => id as unknown as SpeciesArg;
 
 const sheet = useSpecimenSheet((id) =>
     trainerSpecies.url({ user: props.trainer.id, species: speciesKey(id) }),
+);
+
+/** Melhor espécime de quem vê daquela espécie (vem com a ficha). */
+const viewerSpecimenId = computed(() =>
+    typeof sheet.extra.value.viewerSpecimenId === 'number'
+        ? sheet.extra.value.viewerSpecimenId
+        : null,
 );
 
 const isSending = ref(false);
@@ -341,6 +349,21 @@ const pill =
             @close="sheet.close"
             @prev="sheet.step(-1)"
             @next="sheet.step(1)"
-        />
+        >
+            <template #actions="{ specimen }">
+                <Link
+                    v-if="!trainer.isViewer && viewerSpecimenId !== null"
+                    :href="
+                        compareShow({
+                            mine: viewerSpecimenId,
+                            theirs: specimen.id,
+                        })
+                    "
+                    class="bg-brand flex h-12 items-center justify-center rounded-full text-[15px] font-black text-white shadow-[0_8px_20px_rgba(242,77,77,0.3)] transition-transform active:scale-[0.98]"
+                >
+                    Comparar com o meu
+                </Link>
+            </template>
+        </SpecimenSheet>
     </GroupScreen>
 </template>
