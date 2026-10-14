@@ -26,11 +26,10 @@ class BuildGroupFeed
      */
     public function handle(int $limit): array
     {
-        return collect([...$this->openings($limit), ...$this->trades($limit)])
+        return array_values(collect([...$this->openings($limit), ...$this->trades($limit)])
             ->sortByDesc('at')
             ->take($limit)
-            ->values()
-            ->all();
+            ->all());
     }
 
     /**
@@ -40,7 +39,7 @@ class BuildGroupFeed
     {
         $tiers = (array) config('game.group.feed_highlight_tiers');
 
-        return Specimen::query()
+        return array_values(Specimen::query()
             ->with(['species:id,name,rarity_tier,sprite_path,sprite_shiny_path', 'opening.user:id,nickname,avatar_species_id,avatar_is_shiny', 'opening.user.avatarSpecies:id,sprite_path,sprite_shiny_path'])
             ->where(fn (Builder $query) => $query
                 ->where('is_shiny', true)
@@ -63,9 +62,7 @@ class BuildGroupFeed
                 'spritePath' => $specimen->is_shiny ? $specimen->species->sprite_shiny_path : $specimen->species->sprite_path,
                 'mintNumber' => $specimen->mint_number,
                 'caughtAgo' => $specimen->caught_at->diffForHumans(['locale' => 'pt_BR', 'options' => Carbon::JUST_NOW]),
-            ])
-            ->values()
-            ->all();
+            ])->all());
     }
 
     /**

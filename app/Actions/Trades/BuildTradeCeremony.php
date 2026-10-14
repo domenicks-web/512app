@@ -38,7 +38,7 @@ class BuildTradeCeremony
         $given = $trade->items->where('side', '!=', $receivedSide)->map(fn (TradeItem $item): Specimen => $item->specimen);
         $card = fn (Specimen $specimen): array => (new TradeSpecimenResource($specimen))->toArray($request);
 
-        $newSpeciesIds = $received
+        $newSpeciesIds = array_values($received
             ->pluck('species_id')
             ->unique()
             ->filter(fn (int $speciesId): bool => ! $viewer->specimens()
@@ -46,14 +46,13 @@ class BuildTradeCeremony
                 ->whereNotIn('id', $received->pluck('id'))
                 ->exists())
             ->sort()
-            ->values()
-            ->all();
+            ->all());
 
         return [
             'tradeId' => $trade->id,
             'other' => ['id' => $other->id, 'nickname' => (string) $other->nickname, 'avatarSpritePath' => $other->avatarSpritePath()],
-            'received' => $received->map($card)->values()->all(),
-            'given' => $given->map($card)->values()->all(),
+            'received' => array_values($received->map($card)->all()),
+            'given' => array_values($given->map($card)->all()),
             'newSpeciesIds' => $newSpeciesIds,
             'markSeen' => $isProposer && $trade->proposer_seen_at === null,
         ];
