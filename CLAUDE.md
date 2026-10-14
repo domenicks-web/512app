@@ -368,14 +368,14 @@ pushado pro `main`.
     - Grade de parceiros abaixo de 460px conferida a 360/390/412: cabe.
 - **Dock e abas (14/10, tarde)**: Home e telas do grupo moram no layout
   persistente `GroupLayout` (dentro do `EntryLayout`): o dock não é
-  recriado e o conteúdo desliza na ordem do dock (Home → Coleção → Packs
+  recriado e o conteúdo desliza na ordem do dock (Home → Coleção
   → Ranking → Trocas → Amigos → Feed → Perfil). Cascata de entrada só na
   primeira tela (`groupNavigationKey`). Dock: casa (Home), pokébola
   vermelha = abrir o pack (`/pack`), que enche de baixo pra cima conforme
-  o cooldown (`packStatus` compartilhado no `HandleInertiaRequests`), e o
-  ícone Packs vai pra `/packs` ("Conteúdo futuro", pedido do usuário).
+  o cooldown (`packStatus` compartilhado no `HandleInertiaRequests`). O
+  ícone Packs e a tela `/packs` saíram em 14/10 (ver pendências).
   Rótulo do dock só com mouse/teclado (no toque ficava preso). Abaixo de
-  400px o dock encolhe pra caber os 8 botões.
+  400px o dock encolhe pra caber os botões.
 - **Ajustes vira tela (14/10)**: `/ajustes` (`settings/Show`, no
   `GroupLayout`): cartão do perfil → `/perfil` (a seta do perfil volta
   pra Ajustes), Sons (localStorage `pack:muted`, `lib/soundPreference.ts`,
@@ -398,20 +398,26 @@ pushado pro `main`.
   Silhueta do card da Coleção em `game.onboarding.home_silhouette_species_id`
   (Charizard). Amigos online: no desktop na linha do dock à esquerda
   (`GroupLayout`), no celular acima do dock (Home).
-- **Pendências** (revisadas com o usuário em 14/10 à tarde):
-    - Dock apertado no celular (8 botões; "meio apertado", mexer depois).
-    - Tema escuro não existe nas telas novas (decidir se vale o projeto).
+- **Pendências** (revisadas com o usuário em 14/10, 16h50):
+    - Dock apertado no celular: com o Packs fora são 7 botões, conferir
+      se ainda aperta.
+    - Conferir no Gmail o email real do "esqueci a senha" (disparado pro
+      usuário em 14/10, 16h50; o SMTP aceitou).
     - `ResetUnownedAvatar` precisa ser chamado no `AcceptTrade` (fase 4).
-    - Conferir no Gmail o email real do "esqueci a senha".
-    - Arrastar com o dedo entre abas (oferecido, não pedido ainda).
-    - ~~Fase 2: `/verificar`~~ — feito (branch `verificar`, ver abaixo). Fase 3: perfil público, comparar espécimes,
-      rankings de shinies/IV/mint. Fase 4: trocas, Reverb, banimento.
-      Fase 5: polimento (giroscópio, apelido no espécime).
+    - Fase 3 (próxima, primeira em dupla com o Kimi): perfil público,
+      comparar espécimes, rankings de shinies/IV/mint. Fase 4: trocas,
+      Reverb, banimento. Fase 5: polimento (giroscópio, apelido no
+      espécime).
     - PWA por último (pedido do usuário).
+    - **Recusado por agora:** arrastar com o dedo entre abas (não precisa)
+      e tema escuro nas telas novas (ainda não).
+    - **Ideia futura do usuário:** moeda ou "dust" pra comprar packs. O
+      `SPEC.md` põe moeda fora de escopo: se voltar, atualizar o SPEC
+      antes de qualquer código. Por isso o ícone e a tela `/packs`
+      ("Conteúdo futuro") saíram do dock em 14/10.
     - Conta de teste (`claudetest@512app.com` / `claude`) sem dados,
       avatar Pikachu, pack disponível.
-- **Verificar (14/10, branch `verificar`, a partir do `main`, não mergeado
-  nem enviado)**: `/verificar` (Ajustes → "Verificar um pack", ou
+- **Verificar (14/10, mergeado e enviado no `main`)**: `/verificar` (Ajustes → "Verificar um pack", ou
   "Conferir de novo na verificação" no Comprovante, que já preenche via
   query). Calculadora pura: `POST /verificar` (JSON) roda o mesmo
   `DrawPack` + `ResolveSpecimen` da abertura sem gravar nada
