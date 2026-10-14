@@ -76,7 +76,7 @@ it('ordena o ranking por espécies e deixa quem não tem nada sem posição', fu
             ->where('rows.0.nickname', 'Lin')
             ->where('rows.0.position', 1)
             ->where('rows.1.nickname', 'Bia')
-            ->where('rows.1.shinyCount', 1)
+            ->where('rows.1.value', 1)
             ->where('rows.1.position', 2)
             ->where('rows.2.nickname', 'Zé')
             ->where('rows.2.position', null));
