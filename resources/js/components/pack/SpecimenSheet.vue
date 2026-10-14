@@ -390,6 +390,7 @@ const tone = computed(() =>
                         >Verificado
                     </span>
                 </div>
+                <slot name="actions" :specimen="specimen" />
             </div>
         </div>
     </PackModal>
