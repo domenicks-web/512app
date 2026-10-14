@@ -41,7 +41,9 @@ const props = defineProps<{
     presencePollSeconds: number;
 }>();
 
-usePoll(props.presencePollSeconds * 1000, { only: ['friends'] });
+usePoll(props.presencePollSeconds * 1000, {
+    only: ['friends', 'incoming', 'outgoing', 'pendingFriendRequests'],
+});
 
 const confirmingRemoval = ref<number | null>(null);
 
