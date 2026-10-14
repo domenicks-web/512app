@@ -15,10 +15,11 @@ import { waitForIntro } from '@/composables/useIntro';
 import EntryLayout from '@/layouts/EntryLayout.vue';
 import GroupLayout from '@/layouts/GroupLayout.vue';
 import { groupNavigationKey } from '@/layouts/groupNavigation';
-import { formatCountdown, formatFriendsOnline, formatMint } from '@/lib/format';
+import { formatCountdown, formatMint } from '@/lib/format';
 import { animate, spring } from '@/lib/motion';
 import { rarityLook } from '@/lib/pack/rarity';
 import type { Tier } from '@/lib/pack/types';
+import FriendsOnline from '@/components/group/FriendsOnline.vue';
 import TrainerAvatar from '@/components/group/TrainerAvatar.vue';
 import { edit as profileEdit } from '@/routes/profile';
 import { show as collectionShow } from '@/routes/collection';
@@ -554,7 +555,7 @@ const compactLabel =
                         :style="
                             bestLook
                                 ? {
-                                      background: `radial-gradient(70% 60% at 85% 18%, ${bestLook.badge}33, transparent 70%)`,
+                                      background: `radial-gradient(70% 60% at 85% 80%, ${bestLook.badge}33, transparent 70%)`,
                                   }
                                 : undefined
                         "
@@ -563,7 +564,7 @@ const compactLabel =
                             v-if="bestSpecimen || silhouetteSpritePath"
                             :src="`/storage/${bestSpecimen?.spritePath ?? silhouetteSpritePath}`"
                             alt=""
-                            class="absolute -top-[10%] -right-[34%] h-[104%] max-w-none rotate-[-12deg] [image-rendering:pixelated]"
+                            class="absolute -right-[62%] -bottom-[52%] h-[165%] max-w-none rotate-[-12deg] [image-rendering:pixelated]"
                             :class="
                                 bestSpecimen
                                     ? 'drop-shadow-[0_10px_18px_rgba(28,32,38,0.18)]'
@@ -571,10 +572,7 @@ const compactLabel =
                             "
                         />
                         <span
-                            class="absolute inset-y-0 left-0 w-[62%] bg-gradient-to-r from-white via-white/75 to-white/0"
-                        />
-                        <span
-                            class="absolute inset-x-0 bottom-0 h-[42%] bg-gradient-to-t from-white via-white/80 to-white/0"
+                            class="absolute inset-y-0 left-0 w-[58%] bg-gradient-to-r from-white via-white/80 to-white/0"
                         />
                     </span>
                     <span
@@ -803,26 +801,12 @@ const compactLabel =
                 </button>
             </div>
         </div>
-        <footer class="flex items-center px-5 pt-1 pb-2 sm:px-7">
-            <div
+        <footer class="flex items-center px-5 pt-1 pb-2 sm:hidden">
+            <FriendsOnline
                 data-enter="rise"
                 data-delay="120"
-                class="flex items-center gap-[9px]"
-            >
-                <div class="relative size-[9px]" aria-hidden="true">
-                    <div
-                        v-if="friendsOnline > 0"
-                        class="bg-online animate-online-pulse absolute inset-0 rounded-full"
-                    />
-                    <div
-                        class="absolute inset-0 rounded-full"
-                        :class="friendsOnline > 0 ? 'bg-online' : 'bg-faint-2'"
-                    />
-                </div>
-                <div class="text-muted text-[12.5px] font-extrabold">
-                    {{ formatFriendsOnline(friendsOnline) }}
-                </div>
-            </div>
+                :count="friendsOnline"
+            />
         </footer>
     </div>
 </template>

@@ -2,6 +2,7 @@
 import { usePage } from '@inertiajs/vue3';
 import { computed, nextTick, onMounted, provide, ref, watch } from 'vue';
 import HomeDock from '@/components/entry/HomeDock.vue';
+import FriendsOnline from '@/components/group/FriendsOnline.vue';
 import type { DockKey } from '@/components/entry/dock';
 import { waitForIntro } from '@/composables/useIntro';
 import { animate, finished, spring } from '@/lib/motion';
@@ -26,7 +27,7 @@ const SCREENS: Record<string, { order: number; dock?: DockKey }> = {
     'profile/Edit': { order: 7, dock: 'settings' },
 };
 
-const page = usePage();
+const page = usePage<{ friendsOnline?: number }>();
 const active = computed(() => SCREENS[page.component]?.dock);
 
 const direction = ref(1);
@@ -123,7 +124,21 @@ function onLeave(element: Element, done: () => void) {
             </Transition>
         </div>
 
-        <div class="flex justify-center px-4 pt-2 pb-[18px]">
+        <div class="relative flex justify-center px-4 pt-2 pb-[18px]">
+            <!-- Na Home, os amigos online ficam na linha do dock, no canto
+                 esquerdo (no celular não cabe: a Home mostra acima do dock). -->
+            <Transition
+                enter-from-class="opacity-0"
+                leave-to-class="opacity-0"
+                enter-active-class="transition-opacity duration-300"
+                leave-active-class="transition-opacity duration-150"
+            >
+                <FriendsOnline
+                    v-if="page.component === 'Home'"
+                    :count="page.props.friendsOnline ?? 0"
+                    class="absolute bottom-[42px] left-[clamp(24px,7vw,96px)] max-sm:hidden"
+                />
+            </Transition>
             <div ref="dock">
                 <HomeDock :active="active" />
             </div>

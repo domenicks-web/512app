@@ -131,6 +131,9 @@ return [
             52,  // Meowth
         ],
 
+        // Silhueta do card da Coleção na Home pra quem ainda não tem espécime.
+        'home_silhouette_species_id' => 6, // Charizard
+
         'nickname_min_length' => 2,
         'nickname_max_length' => 16,
 

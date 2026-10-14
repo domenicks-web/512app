@@ -160,13 +160,13 @@ it('destaca o espécime de maior valor: shiny antes de raridade, raridade antes 
             ->where('collection.shinyCount', 1));
 });
 
-it('sem espécime, manda a silhueta do primeiro parceiro do config', function () {
-    Species::factory()->create(['id' => config('game.onboarding.avatar_species_ids')[0], 'sprite_path' => 'species/25/sprite.png']);
+it('sem espécime, manda a silhueta da espécie do config', function () {
+    Species::factory()->create(['id' => config('game.onboarding.home_silhouette_species_id'), 'sprite_path' => 'species/6/sprite.png']);
 
     $this->actingAs(User::factory()->create())->get('/')
         ->assertInertia(fn (Assert $page) => $page
             ->where('bestSpecimen', null)
-            ->where('silhouetteSpritePath', 'species/25/sprite.png'));
+            ->where('silhouetteSpritePath', 'species/6/sprite.png'));
 });
 
 it('manda o top 3 do ranking marcando o jogador e conta as trocas enviadas', function () {

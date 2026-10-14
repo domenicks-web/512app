@@ -13,7 +13,7 @@ use Carbon\CarbonInterface;
 
 /**
  * Monta os números da Home: treinador, coleção (com o espécime de maior
- * valor, ou a silhueta de quem não tem nenhum), quando sai o próximo pack,
+ * valor, ou uma silhueta pra quem não tem nenhum), quando sai o próximo pack,
  * posição e top 3 do ranking de espécies, propostas de troca recebidas e
  * enviadas, destaque do feed e quantos amigos estão online.
  */
@@ -62,7 +62,7 @@ class BuildHomeSummary
             ],
             'bestSpecimen' => $this->bestSpecimen->handle($user),
             'silhouetteSpritePath' => Species::query()
-                ->whereKey(config('game.onboarding.avatar_species_ids')[0])
+                ->whereKey(config('game.onboarding.home_silhouette_species_id'))
                 ->value('sprite_path'),
             'rankingTop' => array_map(fn (array $row): array => [
                 'nickname' => $row['nickname'],
