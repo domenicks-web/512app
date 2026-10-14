@@ -2,35 +2,14 @@
 
 declare(strict_types=1);
 
-use App\Actions\Trades\ProposeTrade;
 use App\Enums\TradeItemSide;
-use App\Models\Friendship;
-use App\Models\Opening;
-use App\Models\Specimen;
-use App\Models\Trade;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Validation\ValidationException;
 
+require_once __DIR__.'/helpers.php';
+
 uses(RefreshDatabase::class);
-
-function owned(User $owner, array $attributes = []): Specimen
-{
-    return Specimen::factory()->for($owner)->for(Opening::factory()->for($owner))->create($attributes);
-}
-
-function friends(): array
-{
-    [$a, $b] = User::factory()->count(2)->create();
-    Friendship::factory()->accepted()->create(['requester_id' => $a->id, 'addressee_id' => $b->id]);
-
-    return [$a, $b];
-}
-
-function propose(User $from, User $to, array $offered, array $requested, ?string $message = null): Trade
-{
-    return app(ProposeTrade::class)->handle($from, $to, $offered, $requested, $message);
-}
 
 it('cria a proposta com os itens dos dois lados e validade de 72h', function () {
     $this->travelTo(now()->startOfSecond());
