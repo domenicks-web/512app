@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Http\Controllers\Collection\ShowCollectionController;
 use App\Http\Controllers\Collection\ShowCollectionSpeciesController;
+use App\Http\Controllers\Feed\ShowFeedController;
 use App\Http\Controllers\Friends\AcceptFriendRequestController;
 use App\Http\Controllers\Friends\RemoveFriendshipController;
 use App\Http\Controllers\Friends\SendFriendRequestController;
@@ -24,6 +25,7 @@ Route::middleware(['auth', 'onboarded'])->group(function () {
     Route::get('ranking', ShowRankingController::class)->name('ranking.show');
     Route::get('trocas', ShowTradesController::class)->name('trades.index');
     Route::get('amigos', ShowFriendsController::class)->name('friends.index');
+    Route::get('feed', ShowFeedController::class)->name('feed.show');
 
     Route::get('pack', [PackController::class, 'show'])->name('pack.show');
     Route::post('pack/abrir', [PackController::class, 'open'])->name('pack.open');

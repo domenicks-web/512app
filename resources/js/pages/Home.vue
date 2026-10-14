@@ -13,10 +13,11 @@ import HomeDock from '@/components/entry/HomeDock.vue';
 import { useDotField } from '@/composables/useDotField';
 import { waitForIntro } from '@/composables/useIntro';
 import EntryLayout from '@/layouts/EntryLayout.vue';
-import { formatFriendsOnline, formatMint } from '@/lib/format';
+import { formatCountdown, formatFriendsOnline, formatMint } from '@/lib/format';
 import { animate, spring } from '@/lib/motion';
 import { edit as profileEdit } from '@/routes/profile';
 import { show as collectionShow } from '@/routes/collection';
+import { show as feedShow } from '@/routes/feed';
 import { show as packShow } from '@/routes/pack';
 import { show as rankingShow } from '@/routes/ranking';
 import { index as tradesIndex } from '@/routes/trades';
@@ -25,8 +26,9 @@ defineOptions({ layout: EntryLayout });
 
 /**
  * Home: trilho de tiles com um anel colorido que desliza até o ativo
- * (setas, hover ou clique; Enter "aperta"). Apertar Coleção, Ranking ou
- * Trocas abre a tela; o Pack de hoje levanta a tampa e vai pra abertura.
+ * (setas, hover ou clique; Enter "aperta"). Apertar Coleção, Ranking,
+ * Trocas ou Feed abre a tela; o Pack de hoje levanta a tampa e vai pra
+ * abertura. O tile do pack mostra "Disponível" ou a contagem até o próximo.
  */
 const props = defineProps<{
     trainer: {
@@ -36,7 +38,7 @@ const props = defineProps<{
         isAdmin: boolean;
     };
     collection: { ownedSpecies: number; totalSpecies: number };
-    packDate: string;
+    nextPackAt: string | null;
     rankingPosition: number | null;
     pendingTrades: number;
     feedHighlight: {
@@ -60,6 +62,7 @@ const TILE_DESTINATIONS: Partial<Record<number, () => { url: string }>> = {
     1: collectionShow,
     2: rankingShow,
     3: tradesIndex,
+    4: feedShow,
 };
 const PRESS_BEFORE_VISIT = 300;
 
@@ -85,6 +88,21 @@ const activeTile = ref(0);
  */
 const isCompact = ref(false);
 let compactQuery: MediaQueryList | null = null;
+
+const now = ref(Date.now());
+let clock = 0;
+
+const isPackAvailable = computed(
+    () =>
+        props.nextPackAt === null ||
+        new Date(props.nextPackAt).getTime() <= now.value,
+);
+
+const packStatus = computed(() =>
+    isPackAvailable.value || props.nextPackAt === null
+        ? 'Disponível'
+        : `Próximo em ${formatCountdown(props.nextPackAt, now.value)}`,
+);
 
 const collectionPercent = computed(() =>
     props.collection.totalSpecies > 0
@@ -321,7 +339,12 @@ onMounted(async () => {
     window.addEventListener('resize', onResize);
 });
 
+onMounted(() => {
+    clock = window.setInterval(() => (now.value = Date.now()), 1000);
+});
+
 onBeforeUnmount(() => {
+    clearInterval(clock);
     window.removeEventListener('keydown', onKeydown);
     window.removeEventListener('resize', onResize);
     compactQuery?.removeEventListener('change', onCompactChange);
@@ -424,11 +447,6 @@ const compactLabel =
                         >Pack de hoje</span
                     >
                     <span
-                        class="absolute top-3.5 right-4 text-[12.5px] font-black tracking-[0.08em] text-white uppercase sm:top-4"
-                    >
-                        {{ packDate }}
-                    </span>
-                    <span
                         class="absolute inset-0 flex items-center justify-center"
                     >
                         <span
@@ -456,9 +474,14 @@ const compactLabel =
                         </span>
                     </span>
                     <span
-                        class="text-brand-ink absolute bottom-3.5 left-4 rounded-full bg-white px-3 py-1.5 text-[12.5px] font-black sm:bottom-4"
+                        class="absolute bottom-3.5 left-4 rounded-full px-3 py-1.5 text-[12.5px] font-black tabular-nums sm:bottom-4"
+                        :class="
+                            isPackAvailable
+                                ? 'text-brand-ink bg-white'
+                                : 'bg-white/20 text-white'
+                        "
                     >
-                        1 em 512
+                        {{ packStatus }}
                     </span>
                 </button>
 

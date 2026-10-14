@@ -35,7 +35,7 @@ function specimenOf(User $owner, array $attributes = []): Specimen
 it('exige login e perfil completo nas telas do grupo', function (string $url) {
     $this->get($url)->assertRedirect('/login');
     $this->actingAs(User::factory()->withoutProfile()->create())->get($url)->assertRedirect('/completar-perfil');
-})->with(['/colecao', '/ranking', '/trocas', '/amigos']);
+})->with(['/colecao', '/ranking', '/trocas', '/amigos', '/feed']);
 
 it('lista todas as espécies na coleção com contagem de espécimes e shinies', function () {
     $user = User::factory()->create(['avatar_species_id' => null]);
@@ -154,4 +154,36 @@ it('mostra "agora" em vez de "há 0 segundo" pra pedido recém-enviado', functio
 
     $this->actingAs($user)->get('/amigos')
         ->assertInertia(fn (Assert $page) => $page->where('outgoing.0.sentAgo', 'agora'));
+});
+
+it('lista no feed só as aberturas boas, mais recentes primeiro, com quem abriu', function () {
+    $this->travelTo(now()->startOfMinute());
+    $opener = User::factory()->create(['nickname' => 'Ramon']);
+    $rattata = Species::factory()->create(['name' => 'Rattata', 'sprite_shiny_path' => 'species/19/shiny.png']);
+    $mewtwo = Species::factory()->legendary()->create(['name' => 'Mewtwo', 'sprite_path' => 'species/150/sprite.png']);
+    specimenOf($opener, ['species_id' => $mewtwo->id, 'caught_at' => now()->subHour()]);
+    specimenOf($opener, ['species_id' => $rattata->id, 'is_shiny' => true, 'mint_number' => 4, 'caught_at' => now()->subMinutes(12)]);
+    specimenOf($opener, ['species_id' => $rattata->id, 'caught_at' => now()]);
+
+    $this->actingAs(User::factory()->create())->get('/feed')
+        ->assertInertia(fn (Assert $page) => $page
+            ->component('feed/Show')
+            ->has('entries', 2)
+            ->where('entries.0.speciesName', 'Rattata')
+            ->where('entries.0.isShiny', true)
+            ->where('entries.0.spritePath', 'species/19/shiny.png')
+            ->where('entries.0.trainerNickname', 'Ramon')
+            ->where('entries.0.caughtAgo', 'há 12 minutos')
+            ->where('entries.1.speciesName', 'Mewtwo')
+            ->where('entries.1.rarityTier', 'lendario')
+            ->where('entries.1.spritePath', 'species/150/sprite.png'));
+});
+
+it('limita o feed ao tamanho do config', function () {
+    config(['game.group.feed_limit' => 2]);
+    $species = Species::factory()->legendary()->create();
+    Specimen::factory()->count(3)->create(['species_id' => $species->id]);
+
+    $this->actingAs(User::factory()->create())->get('/feed')
+        ->assertInertia(fn (Assert $page) => $page->has('entries', 2));
 });

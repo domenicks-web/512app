@@ -12,9 +12,9 @@ use App\Services\GroupPresence;
 use Carbon\CarbonInterface;
 
 /**
- * Monta os números da Home: treinador, coleção, posição no ranking de
- * espécies, propostas de troca recebidas, destaque do feed e quantos
- * amigos estão online.
+ * Monta os números da Home: treinador, coleção, quando sai o próximo pack,
+ * posição no ranking de espécies, propostas de troca recebidas, destaque
+ * do feed e quantos amigos estão online.
  */
 class BuildHomeSummary
 {
@@ -28,7 +28,7 @@ class BuildHomeSummary
      * @return array{
      *     trainer: array{nickname: string, tag: string, avatarSpritePath: string|null, isAdmin: bool},
      *     collection: array{ownedSpecies: int, totalSpecies: int},
-     *     packDate: string,
+     *     nextPackAt: string|null,
      *     rankingPosition: int|null,
      *     pendingTrades: int,
      *     feedHighlight: array{isShiny: bool, trainerNickname: string, speciesName: string, mintNumber: int, caughtAgo: string}|null,
@@ -51,7 +51,9 @@ class BuildHomeSummary
                 'ownedSpecies' => $user->specimens()->distinct()->count('species_id'),
                 'totalSpecies' => Species::count(),
             ],
-            'packDate' => $today->locale('pt_BR')->translatedFormat('j M'),
+            'nextPackAt' => $user->next_pack_at !== null && $user->next_pack_at->isAfter($today)
+                ? $user->next_pack_at->toIso8601String()
+                : null,
             'rankingPosition' => $ownRow['position'] ?? null,
             'pendingTrades' => Trade::query()
                 ->where('to_user_id', $user->id)

@@ -9,7 +9,7 @@ import { animate, spring } from '@/lib/motion';
 import { home } from '@/routes';
 
 /**
- * Moldura das telas que saem do dock (Coleção, Ranking, Trocas, Amigos):
+ * Moldura das telas do grupo (Coleção, Ranking, Trocas, Amigos, Feed):
  * voltar pra Home, título, conteúdo rolável e o mesmo dock embaixo, com o
  * item da tela marcado. Os filhos com `data-enter` sobem em cascata, igual
  * à entrada da Home.
@@ -17,7 +17,7 @@ import { home } from '@/routes';
 const props = defineProps<{
     title: string;
     subtitle?: string;
-    active: DockKey;
+    active?: DockKey;
 }>();
 
 const page = usePage<{ auth: { user: { is_admin: boolean } | null } }>();

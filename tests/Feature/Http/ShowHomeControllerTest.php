@@ -130,3 +130,14 @@ it('conta só amigos com sessão ativa na janela de online', function () {
             ->where('friendsOnline', 1)
             ->where('presencePollSeconds', config('game.group.presence_poll_seconds')));
 });
+
+it('mostra quando sai o próximo pack ou deixa vazio se já está disponível', function () {
+    $this->travelTo(now()->startOfSecond());
+    $waiting = User::factory()->create(['next_pack_at' => now()->addHours(5)]);
+    $ready = User::factory()->create(['next_pack_at' => now()->subMinute()]);
+
+    $this->actingAs($waiting)->get('/')
+        ->assertInertia(fn (Assert $page) => $page->where('nextPackAt', now()->addHours(5)->toIso8601String()));
+    $this->actingAs($ready)->get('/')
+        ->assertInertia(fn (Assert $page) => $page->where('nextPackAt', null));
+});

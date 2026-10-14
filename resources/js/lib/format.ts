@@ -33,3 +33,14 @@ export function formatDayMonth(iso: string): string {
 
     return `${String(date.getDate()).padStart(2, '0')} ${shortMonths[date.getMonth()]}`;
 }
+
+/** "05:12:33": horas, minutos e segundos que faltam até `iso` (nunca negativo). */
+export function formatCountdown(iso: string, now: number): string {
+    const seconds = Math.max(
+        0,
+        Math.floor((new Date(iso).getTime() - now) / 1000),
+    );
+    const pad = (value: number) => String(value).padStart(2, '0');
+
+    return `${pad(Math.floor(seconds / 3600))}:${pad(Math.floor(seconds / 60) % 60)}:${pad(seconds % 60)}`;
+}

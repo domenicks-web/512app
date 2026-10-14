@@ -3,7 +3,7 @@ import { Link, usePage } from '@inertiajs/vue3';
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
 import type { DockKey } from '@/components/entry/dock';
 import { animate } from '@/lib/motion';
-import { logout } from '@/routes';
+import { home, logout } from '@/routes';
 import { index as adminIndex } from '@/routes/admin';
 import { edit as profileEdit } from '@/routes/profile';
 import { show as packShow } from '@/routes/pack';
@@ -16,8 +16,8 @@ import type { RouteDefinition } from '@/wayfinder';
 /**
  * Dock de vidro da home. Cada ícone tem uma micro-animação no hover
  * (cartas em leque, cápsula abre, barras sobem, setas trocam, mão acena,
- * sliders correm). Coleção, Packs, Ranking, Trocas e Amigos navegam; "Ajustes"
- * abre o menu (sair/admin).
+ * sliders correm). A pokébola vermelha volta pra Home; Coleção, Packs,
+ * Ranking, Trocas e Amigos navegam; "Ajustes" abre o menu (sair/admin).
  * `active` marca o item da tela atual. Amigos mostra um contador vermelho
  * com os pedidos de amizade recebidos.
  */
@@ -57,6 +57,8 @@ const MICRO: Record<string, string[]> = {
 };
 
 const page = usePage<{ pendingFriendRequests?: number }>();
+const isHome = computed(() => page.url === home.url());
+
 const pendingFriendRequests = computed(
     () => page.props.pendingFriendRequests ?? 0,
 );
@@ -132,15 +134,18 @@ function onActivate(key: string) {
         aria-label="Navegação principal"
         class="relative flex items-center gap-1.5 rounded-full bg-white/70 p-[7px] shadow-[0_0_0_1px_rgba(28,32,38,0.05),0_10px_26px_rgba(28,32,38,0.08)] backdrop-blur-[12px] sm:gap-2.5 sm:p-[9px]"
     >
-        <div
-            class="bg-brand flex size-11 shrink-0 items-center justify-center rounded-full shadow-[0_6px_14px_rgba(242,77,77,0.3)] sm:size-14"
-            aria-hidden="true"
+        <Link
+            :href="home()"
+            aria-label="Início"
+            :aria-current="isHome ? 'page' : undefined"
+            class="bg-brand flex size-11 shrink-0 cursor-pointer items-center justify-center rounded-full shadow-[0_6px_14px_rgba(242,77,77,0.3)] transition-transform active:scale-95 sm:size-14"
         >
             <svg
                 width="34"
                 height="34"
                 viewBox="51 43 708 708"
                 class="block size-7 sm:size-[34px]"
+                aria-hidden="true"
             >
                 <circle cx="405" cy="414" r="353" fill="#ffffff" />
                 <path
@@ -158,7 +163,7 @@ function onActivate(key: string) {
                 <circle cx="405" cy="405" r="119" fill="#434a53" />
                 <circle cx="405" cy="405" r="62.7" fill="#e4e7eb" />
             </svg>
-        </div>
+        </Link>
 
         <component
             :is="item.href ? Link : 'button'"

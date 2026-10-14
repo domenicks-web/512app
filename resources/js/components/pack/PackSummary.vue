@@ -19,6 +19,7 @@ import {
 } from '@/lib/pack/meta';
 import { vPixelFit } from '@/lib/pack/pixelFit';
 import type { PackSpecimen } from '@/lib/pack/types';
+import { formatCountdown } from '@/lib/format';
 import { show as collectionShow } from '@/routes/collection';
 
 /** Resumo do pack (tema claro): cartas com tilt e holo, contagem e comprovante. */
@@ -43,18 +44,11 @@ const openedAtLabel = computed(() => {
     return `${pad(date.getHours(), 2)}:${pad(date.getMinutes(), 2)}`;
 });
 
-const countdown = computed(() => {
-    if (!props.nextPackAt) {
-        return '00:00:00';
-    }
-
-    const seconds = Math.max(
-        0,
-        Math.floor((new Date(props.nextPackAt).getTime() - now.value) / 1000),
-    );
-
-    return `${pad(Math.floor(seconds / 3600), 2)}:${pad(Math.floor(seconds / 60) % 60, 2)}:${pad(seconds % 60, 2)}`;
-});
+const countdown = computed(() =>
+    props.nextPackAt
+        ? formatCountdown(props.nextPackAt, now.value)
+        : '00:00:00',
+);
 
 function tilt(event: MouseEvent) {
     const card = event.currentTarget as HTMLElement;
