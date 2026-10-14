@@ -21,9 +21,13 @@ import type { PackSpecimen } from '@/lib/pack/types';
 import PackModal from './PackModal.vue';
 
 /** Ficha do espécime: sprite até 4×, régua de tamanho, IVs, natureza, captura e hash. */
-const props = defineProps<{ specimen: PackSpecimen | null }>();
+const props = defineProps<{
+    specimen: PackSpecimen | null;
+    /** Mais de um espécime da espécie (coleção): "2 de 3" com setas. */
+    position?: { index: number; count: number } | null;
+}>();
 const isMobile = useMediaQuery('(max-width: 639.98px)');
-const emit = defineEmits<{ close: [] }>();
+const emit = defineEmits<{ close: []; prev: []; next: [] }>();
 
 const caught = computed(() =>
     props.specimen
@@ -70,6 +74,54 @@ const caught = computed(() =>
                         opacity: specimen.isShiny ? 0.45 : 0.4,
                     }"
                 />
+                <div
+                    v-if="position && position.count > 1"
+                    class="absolute bottom-3 left-1/2 flex -translate-x-1/2 items-center gap-1 rounded-full bg-black/40 p-1 text-xs font-extrabold text-white backdrop-blur-sm"
+                >
+                    <button
+                        type="button"
+                        class="flex size-8 cursor-pointer items-center justify-center rounded-full hover:bg-white/10"
+                        aria-label="Espécime anterior"
+                        @click="emit('prev')"
+                    >
+                        <svg
+                            width="14"
+                            height="14"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="3"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            aria-hidden="true"
+                        >
+                            <path d="M15 6l-6 6 6 6" />
+                        </svg>
+                    </button>
+                    <span class="min-w-[44px] text-center tabular-nums"
+                        >{{ position.index + 1 }} de {{ position.count }}</span
+                    >
+                    <button
+                        type="button"
+                        class="flex size-8 cursor-pointer items-center justify-center rounded-full hover:bg-white/10"
+                        aria-label="Próximo espécime"
+                        @click="emit('next')"
+                    >
+                        <svg
+                            width="14"
+                            height="14"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="3"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            aria-hidden="true"
+                        >
+                            <path d="M9 6l6 6-6 6" />
+                        </svg>
+                    </button>
+                </div>
             </div>
             <div
                 class="flex min-w-0 flex-[1_1_360px] flex-col gap-4 px-5 pt-5 pb-5 sm:gap-[22px] sm:px-7 sm:pt-[30px] sm:pb-7"

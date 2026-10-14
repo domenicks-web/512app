@@ -20,6 +20,7 @@ export type Player = {
     invite_quota: number;
     is_email_verified: boolean;
     is_birthdate_locked: boolean;
+    has_pack_available: boolean;
     invite_code: string | null;
     invited_by: string | null;
     specimens_count: number;

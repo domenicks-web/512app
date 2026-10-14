@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Http\Controllers\Collection\ShowCollectionController;
+use App\Http\Controllers\Collection\ShowCollectionSpeciesController;
 use App\Http\Controllers\Friends\AcceptFriendRequestController;
 use App\Http\Controllers\Friends\RemoveFriendshipController;
 use App\Http\Controllers\Friends\SendFriendRequestController;
@@ -19,6 +20,7 @@ use Illuminate\Support\Facades\Route;
 Route::middleware(['auth', 'onboarded'])->group(function () {
     Route::get('/', ShowHomeController::class)->name('home');
     Route::get('colecao', ShowCollectionController::class)->name('collection.show');
+    Route::get('colecao/{species}', ShowCollectionSpeciesController::class)->name('collection.species');
     Route::get('ranking', ShowRankingController::class)->name('ranking.show');
     Route::get('trocas', ShowTradesController::class)->name('trades.index');
     Route::get('amigos', ShowFriendsController::class)->name('friends.index');

@@ -6,6 +6,7 @@ use App\Http\Controllers\Admin\InviteController;
 use App\Http\Controllers\Admin\InviteSuffixController;
 use App\Http\Controllers\Admin\PlayerBirthdateController;
 use App\Http\Controllers\Admin\PlayerController;
+use App\Http\Controllers\Admin\PlayerPackController;
 use App\Http\Controllers\Admin\PlayerPasswordController;
 use App\Http\Controllers\Admin\PlayerQuotaController;
 use App\Http\Controllers\Admin\PlayerRoleController;
@@ -26,4 +27,5 @@ Route::middleware(['auth', 'onboarded', 'can:admin'])->prefix('admin')->name('ad
     Route::post('jogadores/{user}/liberar-nascimento', [PlayerBirthdateController::class, 'store'])->name('players.birthdate');
     Route::post('jogadores/{user}/reenviar-confirmacao', [PlayerVerificationController::class, 'store'])->name('players.verification');
     Route::put('jogadores/{user}/senha', [PlayerPasswordController::class, 'update'])->name('players.password');
+    Route::post('jogadores/{user}/liberar-pack', [PlayerPackController::class, 'store'])->name('players.pack');
 });

@@ -38,7 +38,7 @@ onBeforeUnmount(() => document.removeEventListener('keydown', onKeydown));
 <template>
     <div
         v-if="open"
-        class="absolute inset-0 z-30 box-border flex items-center justify-center overflow-x-hidden overflow-y-auto bg-[rgba(28,31,38,0.62)] p-3 sm:p-5"
+        class="fixed inset-0 z-50 box-border flex items-center justify-center overflow-x-hidden overflow-y-auto bg-[rgba(28,31,38,0.62)] p-3 sm:p-5"
         @click.self="emit('close')"
     >
         <div

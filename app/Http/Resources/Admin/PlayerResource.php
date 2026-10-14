@@ -29,6 +29,7 @@ class PlayerResource extends JsonResource
             'invite_quota' => $this->invite_quota,
             'is_email_verified' => $this->hasVerifiedEmail(),
             'is_birthdate_locked' => $this->birthdate_corrected_at !== null,
+            'has_pack_available' => $this->next_pack_at === null || $this->next_pack_at->isPast(),
             'invite_code' => $this->invitedBy?->code,
             'invited_by' => $this->invitedBy?->createdBy?->nickname,
             'specimens_count' => (int) $this->specimens_count,

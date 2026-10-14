@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { router } from '@inertiajs/vue3';
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
-import { birthdate, verification } from '@/routes/admin/players';
+import { birthdate, pack, verification } from '@/routes/admin/players';
 import AdminIcon from './AdminIcon.vue';
 import { showToast } from './toast';
 import type { Player } from './types';
@@ -26,10 +26,12 @@ const isMounted = ref(false);
 function toggle() {
     if (!open.value && trigger.value) {
         const rect = trigger.value.getBoundingClientRect();
-        position.value = {
-            top: rect.bottom + 8,
-            right: window.innerWidth - rect.right,
-        };
+        const right = window.innerWidth - rect.right;
+        // Sem espaço embaixo (último da lista no celular): abre pra cima.
+        position.value =
+            window.innerHeight - rect.bottom < 300
+                ? { top: Math.max(8, rect.top - 8 - 290), right }
+                : { top: rect.bottom + 8, right };
     }
 
     open.value = !open.value;
@@ -100,6 +102,14 @@ const items = computed(() => [
             : null,
         danger: false,
         run: () => post(verification.url(props.player.id), 'verification'),
+    },
+    {
+        label: 'Liberar próximo pack',
+        disabledReason: props.player.has_pack_available
+            ? 'O pack já está disponível'
+            : null,
+        danger: false,
+        run: () => post(pack.url(props.player.id), 'pack'),
     },
     {
         label: 'Trocar senha',
