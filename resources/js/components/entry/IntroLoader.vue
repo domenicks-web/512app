@@ -82,15 +82,7 @@ async function play(): Promise<void> {
     );
 
     const center = field.center();
-    later(
-        1520,
-        () =>
-            field.converge(center.x, center.y, {
-                swirl: 0.045,
-                specialRadius: 7,
-            }),
-        current,
-    );
+    later(1520, () => field.swirlInto(center.x, center.y, 7), current);
     later(1820, () => field.fadeAllExceptSpecial(), current);
     later(1980, () => field.popSpecial(), current);
 

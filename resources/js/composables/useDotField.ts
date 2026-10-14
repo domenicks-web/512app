@@ -21,11 +21,17 @@ type Dot = {
     a: number;
     ta: number;
     spawn: number;
+    /** Redemoinho: ângulo e distância ao centro na largada, e o atraso. */
+    va: number;
+    vrad: number;
+    vdelay: number;
+    vr0: number;
+    va0: number;
 };
 
 type Ripple = { x: number; y: number; t: number; s: number };
 
-type FieldMode = 'grid' | 'ambient' | 'point' | 'hide';
+type FieldMode = 'grid' | 'ambient' | 'point' | 'vortex' | 'hide';
 
 const DOT_COUNT = 512;
 const COLUMNS = 32;
@@ -36,6 +42,18 @@ const GRID_FILL = 0.84;
 const POKEBALL_MIN_RADIUS = 3.5;
 const INK = '#2b2f36';
 const RED = '#f24d4d';
+/**
+ * Redemoinho do fim da abertura: cada pokébola larga com atraso pela
+ * distância (as de perto do centro primeiro, como água no ralo, até
+ * `VORTEX_SPREAD` ms, mais um sorteio de até `VORTEX_JITTER`), leva
+ * `VORTEX_DURATION` ms pra chegar, gira `VORTEX_TURN` rad em volta do
+ * centro (devagar no começo, rápido no fim) e roda sobre si mesma.
+ */
+const VORTEX_SPREAD = 320;
+const VORTEX_JITTER = 90;
+const VORTEX_DURATION = 520;
+const VORTEX_TURN = 3.4;
+const VORTEX_SELF_SPIN = 2.2;
 /** O ponto vermelho, maior, que vira a onda que dá origem à cápsula. */
 export const SPECIAL_DOT = 245;
 
@@ -52,9 +70,15 @@ const dots: Dot[] = Array.from({ length: DOT_COUNT }, () => ({
     a: 0,
     ta: 0,
     spawn: 0,
+    va: 0,
+    vrad: 0,
+    vdelay: 0,
+    vr0: 0,
+    va0: 0,
 }));
 
 let ripples: Ripple[] = [];
+let vortex = { x: 0, y: 0, start: 0 };
 let mode: FieldMode = 'hide';
 let pointer: { x: number; y: number } | null = null;
 let width = 0;
@@ -163,6 +187,57 @@ function resize() {
     }
 }
 
+/**
+ * Uma pokébola do redemoinho: a distância cai devagar e depois rápido
+ * (1 − p²), o giro acelera junto, ela encolhe e some no último trecho.
+ */
+function drawVortexDot(dot: Dot, now: number) {
+    if (!context) {
+        return;
+    }
+
+    const p = Math.min(
+        1,
+        Math.max(0, (now - vortex.start - dot.vdelay) / VORTEX_DURATION),
+    );
+
+    if (p >= 1) {
+        dot.a = dot.ta = dot.r = dot.tr = 0;
+
+        return;
+    }
+
+    const pull = p * p;
+    const angle = dot.va + VORTEX_TURN * pull;
+    const distance = dot.vrad * (1 - pull);
+    dot.x = vortex.x + Math.cos(angle) * distance;
+    dot.y = vortex.y + Math.sin(angle) * distance;
+    dot.vx = dot.vy = 0;
+    dot.r = dot.vr0 * (1 - 0.7 * p);
+    dot.a = dot.va0 * (p < 0.75 ? 1 : (1 - p) / 0.25);
+
+    if (dot.r < 0.1 || dot.a < 0.01) {
+        return;
+    }
+
+    if (pokeballSprites && dot.r >= POKEBALL_MIN_RADIUS) {
+        const size = dot.r * 2;
+        context.save();
+        context.globalAlpha = dot.a;
+        context.translate(dot.x, dot.y);
+        context.rotate(VORTEX_SELF_SPIN * VORTEX_TURN * pull);
+        context.drawImage(pokeballSprites.ink, -dot.r, -dot.r, size, size);
+        context.restore();
+
+        return;
+    }
+
+    context.fillStyle = `rgba(43,47,54,${dot.a})`;
+    context.beginPath();
+    context.arc(dot.x, dot.y, dot.r, 0, 6.2832);
+    context.fill();
+}
+
 function tick(now: number) {
     frame = requestAnimationFrame(tick);
 
@@ -192,6 +267,12 @@ function tick(now: number) {
             }
         } else if (mode === 'grid') {
             born++;
+        }
+
+        if (mode === 'vortex' && i !== SPECIAL_DOT) {
+            drawVortexDot(dot, now);
+
+            continue;
         }
 
         dot.vx = (dot.vx + (dot.tx - dot.x) * 0.05) * 0.86;
@@ -345,6 +426,39 @@ export function useDotField() {
         });
     }
 
+    /**
+     * Redemoinho pra (x, y): as pokébolas desmancham a grade e descem em
+     * espiral até o centro, em vez de a grade inteira encolher junta. O
+     * ponto vermelho só vai pro centro e cresce até `specialRadius`.
+     */
+    function swirlInto(x: number, y: number, specialRadius = 0.8) {
+        mode = 'vortex';
+        vortex = { x, y, start: performance.now() };
+        const farthest = Math.max(
+            1,
+            ...dots.map((dot) => Math.hypot(dot.x - x, dot.y - y)),
+        );
+
+        dots.forEach((dot, i) => {
+            if (i === SPECIAL_DOT) {
+                dot.tx = x;
+                dot.ty = y;
+                dot.tr = specialRadius;
+
+                return;
+            }
+
+            dot.spawn = 0;
+            dot.va = Math.atan2(dot.y - y, dot.x - x);
+            dot.vrad = Math.hypot(dot.x - x, dot.y - y);
+            dot.vdelay =
+                (dot.vrad / farthest) * VORTEX_SPREAD +
+                Math.random() * VORTEX_JITTER;
+            dot.vr0 = dot.r;
+            dot.va0 = dot.a;
+        });
+    }
+
     function fadeAllExceptSpecial() {
         dots.forEach((dot, i) => {
             if (i !== SPECIAL_DOT) {
@@ -407,6 +521,7 @@ export function useDotField() {
         grid,
         ambient,
         converge,
+        swirlInto,
         fadeAllExceptSpecial,
         popSpecial,
         hide,
