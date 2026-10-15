@@ -56,7 +56,7 @@ class Sanction extends Model
     {
         return $this->type === SanctionType::Ban
             ? "Sua conta foi banida. Motivo: {$this->reason}"
-            : 'Sua conta está suspensa até '.$this->ends_at?->timezone((string) config('app.timezone'))->format('d/m \à\s H:i').". Motivo: {$this->reason}";
+            : 'Sua conta está suspensa até '.$this->ends_at?->timezone((string) config('game.display_timezone'))->format('d/m \à\s H:i').". Motivo: {$this->reason}";
     }
 
     /**

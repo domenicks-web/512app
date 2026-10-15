@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Models\Sanction;
 use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
 uses(RefreshDatabase::class);
@@ -34,7 +35,7 @@ it('deixa de fora do grupo o sistema, o suspenso e o banido', function () {
 });
 
 it('explica a sanção no texto do login', function () {
-    $suspension = Sanction::factory()->create(['reason' => 'spam', 'ends_at' => now()->setDate(2026, 10, 18)->setTime(14, 0)]);
+    $suspension = Sanction::factory()->create(['reason' => 'spam', 'ends_at' => Carbon::create(2026, 10, 18, 14, 0, 0, 'America/Sao_Paulo')->utc()]);
     $ban = Sanction::factory()->ban()->create(['reason' => 'trapaça']);
 
     expect($suspension->message())->toBe('Sua conta está suspensa até 18/10 às 14:00. Motivo: spam')
