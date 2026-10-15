@@ -10,4 +10,14 @@ enum RarityTier: string
     case Uncommon = 'incomum';
     case Rare = 'raro';
     case Legendary = 'lendario';
+
+    public function label(): string
+    {
+        return match ($this) {
+            self::Common => 'Comum',
+            self::Uncommon => 'Incomum',
+            self::Rare => 'Raro',
+            self::Legendary => 'Lendário',
+        };
+    }
 }

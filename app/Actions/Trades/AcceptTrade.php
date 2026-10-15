@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Actions\Trades;
 
+use App\Actions\Notify\BuildNotice;
+use App\Actions\Notify\Notifier;
 use App\Actions\Profile\ResetUnownedAvatar;
 use App\Enums\TradeCancelReason;
 use App\Enums\TradeItemSide;
@@ -26,7 +28,11 @@ use Illuminate\Validation\ValidationException;
  */
 class AcceptTrade
 {
-    public function __construct(private readonly ResetUnownedAvatar $resetAvatar) {}
+    public function __construct(
+        private readonly ResetUnownedAvatar $resetAvatar,
+        private readonly Notifier $notifier,
+        private readonly BuildNotice $notices,
+    ) {}
 
     public function handle(Trade $trade, User $accepter): Trade
     {
@@ -75,6 +81,8 @@ class AcceptTrade
             $this->resetAvatar->handle(User::findOrFail($locked->from_user_id));
             $this->resetAvatar->handle(User::findOrFail($locked->to_user_id));
 
+            $this->notifier->toPlayer($locked->from_user_id, $this->notices->tradeAccepted($locked));
+
             return $locked;
         });
 
@@ -90,13 +98,24 @@ class AcceptTrade
         return $item->side === TradeItemSide::Offered ? $trade->from_user_id : $trade->to_user_id;
     }
 
-    /** @param  Builder<Trade>  $query */
+    /**
+     * Derruba as propostas (espécime já não está com quem ia dar) e avisa
+     * quem propôs cada uma.
+     *
+     * @param  Builder<Trade>  $query
+     */
     private function cancelUnavailable(Builder $query): void
     {
-        $query->update([
+        $fallen = $query->with('toUser.avatarSpecies')->get();
+
+        Trade::query()->whereKey($fallen->modelKeys())->update([
             'status' => TradeStatus::Cancelled,
             'cancel_reason' => TradeCancelReason::Unavailable,
             'responded_at' => now(),
         ]);
+
+        foreach ($fallen as $trade) {
+            $this->notifier->toPlayer($trade->from_user_id, $this->notices->tradeFallen($trade));
+        }
     }
 }
