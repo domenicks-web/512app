@@ -44,15 +44,7 @@ const props = defineProps<{
     presencePollSeconds: number;
 }>();
 
-usePoll(props.presencePollSeconds * 1000, {
-    only: [
-        'friends',
-        'incoming',
-        'outgoing',
-        'pendingFriendRequests',
-        'tradeAlerts',
-    ],
-});
+usePoll(props.presencePollSeconds * 1000, { only: ['friends'] });
 
 const confirmingRemoval = ref<number | null>(null);
 // Recusar ou cancelar pedido pede um Sim/Não antes, contra clique errado.

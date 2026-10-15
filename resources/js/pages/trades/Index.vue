@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Link, router, usePoll } from '@inertiajs/vue3';
+import { Link, router } from '@inertiajs/vue3';
 import { computed, ref, watch } from 'vue';
 import GroupScreen from '@/components/group/GroupScreen.vue';
 import TrainerAvatar from '@/components/group/TrainerAvatar.vue';
@@ -22,7 +22,7 @@ defineOptions({ layout: [EntryLayout, GroupLayout] });
 /**
  * Trocas: Recebidas (aceitar, contrapropor, recusar), Enviadas (cancelar;
  * vencidas e caídas esmaecidas) e Concluídas. "Nova troca" escolhe o
- * amigo e abre o montador. Recarrega junto com a presença até a 4B.
+ * amigo e abre o montador. Atualiza na hora pelos avisos em tempo real (`useRealtime`).
  */
 const props = defineProps<{
     tab: 'recebidas' | 'enviadas' | 'concluidas';
@@ -35,10 +35,6 @@ const props = defineProps<{
     expiresAfterHours: number;
     presencePollSeconds: number;
 }>();
-
-usePoll(props.presencePollSeconds * 1000, {
-    only: ['received', 'sent', 'done', 'newCounts', 'tradeAlerts'],
-});
 
 const TABS = [
     { key: 'recebidas', label: 'Recebidas' },

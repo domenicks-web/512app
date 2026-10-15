@@ -1,11 +1,24 @@
 <script setup lang="ts">
 import { usePage } from '@inertiajs/vue3';
-import { computed, nextTick, onMounted, provide, ref, watch } from 'vue';
+import {
+    computed,
+    nextTick,
+    onBeforeUnmount,
+    onMounted,
+    provide,
+    ref,
+    watch,
+} from 'vue';
 import HomeDock from '@/components/entry/HomeDock.vue';
+import DockBubble from '@/components/group/DockBubble.vue';
 import FriendsOnline from '@/components/group/FriendsOnline.vue';
 import type { DockKey } from '@/components/entry/dock';
 import { waitForIntro } from '@/composables/useIntro';
-import { animate, finished, spring } from '@/lib/motion';
+import { useRealtime } from '@/composables/useRealtime';
+import { animate, finished, prefersReducedMotion, spring } from '@/lib/motion';
+import { Sfx } from '@/lib/pack/sfx';
+import type { Notice } from '@/lib/realtime/notice';
+import { isSoundMuted } from '@/lib/soundPreference';
 import { groupNavigationKey } from '@/layouts/groupNavigation';
 
 /**
@@ -13,7 +26,8 @@ import { groupNavigationKey } from '@/layouts/groupNavigation';
  * fica parado entre as visitas e só o conteúdo troca, deslizando na ordem
  * do dock (pra frente vai pra esquerda, pra trás vai pra direita). A
  * entrada em cascata da tela só toca na primeira vez, vindo da Home ou de
- * um carregamento; entre abas, o deslize basta.
+ * um carregamento; entre abas, o deslize basta. Os avisos em tempo real
+ * (`useRealtime`) saem como bolha do ícone certo do dock, um de cada vez.
  */
 const SCREENS: Record<string, { order: number; dock?: DockKey }> = {
     Home: { order: -1, dock: 'home' },
@@ -29,7 +43,10 @@ const SCREENS: Record<string, { order: number; dock?: DockKey }> = {
     'compare/Show': { order: 10 },
 };
 
-const page = usePage<{ friendsOnline?: number }>();
+const page = usePage<{
+    friendsOnline?: number;
+    auth: { user: { id: number } | null };
+}>();
 const active = computed(() => SCREENS[page.component]?.dock);
 
 const direction = ref(1);
@@ -51,6 +68,98 @@ provide(groupNavigationKey, {
 });
 
 const dock = ref<HTMLElement | null>(null);
+const row = ref<HTMLElement | null>(null);
+
+// Avisos em tempo real: um por vez; 3 ou mais do mesmo ícone esperando
+// viram uma bolha só.
+const { queue } = useRealtime(() => page.props.auth.user?.id ?? null);
+const current = ref<{
+    id: number;
+    notice: Notice;
+    anchorX: number;
+    rowWidth: number;
+}>();
+let shown = 0;
+const sfx = new Sfx();
+const PLACE: Record<Notice['dock'], string> = {
+    trades: 'nas trocas',
+    friends: 'nos amigos',
+    home: 'no feed',
+};
+
+function nextNotice() {
+    const head = queue.value[0];
+
+    if (current.value || !head || !row.value) {
+        return;
+    }
+
+    const same = queue.value.filter((n) => n.dock === head.dock);
+    let notice: Notice;
+
+    if (same.length >= 3) {
+        queue.value = queue.value.filter((n) => n.dock !== head.dock);
+        notice = {
+            ...head,
+            title: `${same.length} novidades ${PLACE[head.dock]}`,
+            body: null,
+            spritePath: null,
+            tier: null,
+            isShiny: false,
+        };
+    } else {
+        notice = queue.value.shift() as Notice;
+    }
+
+    const box = row.value.getBoundingClientRect();
+    const icon = row.value.querySelector(`[data-dock="${notice.dock}"]`);
+    const at = icon?.getBoundingClientRect();
+    current.value = {
+        id: ++shown,
+        notice,
+        anchorX: at ? at.left + at.width / 2 - box.left : box.width / 2,
+        rowWidth: box.width,
+    };
+
+    if (icon && !prefersReducedMotion()) {
+        animate(
+            icon,
+            [
+                { transform: 'none' },
+                { transform: 'translateY(-10px) scale(1.12)', offset: 0.35 },
+                { transform: 'none' },
+            ],
+            620,
+            { easing: spring(320, 13) },
+        );
+    }
+
+    sfx.on = !isSoundMuted();
+    sfx.notice(notice.kind, notice.tier, notice.isShiny);
+
+    if (notice.kind === 'trade_received' || notice.kind === 'trade_accepted') {
+        try {
+            navigator.vibrate?.(20);
+        } catch {
+            // sem vibração
+        }
+    }
+}
+
+function onBubbleDone() {
+    current.value = undefined;
+    void nextTick(nextNotice);
+}
+
+watch(() => queue.value.length, nextNotice);
+
+// O áudio só pode começar depois de um gesto do jogador.
+const unlockAudio = () => sfx.init();
+onMounted(() => window.addEventListener('pointerdown', unlockAudio));
+onBeforeUnmount(() => {
+    window.removeEventListener('pointerdown', unlockAudio);
+    sfx.close();
+});
 
 onMounted(async () => {
     await waitForIntro();
@@ -127,8 +236,18 @@ function onLeave(element: Element, done: () => void) {
         </div>
 
         <div
+            ref="row"
             class="relative flex justify-center px-[clamp(16px,5vw,56px)] pt-2 pb-[18px]"
         >
+            <DockBubble
+                v-if="current"
+                :key="current.id"
+                :notice="current.notice"
+                :more="queue.length"
+                :anchor-x="current.anchorX"
+                :row-width="current.rowWidth"
+                @done="onBubbleDone"
+            />
             <!-- Na Home, os amigos online ficam na linha do dock, no canto
                  esquerdo (no celular não cabe: a Home mostra acima do dock). -->
             <Transition

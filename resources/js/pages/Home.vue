@@ -80,14 +80,7 @@ const props = defineProps<{
     presencePollSeconds: number;
 }>();
 
-usePoll(props.presencePollSeconds * 1000, {
-    only: [
-        'friendsOnline',
-        'pendingFriendRequests',
-        'tradeAlerts',
-        'pendingTrades',
-    ],
-});
+usePoll(props.presencePollSeconds * 1000, { only: ['friendsOnline'] });
 
 /** Tile → tela que ele abre depois de apertado. */
 const TILE_DESTINATIONS: Partial<Record<number, () => { url: string }>> = {

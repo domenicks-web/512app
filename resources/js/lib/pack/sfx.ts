@@ -293,6 +293,24 @@ export class Sfx {
         });
     }
 
+    /**
+     * Aviso em tempo real (bolha do dock): plim de duas notas que sobe nas
+     * boas notícias e desce na recusa ou na troca que caiu; o destaque do
+     * feed toca o acorde da raridade.
+     */
+    notice(kind: string, tier: Tier | null, shiny: boolean): void {
+        if (kind === 'feed_highlight' && tier) {
+            this.chord(tier, shiny);
+
+            return;
+        }
+
+        const down = kind === 'trade_declined' || kind === 'trade_fallen';
+        const [first, second] = down ? [784, 587.33] : [659.25, 987.77];
+        this.tone(first, 0.18, { type: 'triangle', g: 0.12 });
+        this.tone(second, 0.34, { type: 'triangle', g: 0.12, d: 0.11 });
+    }
+
     summary(): void {
         [659.25, 880, 1318.5].forEach((f, k) =>
             this.tone(f, 1.1, { g: 0.06, d: k * 0.09, a: 0.02 }),
