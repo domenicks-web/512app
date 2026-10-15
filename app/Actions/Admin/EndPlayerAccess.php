@@ -11,14 +11,16 @@ use App\Enums\TradeStatus;
 use App\Exceptions\SanctionNotAllowedException;
 use App\Models\Trade;
 use App\Models\User;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 /**
- * O que toda sanção faz com o acesso: derruba as sessões, invalida o
- * "manter conectado" e cancela as trocas abertas dele (quem tinha
- * proposto pra ele fica sabendo que caiu). Também guarda as regras de
- * quem pode ser punido.
+ * O que toda sanção faz com o acesso: invalida o "manter conectado" e
+ * cancela as trocas abertas dele (quem tinha proposto pra ele fica sabendo
+ * que caiu). Também guarda as regras de quem pode ser punido.
+ *
+ * As sessões ficam: quem derruba é o `EnsureNotSanctioned`, no próximo
+ * request, e é ele que leva o motivo pro login. Apagar a sessão aqui fazia
+ * o jogador cair no login como visitante, sem saber por quê.
  */
 class EndPlayerAccess
 {
@@ -44,7 +46,6 @@ class EndPlayerAccess
 
     public function handle(User $target): void
     {
-        DB::table('sessions')->where('user_id', $target->id)->delete();
         $target->forceFill(['remember_token' => Str::random(60)])->save();
 
         $open = Trade::query()->open()->involving($target)->with('toUser.avatarSpecies')->get();

@@ -104,7 +104,7 @@ está em `docs/checkpoint.md`. Ler lá quando precisar do porquê de algo.
   tem sanção ativa some de tudo pelo `User::active()`), admin (`/admin`,
   sem atalho na UI).
 - **Pendências (15/10, 2h50; combinado continuar no dia seguinte)**:
-    1. Fase 5 (branch `fase5`, CI verde, não testado no celular):
+    1. Fase 5 (no `main`; falta o usuário testar no S26+):
        apelido no espécime, giroscópio (brilho das cartas; sensor só em
        `https`, no S26+ pela flag
        `chrome://flags/#unsafely-treat-insecure-origin-as-secure`), passo
@@ -113,8 +113,6 @@ está em `docs/checkpoint.md`. Ler lá quando precisar do porquê de algo.
        `docs/superpowers/specs/2026-10-15-fase5-design.md`.
     2. PWA por último (instalar no celular exige `https`: só com deploy).
     3. Deploy (VPS/Oracle free tier; Reverb como processo próprio).
-    4. Não visto no navegador (só em teste): suspenso com o app aberto
-       cair no próximo clique.
 - **Decidido em 15/10 à tarde**: feed só com shiny e lendário (raro
   saiu); selo "Nº 1" virou a plaquinha dourada `FirstMintSeal`; dock de
   7 botões aprovado no celular; `SPEC.md` com fases 1–4 marcadas.

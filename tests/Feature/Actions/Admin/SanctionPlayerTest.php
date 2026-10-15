@@ -34,7 +34,7 @@ function suspend(?User $admin, User $target, int $days = 3): void
     app(SuspendPlayer::class)->handle($admin, $target, $days, 'Spam no grupo');
 }
 
-it('suspende: derruba as sessões, troca o remember token, cancela as trocas e manda email', function () {
+it('suspende: mantém a sessão pro middleware mostrar o motivo, troca o remember token, cancela as trocas e manda email', function () {
     [$a, $b] = friends();
     $admin = User::factory()->admin()->create();
     $toHim = propose($a, $b, [owned($a)->id], [owned($b)->id]);
@@ -45,7 +45,7 @@ it('suspende: derruba as sessões, troca o remember token, cancela as trocas e m
     suspend($admin, $b);
 
     expect($b->fresh()->activeSanction()?->type)->toBe(SanctionType::Suspension)
-        ->and(DB::table('sessions')->where('user_id', $b->id)->exists())->toBeFalse()
+        ->and(DB::table('sessions')->where('user_id', $b->id)->exists())->toBeTrue()
         ->and($b->fresh()->remember_token)->not->toBe($token)
         ->and($toHim->fresh()->status)->toBe(TradeStatus::Cancelled)
         ->and($fromHim->fresh()->status)->toBe(TradeStatus::Cancelled);
