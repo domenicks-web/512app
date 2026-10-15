@@ -298,7 +298,10 @@ function onKeydown(event: KeyboardEvent) {
         activeTile.value = Math.max(0, activeTile.value - 1);
     } else if (
         event.key === 'Enter' &&
-        (event.target as HTMLElement | null)?.closest('[data-tile]')
+        // Sem nada focado (só setas), o Enter abre o tile ativo; com o foco
+        // num link ou botão de fora (o dock), o Enter é dele.
+        (event.target === document.body ||
+            (event.target as HTMLElement | null)?.closest('[data-tile]'))
     ) {
         event.preventDefault();
         pressTile(activeTile.value);
