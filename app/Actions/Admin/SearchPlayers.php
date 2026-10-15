@@ -23,6 +23,7 @@ class SearchPlayers
         $search = trim((string) $search);
 
         return User::query()
+            ->where('is_system', false)
             ->with(['avatarSpecies:id,sprite_path,sprite_shiny_path', 'invitedBy.createdBy:id,nickname'])
             ->withCount('specimens')
             ->when($search !== '', function (Builder $query) use ($search): void {

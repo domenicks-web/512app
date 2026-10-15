@@ -8,6 +8,7 @@ use Database\Factories\UserFactory;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -28,6 +29,7 @@ use Illuminate\Support\Carbon;
  * @property int|null $avatar_species_id
  * @property bool $avatar_is_shiny
  * @property bool $is_admin
+ * @property bool $is_system
  * @property int $invite_quota
  * @property int|null $invited_by
  * @property string $password
@@ -123,14 +125,51 @@ class User extends Authenticatable implements MustVerifyEmail
      */
     public function friendIds(): array
     {
-        return array_values(Friendship::query()
+        $ids = Friendship::query()
             ->accepted()
             ->involving($this)
             ->get(['requester_id', 'addressee_id'])
             ->map(fn (Friendship $friendship): int => $friendship->requester_id === $this->id
                 ? $friendship->addressee_id
-                : $friendship->requester_id)
-            ->all());
+                : $friendship->requester_id);
+
+        // Amigo suspenso não conta enquanto a sanção durar.
+        return array_values(self::query()->active()->whereKey($ids)->orderBy('id')->pluck('id')->map(fn (mixed $id): int => (int) $id)->all());
+    }
+
+    /**
+     * @return HasMany<Sanction, $this>
+     */
+    public function sanctions(): HasMany
+    {
+        return $this->hasMany(Sanction::class);
+    }
+
+    public function activeSanction(): ?Sanction
+    {
+        return $this->sanctions()->active()->latest('id')->first();
+    }
+
+    /**
+     * Jogadores que o grupo vê: sem a conta do sistema e sem sanção ativa.
+     *
+     * @param  Builder<User>  $query
+     */
+    public function scopeActive(Builder $query): void
+    {
+        $query->where('is_system', false)->whereDoesntHave('sanctions', fn (Builder $q) => $q->active());
+    }
+
+    /** Visível pro grupo: não é o sistema e não tem sanção ativa. */
+    public function isActive(): bool
+    {
+        return ! $this->is_system && $this->activeSanction() === null;
+    }
+
+    /** Professor Carvalho, quem guarda os espécimes libertados. */
+    public static function system(): self
+    {
+        return self::query()->where('is_system', true)->firstOrFail();
     }
 
     public function hasCompletedProfile(): bool
@@ -176,6 +215,7 @@ class User extends Authenticatable implements MustVerifyEmail
             'birthdate_corrected_at' => 'datetime',
             'nickname_changed_at' => 'datetime',
             'is_admin' => 'boolean',
+            'is_system' => 'boolean',
             'avatar_is_shiny' => 'boolean',
             'invite_quota' => 'integer',
             'password' => 'hashed',

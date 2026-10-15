@@ -15,7 +15,7 @@ class ShowTrainerController extends Controller
 {
     public function __invoke(User $user, BuildTrainerCard $action): Response
     {
-        abort_unless($user->hasCompletedProfile(), 404);
+        abort_unless($user->hasCompletedProfile() && $user->isActive(), 404);
 
         /** @var User $viewer */
         $viewer = Auth::user();

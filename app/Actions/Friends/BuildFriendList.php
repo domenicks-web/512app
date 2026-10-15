@@ -30,8 +30,12 @@ class BuildFriendList
      */
     public function handle(User $viewer, CarbonInterface $now): array
     {
+        // Quem está suspenso some da lista (e dos pedidos) até a sanção acabar.
+        $hidden = User::query()->whereNot(fn ($query) => $query->active())->pluck('id');
         $friendships = Friendship::query()
             ->involving($viewer)
+            ->whereNotIn('requester_id', $hidden)
+            ->whereNotIn('addressee_id', $hidden)
             ->with(['requester.avatarSpecies:id,sprite_path,sprite_shiny_path', 'addressee.avatarSpecies:id,sprite_path,sprite_shiny_path'])
             ->latest()
             ->latest('id')

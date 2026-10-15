@@ -31,6 +31,11 @@ class BuildComparison
         $mine->load('species', 'user');
         $theirs->load('species', 'user');
 
+        // Dono suspenso, banido (o sistema) some do grupo: comparar dá 404.
+        if (! $theirs->user->isActive()) {
+            throw (new ModelNotFoundException)->setModel(Specimen::class);
+        }
+
         $choices = $viewer->specimens()
             ->where('species_id', $mine->species_id)
             ->orderByDesc('is_shiny')

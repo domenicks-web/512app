@@ -250,4 +250,18 @@ return [
     */
 
     'specimen_secret' => env('GAME_SPECIMEN_SECRET'),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Sanções
+    |--------------------------------------------------------------------------
+    |
+    | Prazos (em dias) que o admin pode escolher pra suspender. Banimento é
+    | permanente e não tem prazo.
+    |
+    */
+
+    'sanctions' => [
+        'suspension_days' => [1, 3, 7, 30],
+    ],
 ];

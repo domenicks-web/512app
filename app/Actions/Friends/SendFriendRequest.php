@@ -76,6 +76,7 @@ class SendFriendRequest
         }
 
         return User::query()
+            ->active()
             ->whereRaw('lower(nickname) = ?', [mb_strtolower($nickname)])
             ->where('tag', $tag)
             ->first()

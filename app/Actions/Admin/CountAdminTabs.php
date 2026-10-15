@@ -17,7 +17,7 @@ class CountAdminTabs
     {
         return [
             'invites' => Invite::active()->count(),
-            'players' => User::count(),
+            'players' => User::query()->where('is_system', false)->count(),
         ];
     }
 }

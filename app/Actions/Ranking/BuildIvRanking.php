@@ -21,7 +21,7 @@ class BuildIvRanking
      */
     public function handle(): array
     {
-        $users = User::query()->whereNotNull('nickname')->with('avatarSpecies:id,sprite_path,sprite_shiny_path')->orderBy('id')->get();
+        $users = User::query()->active()->whereNotNull('nickname')->with('avatarSpecies:id,sprite_path,sprite_shiny_path')->orderBy('id')->get();
 
         // O grupo é pequeno (só por convite): um espécime por dono, o melhor.
         $best = Specimen::query()

@@ -19,6 +19,7 @@ class BuildFirstMintRanking
     public function handle(): array
     {
         $users = User::query()
+            ->active()
             ->whereNotNull('nickname')
             ->with('avatarSpecies:id,sprite_path,sprite_shiny_path')
             ->select('users.*')
