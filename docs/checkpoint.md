@@ -591,6 +591,20 @@ pushado pro `main`.
   nos grids e ~6–7 px nos balcões: reduzir à resolução nativa e casar a
   escala com o balcão. Testar se a prateleira do balcão + a estante do
   fundo poluem; se sim, só o tampo. Falta: cenário vazio do Laboratório.
+- **Assets que o usuário vai gerar (entregar esta lista + o link do
+  canvas https://claude.ai/artifact/1Q8n2XiYMpNzkk5pUVAvrF no começo da
+  próxima sessão)**. Todos no estilo dos irmãos, fundo transparente, as
+  9 poses na mesma ordem (parado, acena, apresenta, comemora, surpreso,
+  pensa, aponta, segura caixa, reverência):
+    1. Grid da **Jessie**.
+    2. Grid do **James**.
+    3. Grid do **Meowth** de pé, no estilo dos treinadores (o GIF da
+       espécie no storage é outro estilo). Na reverência, pode ser a
+       pose clássica de "decolar" ou de garra.
+    4. **Laboratório vazio**: bancada na frente + fundo, mesmo
+       enquadramento do `assets_store.png`.
+    5. **Mercado da Equipe Rocket vazio**: barraca/balcão noturno, tema
+       escuro e neon, mesmo enquadramento.
 - **Onde paramos**: nomes e piada aprovados. Próximo: **números** (preços
   e ganhos de cada moeda), calendário do Mercado Rocket, marcos de
   pontos, e então a spec e o SPEC atualizado (tirar "Economia com moeda"
