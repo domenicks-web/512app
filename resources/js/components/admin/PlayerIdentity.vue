@@ -1,8 +1,9 @@
 <script setup lang="ts">
+import { formatDayMonth } from '@/lib/format';
 import PlayerAvatar from './PlayerAvatar.vue';
 import type { Player } from './types';
 
-/** Avatar + Nick #tag (+ "você") + email. */
+/** Avatar + Nick #tag (+ "você") + email, e a pílula da sanção ativa. */
 defineProps<{ player: Player; isSelf: boolean }>();
 </script>
 
@@ -29,6 +30,21 @@ defineProps<{ player: Player; isSelf: boolean }>();
                     >você</span
                 >
             </div>
+            <span
+                v-if="player.sanction"
+                class="w-fit rounded-full px-2 py-0.5 text-[11px] font-extrabold"
+                :class="
+                    player.sanction.type === 'ban'
+                        ? 'bg-[#2b2f36] text-white'
+                        : 'bg-[#ffe6e6] text-[#d63c3c]'
+                "
+                :title="player.sanction.reason"
+                >{{
+                    player.sanction.type === 'ban'
+                        ? 'Banido'
+                        : `Suspenso até ${formatDayMonth(player.sanction.endsAt ?? '')}`
+                }}</span
+            >
             <span class="truncate text-xs font-semibold text-[#8a9099]">{{
                 player.email
             }}</span>

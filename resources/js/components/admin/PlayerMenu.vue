@@ -1,17 +1,21 @@
 <script setup lang="ts">
 import { router } from '@inertiajs/vue3';
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
-import { birthdate, pack, verification } from '@/routes/admin/players';
+import { birthdate, lift, pack, verification } from '@/routes/admin/players';
 import AdminIcon from './AdminIcon.vue';
 import { showToast } from './toast';
 import type { Player } from './types';
 
 /**
  * Menu "⋯" da linha do jogador: ações que o handoff não desenhou (liberar
- * correção da data, reenviar confirmação, trocar senha).
+ * correção da data, reenviar confirmação, trocar senha) e as sanções
+ * (suspender, encerrar suspensão, banir). Banido não tem ação nenhuma.
  */
 const props = defineProps<{ player: Player; isSelf: boolean }>();
-const emit = defineEmits<{ changePassword: [player: Player] }>();
+const emit = defineEmits<{
+    changePassword: [player: Player];
+    sanction: [player: Player, mode: 'suspend' | 'ban'];
+}>();
 
 const open = ref(false);
 const root = ref<HTMLElement | null>(null);
@@ -29,8 +33,8 @@ function toggle() {
         const right = window.innerWidth - rect.right;
         // Sem espaço embaixo (último da lista no celular): abre pra cima.
         position.value =
-            window.innerHeight - rect.bottom < 300
-                ? { top: Math.max(8, rect.top - 8 - 290), right }
+            window.innerHeight - rect.bottom < 400
+                ? { top: Math.max(8, rect.top - 8 - 390), right }
                 : { top: rect.bottom + 8, right };
     }
 
@@ -86,7 +90,7 @@ function post(url: string, errorKey: string) {
 /**
  * Item desabilitado mostra o motivo embaixo (no celular não tem tooltip).
  */
-const items = computed(() => [
+const allItems = computed(() => [
     {
         label: 'Liberar correção da data',
         disabledReason: props.player.is_birthdate_locked
@@ -117,7 +121,63 @@ const items = computed(() => [
         danger: true,
         run: changePassword,
     },
+    ...sanctionItems.value,
 ]);
+
+/** Ninguém pune a si mesmo nem outro admin (tira o papel antes). */
+const sanctionBlock = computed(() =>
+    props.isSelf
+        ? 'Não dá pra se punir'
+        : props.player.is_admin
+          ? 'Tire o papel de admin antes'
+          : null,
+);
+
+const sanctionItems = computed(() =>
+    props.player.sanction?.type === 'suspension'
+        ? [
+              {
+                  label: 'Encerrar suspensão',
+                  disabledReason: null,
+                  danger: false,
+                  run: () => post(lift.url(props.player.id), 'sanction'),
+              },
+              {
+                  label: 'Banir',
+                  disabledReason: sanctionBlock.value,
+                  danger: true,
+                  run: () => openSanction('ban'),
+              },
+          ]
+        : [
+              {
+                  label: 'Suspender',
+                  disabledReason: sanctionBlock.value,
+                  danger: true,
+                  run: () => openSanction('suspend'),
+              },
+              {
+                  label: 'Banir',
+                  disabledReason: sanctionBlock.value,
+                  danger: true,
+                  run: () => openSanction('ban'),
+              },
+          ],
+);
+
+/** Banido não tem ação: tudo aparece desligado com o motivo. */
+const items = computed(() =>
+    props.player.sanction?.type === 'ban'
+        ? allItems.value
+              .filter((item) => !['Suspender', 'Banir'].includes(item.label))
+              .map((item) => ({ ...item, disabledReason: 'Jogador banido' }))
+        : allItems.value,
+);
+
+function openSanction(mode: 'suspend' | 'ban') {
+    open.value = false;
+    emit('sanction', props.player, mode);
+}
 
 function changePassword() {
     open.value = false;

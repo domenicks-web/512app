@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Head, Link, router, useHttp } from '@inertiajs/vue3';
+import { Head, Link, router, useHttp, usePage } from '@inertiajs/vue3';
 import { onMounted, ref } from 'vue';
 import { store } from '@/actions/App/Http/Controllers/Auth/LoginUserController';
 import BrandLogo from '@/components/entry/BrandLogo.vue';
@@ -22,6 +22,8 @@ const FLIGHT_DURATION = 780;
 const EMAIL_PATTERN = /.+@.+\..+/;
 
 const field = useDotField();
+/** Quem foi suspenso ou banido com o app aberto cai aqui com o motivo. */
+const page = usePage<{ flash: { sanction?: string | null } }>();
 const { capture } = useCaptureSubmit();
 
 const card = ref<HTMLFormElement | null>(null);
@@ -166,6 +168,15 @@ async function submit() {
                     Entre com sua conta pra continuar
                 </p>
             </div>
+
+            <p
+                v-if="page.props.flash.sanction"
+                data-enter
+                role="alert"
+                class="rounded-2xl bg-[#ffe6e6] px-4 py-3 text-[13.5px] leading-snug font-bold text-[#b42f2f]"
+            >
+                {{ page.props.flash.sanction }}
+            </p>
 
             <div data-enter>
                 <EntryField

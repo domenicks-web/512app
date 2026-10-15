@@ -25,6 +25,12 @@ export type Player = {
     invited_by: string | null;
     specimens_count: number;
     created_at: string | null;
+    /** Sanção ativa (suspensão com prazo ou banimento), ou nulo. */
+    sanction: {
+        type: 'suspension' | 'ban';
+        endsAt: string | null;
+        reason: string;
+    } | null;
 };
 
 export type InviteStatus = 'active' | 'exhausted' | 'expired' | 'revoked';

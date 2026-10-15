@@ -9,6 +9,7 @@ import PlayerIdentity from '@/components/admin/PlayerIdentity.vue';
 import PlayerMenu from '@/components/admin/PlayerMenu.vue';
 import QuotaStepper from '@/components/admin/QuotaStepper.vue';
 import RoleButton from '@/components/admin/RoleButton.vue';
+import SanctionDialog from '@/components/admin/SanctionDialog.vue';
 import RoleDialog from '@/components/admin/RoleDialog.vue';
 import type { Player } from '@/components/admin/types';
 import { formatDayMonth } from '@/lib/format';
@@ -23,6 +24,7 @@ const props = defineProps<{
     search: string;
     counts: { invites: number; players: number };
     quota: { min: number; max: number };
+    sanctionDays: number[];
 }>();
 
 const page = usePage();
@@ -32,6 +34,13 @@ const filter = ref<'all' | 'admins'>('all');
 const query = ref(props.search);
 const roleTarget = ref<Player | null>(null);
 const passwordTarget = ref<Player | null>(null);
+const sanctionTarget = ref<Player | null>(null);
+const sanctionMode = ref<'suspend' | 'ban'>('suspend');
+
+function openSanction(player: Player, mode: 'suspend' | 'ban') {
+    sanctionMode.value = mode;
+    sanctionTarget.value = player;
+}
 
 const adminCount = computed(
     () => props.players.filter((player) => player.is_admin).length,
@@ -179,6 +188,7 @@ function joinedAt(player: Player): string {
                         :player="player"
                         :is-self="isSelf(player)"
                         @change-password="passwordTarget = $event"
+                        @sanction="openSanction"
                     />
                 </div>
             </div>
@@ -206,6 +216,7 @@ function joinedAt(player: Player): string {
                         :player="player"
                         :is-self="isSelf(player)"
                         @change-password="passwordTarget = $event"
+                        @sanction="openSanction"
                     />
                 </div>
 
@@ -274,6 +285,12 @@ function joinedAt(player: Player): string {
         <PasswordDialog
             :player="passwordTarget"
             @close="passwordTarget = null"
+        />
+        <SanctionDialog
+            :player="sanctionTarget"
+            :mode="sanctionMode"
+            :days="sanctionDays"
+            @close="sanctionTarget = null"
         />
     </AdminShell>
 </template>

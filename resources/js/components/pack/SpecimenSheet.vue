@@ -417,7 +417,9 @@ const tone = computed(() =>
                             <span :style="{ color: tone.value }">{{
                                 step.kind === 'caught'
                                     ? `Capturado por ${step.nickname}`
-                                    : `Trocado: ${step.fromNickname} → ${step.nickname}`
+                                    : step.kind === 'released'
+                                      ? `Libertado: era de ${step.fromNickname}`
+                                      : `Trocado: ${step.fromNickname} → ${step.nickname}`
                             }}</span>
                             <span :class="tone.muted">
                                 · {{ formatDayMonth(step.at) }}</span
