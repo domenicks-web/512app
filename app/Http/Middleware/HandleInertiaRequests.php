@@ -56,6 +56,11 @@ class HandleInertiaRequests extends Middleware
             'pendingTrades' => fn (): int => $request->user() === null
                 ? 0
                 : Trade::query()->open()->where('to_user_id', $request->user()->id)->count(),
+            // Bolinha do dock: recebidas abertas + desfechos das enviadas não vistos.
+            'tradeAlerts' => fn (): int => $request->user() === null
+                ? 0
+                : Trade::query()->open()->where('to_user_id', $request->user()->id)->count()
+                    + Trade::query()->outcomeUnseenBy($request->user())->count(),
             'flash' => [
                 'profile_status' => fn () => $request->session()->get('profile_status'),
             ],

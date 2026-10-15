@@ -64,6 +64,11 @@ const closedText = () =>
                 </div>
             </Link>
             <span
+                v-if="offer.isNew"
+                class="bg-brand rounded-full px-2.5 py-1 text-[10.5px] font-black tracking-[0.06em] text-white uppercase"
+                >Nova</span
+            >
+            <span
                 v-if="offer.isCounter"
                 class="rounded-full bg-[#2b2f36] px-2.5 py-1 text-[10.5px] font-black tracking-[0.06em] text-white uppercase"
                 >Contraproposta</span

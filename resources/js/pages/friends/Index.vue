@@ -45,7 +45,13 @@ const props = defineProps<{
 }>();
 
 usePoll(props.presencePollSeconds * 1000, {
-    only: ['friends', 'incoming', 'outgoing', 'pendingFriendRequests'],
+    only: [
+        'friends',
+        'incoming',
+        'outgoing',
+        'pendingFriendRequests',
+        'tradeAlerts',
+    ],
 });
 
 const confirmingRemoval = ref<number | null>(null);

@@ -3,7 +3,10 @@
 declare(strict_types=1);
 
 use App\Actions\Trades\AcceptTrade;
+use App\Actions\Trades\DeclineTrade;
 use App\Actions\Trades\MarkTradeSeen;
+use App\Enums\TradeCancelReason;
+use App\Enums\TradeStatus;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Inertia\Testing\AssertableInertia as Assert;
@@ -88,4 +91,41 @@ it('esconde encerradas mais velhas que o prazo', function () {
 
     $this->actingAs($b)->get('/trocas?aba=concluidas')
         ->assertInertia(fn (Assert $page) => $page->where('tab', 'concluidas')->has('done', 0));
+});
+
+it('avisa no dock e na aba os desfechos que quem propôs ainda não viu', function () {
+    [$a, $b] = friends();
+    $declined = propose($a, $b, [owned($a)->id], [owned($b)->id]);
+    app(DeclineTrade::class)->handle($declined, $b);
+    $fallen = propose($a, $b, [owned($a)->id], [owned($b)->id]);
+    $fallen->update(['status' => TradeStatus::Cancelled, 'cancel_reason' => TradeCancelReason::Unavailable, 'responded_at' => now()]);
+    $byMe = propose($a, $b, [owned($a)->id], [owned($b)->id]);
+    $byMe->update(['status' => TradeStatus::Cancelled, 'cancel_reason' => TradeCancelReason::ByProposer, 'responded_at' => now()]);
+    propose($b, $a, [owned($b)->id], [owned($a)->id]);
+
+    $this->actingAs($a)->get('/trocas')
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('tradeAlerts', 3)
+            ->where('newCounts.enviadas', 1)
+            ->where('newCounts.concluidas', 1));
+
+    $this->actingAs($a)->get('/trocas?aba=concluidas')
+        ->assertInertia(fn (Assert $page) => $page->where('done.0.isNew', true));
+    $this->actingAs($a)->get('/trocas?aba=concluidas')
+        ->assertInertia(fn (Assert $page) => $page->where('done.0.isNew', false)->where('tradeAlerts', 2));
+
+    $this->actingAs($a)->get('/trocas?aba=enviadas');
+    $this->actingAs($a)->get('/trocas')
+        ->assertInertia(fn (Assert $page) => $page->where('tradeAlerts', 1)->where('newCounts.enviadas', 0));
+    $this->actingAs($b)->get('/trocas')->assertInertia(fn (Assert $page) => $page->where('tradeAlerts', 0));
+});
+
+it('conta a troca aceita no dock até a cerimônia tocar', function () {
+    [$a, $b] = friends();
+    $trade = propose($a, $b, [owned($a)->id], [owned($b)->id]);
+    app(AcceptTrade::class)->handle($trade, $b);
+
+    $this->actingAs($a)->get('/')->assertInertia(fn (Assert $page) => $page->where('tradeAlerts', 1));
+    app(MarkTradeSeen::class)->handle($trade, $a);
+    $this->actingAs($a)->get('/')->assertInertia(fn (Assert $page) => $page->where('tradeAlerts', 0));
 });

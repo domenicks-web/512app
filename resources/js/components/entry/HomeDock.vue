@@ -57,7 +57,7 @@ const MICRO: Record<string, string[]> = {
 
 const page = usePage<{
     pendingFriendRequests?: number;
-    pendingTrades?: number;
+    tradeAlerts?: number;
 }>();
 
 /** Relógio do enchimento da pokébola (ver `usePackProgress`). */
@@ -68,7 +68,8 @@ const { progress: packProgress, isReady: isPackReady } = usePackProgress(now);
 const pendingFriendRequests = computed(
     () => page.props.pendingFriendRequests ?? 0,
 );
-const pendingTrades = computed(() => page.props.pendingTrades ?? 0);
+/** Recebidas abertas + desfechos das enviadas que ainda não viu. */
+const tradeAlerts = computed(() => page.props.tradeAlerts ?? 0);
 
 const hovered = ref<string | null>(null);
 
@@ -351,10 +352,10 @@ function onFocus(key: string, event: FocusEvent) {
                 >{{ pendingFriendRequests }}</span
             >
             <span
-                v-if="item.key === 'trades' && pendingTrades > 0"
+                v-if="item.key === 'trades' && tradeAlerts > 0"
                 class="bg-brand absolute -top-1 -right-1 flex h-[18px] min-w-[18px] items-center justify-center rounded-full px-1 text-[11px] leading-none font-black text-white shadow-[0_0_0_2px_#fff]"
-                :aria-label="`${pendingTrades} propostas de troca`"
-                >{{ pendingTrades }}</span
+                :aria-label="`${tradeAlerts} novidades nas trocas`"
+                >{{ tradeAlerts }}</span
             >
             <span
                 v-if="hovered === item.key"

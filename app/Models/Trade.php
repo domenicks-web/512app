@@ -85,6 +85,31 @@ class Trade extends Model
         $query->where(fn (Builder $q) => $q->where('from_user_id', $user->id)->orWhere('to_user_id', $user->id));
     }
 
+    /**
+     * Desfecho que quem propôs ainda não viu: aceita (some quando a
+     * cerimônia toca), recusada ou caída porque um espécime foi trocado
+     * em outra (somem quando ele abre a aba delas).
+     *
+     * @param  Builder<Trade>  $query
+     */
+    public function scopeOutcomeUnseenBy(Builder $query, User $user): void
+    {
+        $query->where('from_user_id', $user->id)
+            ->whereNull('proposer_seen_at')
+            ->where(fn (Builder $q) => $q
+                ->whereIn('status', [TradeStatus::Accepted, TradeStatus::Declined])
+                ->orWhere(fn (Builder $c) => $c->where('status', TradeStatus::Cancelled)->where('cancel_reason', TradeCancelReason::Unavailable)));
+    }
+
+    public function isOutcomeUnseenBy(User $user): bool
+    {
+        return $this->from_user_id === $user->id
+            && $this->proposer_seen_at === null
+            && ($this->status === TradeStatus::Accepted
+                || $this->status === TradeStatus::Declined
+                || ($this->status === TradeStatus::Cancelled && $this->cancel_reason === TradeCancelReason::Unavailable));
+    }
+
     public function isOpen(): bool
     {
         return $this->status === TradeStatus::Pending && $this->expires_at->isFuture();

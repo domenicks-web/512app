@@ -33,6 +33,8 @@ export type TradeOffer = {
     other: TradeTrainer;
     message: string | null;
     isCounter: boolean;
+    /** Desfecho de uma enviada que quem propôs ainda não viu. */
+    isNew: boolean;
     expiresAt: string;
     createdAgo: string;
     give: TradeSpecimen[];

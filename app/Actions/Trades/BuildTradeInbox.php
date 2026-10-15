@@ -19,6 +19,8 @@ use Illuminate\Http\Request;
  * as encerradas só por `closed_visible_days`. Cada carta vem do ponto de
  * vista de quem vê (`give` / `receive`). Também diz qual cerimônia tocar:
  * a pedida em `?troca=` ou a primeira aceita que o proponente não viu.
+ * Desfecho que quem propôs ainda não viu vem com `isNew`, e `newCounts`
+ * diz quantos tem em cada aba.
  */
 class BuildTradeInbox
 {
@@ -42,11 +44,19 @@ class BuildTradeInbox
         $present = fn (Trade $trade): array => $this->present($trade, $viewer, $request);
         $tab = in_array($request->query('aba'), ['enviadas', 'concluidas'], true) ? (string) $request->query('aba') : 'recebidas';
 
+        $sent = $trades->filter(fn (Trade $t): bool => $t->from_user_id === $viewer->id && in_array($t->state(), ['open', 'expired', 'cancelled'], true));
+        $done = $trades->filter(fn (Trade $t): bool => in_array($t->state(), ['accepted', 'declined'], true));
+        $unseen = fn (Trade $t): bool => $t->isOutcomeUnseenBy($viewer);
+
         return [
             'tab' => $tab,
             'received' => $trades->filter(fn (Trade $t): bool => $t->to_user_id === $viewer->id && $t->state() === 'open')->map($present)->values()->all(),
-            'sent' => $trades->filter(fn (Trade $t): bool => $t->from_user_id === $viewer->id && in_array($t->state(), ['open', 'expired', 'cancelled'], true))->map($present)->values()->all(),
-            'done' => $trades->filter(fn (Trade $t): bool => in_array($t->state(), ['accepted', 'declined'], true))->map($present)->values()->all(),
+            'sent' => $sent->map($present)->values()->all(),
+            'done' => $done->map($present)->values()->all(),
+            'newCounts' => [
+                'enviadas' => $sent->filter($unseen)->count(),
+                'concluidas' => $done->filter($unseen)->count(),
+            ],
             'friends' => User::query()->whereIn('id', $viewer->friendIds())->with('avatarSpecies')->orderBy('nickname')->get()
                 ->map(fn (User $friend): array => ['id' => $friend->id, 'nickname' => (string) $friend->nickname, 'avatarSpritePath' => $friend->avatarSpritePath()])
                 ->all(),
@@ -95,6 +105,7 @@ class BuildTradeInbox
             'other' => ['id' => $other->id, 'nickname' => (string) $other->nickname, 'avatarSpritePath' => $other->avatarSpritePath()],
             'message' => $trade->message,
             'isCounter' => $trade->counter_of_id !== null,
+            'isNew' => $trade->isOutcomeUnseenBy($viewer),
             'expiresAt' => $trade->expires_at->toIso8601String(),
             'createdAgo' => $trade->created_at->diffForHumans(['locale' => 'pt_BR', 'options' => Carbon::JUST_NOW]),
             'give' => $side($isProposer ? TradeItemSide::Offered : TradeItemSide::Requested),

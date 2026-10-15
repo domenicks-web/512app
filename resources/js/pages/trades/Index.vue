@@ -30,13 +30,14 @@ const props = defineProps<{
     sent: TradeOffer[];
     done: TradeOffer[];
     friends: TradeTrainer[];
+    newCounts: { enviadas: number; concluidas: number };
     ceremony: TradeCeremonyData | null;
     expiresAfterHours: number;
     presencePollSeconds: number;
 }>();
 
 usePoll(props.presencePollSeconds * 1000, {
-    only: ['received', 'sent', 'done', 'pendingTrades'],
+    only: ['received', 'sent', 'done', 'newCounts', 'tradeAlerts'],
 });
 
 const TABS = [
@@ -44,6 +45,10 @@ const TABS = [
     { key: 'enviadas', label: 'Enviadas' },
     { key: 'concluidas', label: 'Concluídas' },
 ] as const;
+
+/** Número na aba: recebidas abertas; nas outras, desfechos ainda não vistos. */
+const badge = (key: (typeof TABS)[number]['key']) =>
+    key === 'recebidas' ? props.received.length : props.newCounts[key];
 
 const list = computed(
     () =>
@@ -128,9 +133,9 @@ function go(tab: string) {
                     >
                         {{ option.label }}
                         <span
-                            v-if="option.key === 'recebidas' && received.length"
+                            v-if="badge(option.key) > 0"
                             class="bg-brand ml-1 rounded-full px-1.5 text-[11px] text-white"
-                            >{{ received.length }}</span
+                            >{{ badge(option.key) }}</span
                         >
                     </button>
                 </div>

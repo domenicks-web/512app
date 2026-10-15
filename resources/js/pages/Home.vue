@@ -81,7 +81,12 @@ const props = defineProps<{
 }>();
 
 usePoll(props.presencePollSeconds * 1000, {
-    only: ['friendsOnline', 'pendingFriendRequests'],
+    only: [
+        'friendsOnline',
+        'pendingFriendRequests',
+        'tradeAlerts',
+        'pendingTrades',
+    ],
 });
 
 /** Tile → tela que ele abre depois de apertado. */
