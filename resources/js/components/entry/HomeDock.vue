@@ -31,11 +31,13 @@ type DockItem = {
     key: DockKey;
     label: string;
     href: () => RouteDefinition<'get'>;
+    /** Some do dock no celular (lá o Ranking abre pelo tile da Home). */
+    desktopOnly?: boolean;
 };
 
 const items: DockItem[] = [
     { key: 'collection', label: 'Coleção', href: collectionShow },
-    { key: 'ranking', label: 'Ranking', href: rankingShow },
+    { key: 'ranking', label: 'Ranking', href: rankingShow, desktopOnly: true },
     { key: 'trades', label: 'Trocas', href: tradesIndex },
     { key: 'friends', label: 'Amigos', href: friendsIndex },
     { key: 'settings', label: 'Ajustes', href: settingsShow },
@@ -225,11 +227,12 @@ function onFocus(key: string, event: FocusEvent) {
             :data-dock="item.key"
             :aria-current="active === item.key ? 'page' : undefined"
             class="relative flex size-12 shrink-0 cursor-pointer items-center justify-center rounded-full bg-white max-[440px]:size-11 max-[400px]:size-10 sm:size-14"
-            :class="
+            :class="[
                 active === item.key
                     ? 'shadow-[0_0_0_2.5px_#f24d4d,0_6px_14px_rgba(242,77,77,0.22)]'
-                    : 'shadow-[0_1px_2px_rgba(28,32,38,0.06)]'
-            "
+                    : 'shadow-[0_1px_2px_rgba(28,32,38,0.06)]',
+                item.desktopOnly ? 'max-sm:hidden' : '',
+            ]"
             @pointerenter="onEnter(item.key, $event)"
             @pointerleave="hovered = null"
             @focus="onFocus(item.key, $event)"
