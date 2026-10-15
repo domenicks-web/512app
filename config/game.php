@@ -245,6 +245,22 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Espécime
+    |--------------------------------------------------------------------------
+    |
+    | `nickname_*`: tamanho do apelido que o dono dá ao espécime (uma vez
+    | por dono; na troca ele vai pro histórico). O máximo bate com a
+    | coluna `specimens.nickname`.
+    |
+    */
+
+    'specimen' => [
+        'nickname_min_length' => 1,
+        'nickname_max_length' => 16,
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
     | Verificação do espécime
     |--------------------------------------------------------------------------
     */

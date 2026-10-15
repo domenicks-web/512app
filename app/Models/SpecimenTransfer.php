@@ -20,9 +20,10 @@ use Illuminate\Support\Carbon;
  * @property int $from_user_id
  * @property int $to_user_id
  * @property int|null $trade_id
+ * @property string|null $nickname
  * @property Carbon $transferred_at
  */
-#[Fillable(['specimen_id', 'from_user_id', 'to_user_id', 'trade_id', 'transferred_at'])]
+#[Fillable(['specimen_id', 'from_user_id', 'to_user_id', 'trade_id', 'nickname', 'transferred_at'])]
 class SpecimenTransfer extends Model
 {
     /** @use HasFactory<SpecimenTransferFactory> */
