@@ -378,13 +378,14 @@ visual e prova de autenticidade. Não é blockchain e não precisa ser.
 
 ### Fase 1, o núcleo
 
-- [ ] Projeto Laravel + Inertia + Tailwind + PWA
-- [ ] Cadastro e login com email + senha
-- [ ] Command `php artisan pokedex:sync` que importa as 151 e baixa sprites
-- [ ] `ResolveSpecimen` pura, com teste de determinismo
-- [ ] `OpenPack` com cooldown de 24h
-- [ ] Tela de abertura com animação
-- [ ] Tela de coleção com grid
+- [x] Projeto Laravel + Inertia + Tailwind
+- [ ] PWA (fica pro fim: instalar no celular exige `https`, só depois do deploy)
+- [x] Cadastro e login com email + senha
+- [x] Command `php artisan pokedex:sync` que importa as 151 e baixa sprites
+- [x] `ResolveSpecimen` pura, com teste de determinismo
+- [x] `OpenPack` com cooldown de 24h
+- [x] Tela de abertura com animação
+- [x] Tela de coleção com grid
 
 **Critério de pronto:** abrir um pack, ver os 5 bichos aparecerem, e a coleção
 encher. Se isso não der vontade de abrir de novo amanhã, parar e repensar antes de
@@ -411,9 +412,9 @@ construir o resto.
 ### Fase 5, o polimento
 
 - [ ] Tilt com giroscópio no celular
-- [ ] Som de abertura
+- [x] Som de abertura
 - [ ] Apelido no espécime
-- [ ] Feed do grupo
+- [x] Feed do grupo (só shiny e lendário, aberturas e trocas)
 
 ---
 

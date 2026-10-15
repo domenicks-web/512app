@@ -173,7 +173,8 @@ return [
     | `presence_poll_seconds`: de quanto em quanto tempo Home e Amigos
     | recarregam a presença — a própria recarga mantém a sessão ativa.
     | `feed_highlight_tiers`: tiers que entram no feed do grupo além de
-    | todo shiny, que entra sempre. `feed_limit`: quantas aberturas a tela
+    | todo shiny, que entra sempre. Só o que é importante: raro sai em ~40%
+    | dos packs e afogava o feed. `feed_limit`: quantas aberturas a tela
     | do feed mostra.
     |
     */
@@ -182,7 +183,6 @@ return [
         'online_window_minutes' => 2,
         'presence_poll_seconds' => 60,
         'feed_highlight_tiers' => [
-            RarityTier::Rare->value,
             RarityTier::Legendary->value,
         ],
         'feed_limit' => 40,

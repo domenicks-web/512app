@@ -104,18 +104,16 @@ está em `docs/checkpoint.md`. Ler lá quando precisar do porquê de algo.
   tem sanção ativa some de tudo pelo `User::active()`), admin (`/admin`,
   sem atalho na UI).
 - **Pendências (15/10, 2h50; combinado continuar no dia seguinte)**:
-    1. Arrumar o `SPEC.md`: marcar as fases 1–3 (prontas), "Som de
-       abertura" e "Feed do grupo" (já existem). Sugestão do Claude pra
-       começar.
-    2. Fase 5: **apelido no espécime** e **tilt com giroscópio** no
-       celular (hoje só `v-card-tilt` com mouse). Brainstorm antes.
-    3. PWA por último (instalar no celular exige `https`: só com deploy).
-    4. Deploy (VPS/Oracle free tier; Reverb como processo próprio).
-    5. Decidir: feed avisar o grupo a cada raro (~40% dos packs) ou só
-       lendário/shiny; selo "Nº 1" (usuário achou feio); conferir o dock
-       de 7 botões no celular.
-    6. Não visto no navegador (só em teste): suspenso com o app aberto
+    1. Fase 5: **apelido no espécime** e **tilt com giroscópio** no
+       celular (hoje só `v-card-tilt` com mouse). Plano em
+       `docs/superpowers/specs/2026-10-15-fase5-design.md`.
+    2. PWA por último (instalar no celular exige `https`: só com deploy).
+    3. Deploy (VPS/Oracle free tier; Reverb como processo próprio).
+    4. Não visto no navegador (só em teste): suspenso com o app aberto
        cair no próximo clique.
+- **Decidido em 15/10 à tarde**: feed só com shiny e lendário (raro
+  saiu); selo "Nº 1" virou a plaquinha dourada `FirstMintSeal`; dock de
+  7 botões aprovado no celular; `SPEC.md` com fases 1–4 marcadas.
 - **Fora de escopo até atualizar o SPEC**: moeda/dust, loja, dinheiro
   real (ideias do usuário, anotadas no histórico).
 

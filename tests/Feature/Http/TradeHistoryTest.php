@@ -40,10 +40,11 @@ it('marca na coleção a espécie que veio de troca', function () {
 
 it('põe no feed só a troca com shiny ou tier de destaque', function () {
     [$a, $b] = friends();
+    $legendary = Species::factory()->create(['rarity_tier' => 'lendario']);
     $rare = Species::factory()->create(['rarity_tier' => 'raro']);
     $common = Species::factory()->create(['rarity_tier' => 'comum']);
-    $good = propose($a, $b, [owned($a, ['species_id' => $rare->id])->id], [owned($b, ['species_id' => $common->id])->id]);
-    $boring = propose($a, $b, [owned($a, ['species_id' => $common->id])->id], [owned($b, ['species_id' => $common->id])->id]);
+    $good = propose($a, $b, [owned($a, ['species_id' => $legendary->id])->id], [owned($b, ['species_id' => $common->id])->id]);
+    $boring = propose($a, $b, [owned($a, ['species_id' => $rare->id])->id], [owned($b, ['species_id' => $common->id])->id]);
     app(AcceptTrade::class)->handle($good, $b);
     app(AcceptTrade::class)->handle($boring, $b);
 

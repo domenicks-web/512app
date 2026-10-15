@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue';
+import FirstMintSeal from '@/components/FirstMintSeal.vue';
 import { useMediaQuery } from '@/composables/useMediaQuery';
 import { formatDayMonth } from '@/lib/format';
 import {
@@ -156,20 +157,11 @@ const tone = computed(() =>
                         >✦</span
                     >
                 </template>
-                <span
+                <FirstMintSeal
                     v-if="light && specimen.mint === 1"
-                    class="absolute top-4 left-4 flex size-[46px] -rotate-12 flex-col items-center justify-center rounded-full border-2 leading-none font-black shadow-[0_2px_5px_rgba(0,0,0,0.25)]"
-                    :class="
-                        specimen.isShiny
-                            ? 'border-white bg-black/45 text-white'
-                            : 'border-[#2b2f36] bg-white/90 text-[#2b2f36]'
-                    "
-                    title="Primeiro do servidor"
-                    aria-label="Primeiro do servidor"
-                >
-                    <span class="text-[9px] tracking-[0.06em]">Nº</span>
-                    <span class="-mt-px text-[20px]">1</span>
-                </span>
+                    size="lg"
+                    class="absolute top-4 left-4"
+                />
                 <div
                     v-if="!light"
                     class="pointer-events-none absolute inset-0 bg-[length:240%_240%] mix-blend-screen"

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import FittedSprite from '@/components/FittedSprite.vue';
+import FirstMintSeal from '@/components/FirstMintSeal.vue';
 import { vCardTilt } from '@/lib/cardTilt';
 import { GOLD, pad } from '@/lib/pack/meta';
 import { rarityLook } from '@/lib/pack/rarity';
@@ -145,20 +146,11 @@ const mintHighlight = computed(() =>
                         >✦</span
                     >
                 </template>
-                <span
+                <FirstMintSeal
                     v-if="isFirst"
-                    class="absolute bottom-1.5 left-2 flex size-[27px] -rotate-12 flex-col items-center justify-center rounded-full border-[1.5px] leading-none font-black shadow-[0_1px_3px_rgba(0,0,0,0.25)]"
-                    :class="
-                        shiny
-                            ? 'border-white bg-black/45 text-white'
-                            : 'border-[#2b2f36] bg-white/90 text-[#2b2f36]'
-                    "
-                    title="Primeiro do servidor"
-                    aria-label="Primeiro do servidor"
-                >
-                    <span class="text-[6px] tracking-[0.06em]">Nº</span>
-                    <span class="-mt-px text-[12px]">1</span>
-                </span>
+                    size="sm"
+                    class="absolute bottom-1.5 left-2"
+                />
                 <div
                     v-if="look.sheen"
                     class="motion-safe:animate-foil-sweep pointer-events-none absolute inset-0 bg-[linear-gradient(115deg,rgba(255,255,255,0)_38%,rgba(255,255,255,0.7)_50%,rgba(255,255,255,0)_62%)] bg-[length:250%_100%] bg-[position:160%_0] mix-blend-overlay"

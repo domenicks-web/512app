@@ -13,9 +13,9 @@ import { show as trainerShow } from '@/routes/trainer';
 defineOptions({ layout: [EntryLayout, GroupLayout] });
 
 /**
- * Feed do grupo: as aberturas boas mais recentes (todo shiny, mais raros e
- * lendários), de quem abriu, e as trocas que valem a pena (com shiny,
- * raro ou lendário), com a moldura da raridade no sprite.
+ * Feed do grupo: só o que é importante. As aberturas de shiny e lendário,
+ * de quem abriu, e as trocas que movem um deles, com a moldura da raridade
+ * no sprite. Os tiers ficam em `game.group.feed_highlight_tiers`.
  */
 type FeedBase = {
     key: string;
@@ -51,14 +51,14 @@ const look = (entry: FeedEntry) =>
 </script>
 
 <template>
-    <GroupScreen title="Feed" subtitle="Shinies, raros e trocas do grupo">
+    <GroupScreen title="Feed" subtitle="Shinies, lendários e trocas do grupo">
         <p
             v-if="entries.length === 0"
             data-enter
             class="text-soft rounded-[22px] bg-white p-6 text-center text-sm font-semibold shadow-[0_2px_4px_rgba(28,32,38,0.05),0_8px_18px_rgba(28,32,38,0.07)]"
         >
-            Nada de raro por aqui ainda. Quando alguém abrir um shiny, um raro
-            ou um lendário, aparece aqui.
+            Nada por aqui ainda. Quando alguém abrir um shiny ou um lendário,
+            aparece aqui.
         </p>
 
         <ol v-else class="flex flex-col gap-2.5">
