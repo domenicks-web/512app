@@ -40,6 +40,15 @@ const look = computed(() =>
 );
 const dex = computed(() => `#${pad(props.entry.id, 3)}`);
 const skin = computed(() => look.value.card);
+
+/** Cor do brilho que segue o mouse/celular: arco-íris no shiny, ouro no lendário. */
+const glareTone = computed(() =>
+    shiny.value
+        ? 'card-glare-rainbow'
+        : props.entry.rarityTier === 'lendario'
+          ? 'card-glare-gold'
+          : '',
+);
 const isFirst = computed(() => props.entry.bestMint === 1);
 
 /** Selo e mint de destaque precisam contrastar com o fundo da carta. */
@@ -197,9 +206,12 @@ const mintHighlight = computed(() =>
             <div
                 v-if="skin.tilt"
                 class="card-glare"
-                :class="shiny ? 'mix-blend-screen' : 'mix-blend-overlay'"
+                :class="[
+                    glareTone,
+                    shiny ? 'mix-blend-screen' : 'mix-blend-overlay',
+                ]"
             />
-            <div class="card-gyro-glare" />
+            <div class="card-gyro-glare" :class="glareTone" />
         </div>
 
         <span

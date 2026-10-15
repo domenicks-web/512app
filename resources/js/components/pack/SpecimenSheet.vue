@@ -160,7 +160,17 @@ const tone = computed(() =>
                     v-if="light && look.card.foil === 'rainbow'"
                     class="card-foil card-foil-rainbow card-foil-gyro opacity-60"
                 />
-                <div v-if="light" class="card-glare" />
+                <div
+                    v-if="light"
+                    class="card-glare"
+                    :class="
+                        specimen.isShiny
+                            ? 'card-glare-rainbow'
+                            : specimen.tier === 'lendario'
+                              ? 'card-glare-gold'
+                              : ''
+                    "
+                />
                 <div
                     v-if="light"
                     class="absolute bottom-[18%] left-1/2 h-4 w-40 -translate-x-1/2 rounded-[50%] blur-[5px]"
