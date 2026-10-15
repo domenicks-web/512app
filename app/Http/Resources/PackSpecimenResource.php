@@ -34,6 +34,7 @@ class PackSpecimenResource extends JsonResource
             'speciesId' => $species->id,
             'dex' => str_pad((string) $species->id, 3, '0', STR_PAD_LEFT),
             'name' => $species->name,
+            'nickname' => $this->nickname,
             'tier' => $species->rarity_tier->value,
             'isShiny' => $this->is_shiny,
             'mint' => $this->mint_number,
