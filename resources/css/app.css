@@ -411,6 +411,14 @@
         }
     }
 
+    /* Com o giroscópio (`deviceTilt.ts`), quem move é o celular: o foil da
+       grade herda o `--mx`/`--my` do <html> e corre junto em todas. */
+    .has-gyro .card-foil-interactive,
+    .has-gyro .card-foil-gyro {
+        animation: none;
+        transition: background-position 0.15s linear;
+    }
+
     @media (prefers-reduced-motion: reduce) {
         .card-foil,
         .card-sparkle {

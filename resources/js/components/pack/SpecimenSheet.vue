@@ -18,6 +18,7 @@ import {
     STATS,
     TIER_META,
 } from '@/lib/pack/meta';
+import { vCardTilt } from '@/lib/cardTilt';
 import { vPixelFit } from '@/lib/pack/pixelFit';
 import { rarityLook } from '@/lib/pack/rarity';
 import type { PackSpecimen } from '@/lib/pack/types';
@@ -95,6 +96,7 @@ const tone = computed(() =>
     >
         <div v-if="specimen && look" class="flex flex-wrap">
             <div
+                v-card-tilt.gyro="!!light"
                 class="relative flex min-h-[190px] flex-[1_1_300px] items-center justify-center overflow-hidden sm:min-h-[340px]"
                 :style="{
                     background: light
@@ -117,19 +119,20 @@ const tone = computed(() =>
                 />
                 <div
                     v-if="light && look.card.foil === 'holo'"
-                    class="card-foil card-foil-holo"
+                    class="card-foil card-foil-holo card-foil-gyro"
                 />
                 <div
                     v-if="
                         light &&
                         (look.card.foil === 'holo' || look.card.foil === 'gold')
                     "
-                    class="card-foil card-foil-stars"
+                    class="card-foil card-foil-stars card-foil-gyro"
                 />
                 <div
                     v-if="light && look.card.foil === 'rainbow'"
-                    class="card-foil card-foil-rainbow opacity-60"
+                    class="card-foil card-foil-rainbow card-foil-gyro opacity-60"
                 />
+                <div v-if="light" class="card-glare" />
                 <div
                     v-if="light"
                     class="absolute bottom-[18%] left-1/2 h-4 w-40 -translate-x-1/2 rounded-[50%] blur-[5px]"

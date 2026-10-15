@@ -1,4 +1,5 @@
 import type { Directive } from 'vue';
+import { onDeviceTilt } from '@/lib/deviceTilt';
 
 /**
  * `v-card-tilt="ligado"`: a carta inclina seguindo o mouse e passa pro CSS
@@ -6,6 +7,11 @@ import type { Directive } from 'vue';
  * e o brilho acompanhar. Só com mouse de verdade (hover + ponteiro fino) e
  * sem movimento reduzido: no toque a carta fica parada e o holo corre
  * sozinho pelo CSS. Nada roda enquanto o mouse não está em cima.
+ *
+ * `v-card-tilt.gyro`: no celular, a luz da arte da ficha (foil e brilho)
+ * segue o giroscópio (`deviceTilt.ts`), com o mesmo `--mx`/`--my`/`--tilt`.
+ * Sem girar o bloco: ele é parte do modal, e o sprite não se mexe (pedido
+ * do usuário). A grade não usa: lá só o foil segue o celular, pelo CSS.
  */
 const MAX_DEG = 8;
 // O sobe/encolhe da carta (`translate`/`scale` das classes) segue com a
@@ -20,6 +26,7 @@ type TiltElement = HTMLElement & {
         onEnter: () => void;
         onLeave: () => void;
     };
+    __gyro?: () => void;
 };
 
 function canTilt(): boolean {
@@ -37,8 +44,31 @@ function reset(el: TiltElement): void {
     el.style.setProperty('--my', '50%');
 }
 
+function followGyro(el: TiltElement): () => void {
+    return onDeviceTilt(({ gx, gy }) => {
+        if (gx === 0 && gy === 0) {
+            reset(el);
+
+            return;
+        }
+
+        el.style.setProperty('--tilt', '1');
+        el.style.setProperty('--mx', `${(50 + gx * 50).toFixed(1)}%`);
+        el.style.setProperty('--my', `${(50 + gy * 50).toFixed(1)}%`);
+    });
+}
+
 export const vCardTilt: Directive<TiltElement, boolean> = {
     mounted(el, binding) {
+        // `.gyro` é só do celular: com mouse a arte da ficha fica como era.
+        if (binding.modifiers.gyro) {
+            if (!canTilt() && binding.value) {
+                el.__gyro = followGyro(el);
+            }
+
+            return;
+        }
+
         if (!canTilt()) {
             return;
         }
@@ -92,6 +122,8 @@ export const vCardTilt: Directive<TiltElement, boolean> = {
         }
     },
     beforeUnmount(el) {
+        el.__gyro?.();
+        delete el.__gyro;
         const state = el.__tilt;
 
         if (!state) {

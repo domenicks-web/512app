@@ -11,12 +11,20 @@ import PrimaryButton from '@/components/entry/PrimaryButton.vue';
 import SecondaryButton from '@/components/entry/SecondaryButton.vue';
 import StepPills from '@/components/entry/StepPills.vue';
 import TrainerChip from '@/components/entry/TrainerChip.vue';
+import PreferenceSwitch from '@/components/PreferenceSwitch.vue';
 import { useDotField } from '@/composables/useDotField';
 import { flySpriteTo } from '@/composables/useSpriteFlight';
 import { waitForIntro } from '@/composables/useIntro';
 import { usePillMorph } from '@/composables/usePillMorph';
 import EntryLayout from '@/layouts/EntryLayout.vue';
 import { animate, shake, spring, wait } from '@/lib/motion';
+import {
+    hasMotionSensor,
+    isMotionEnabled,
+    motionNeedsPermission,
+    toggleMotion,
+} from '@/lib/motionPreference';
+import { isSoundMuted, setSoundMuted } from '@/lib/soundPreference';
 import { home } from '@/routes';
 
 defineOptions({ layout: EntryLayout });
@@ -54,6 +62,22 @@ const isMoving = ref(false);
 const tag = ref<string | null>(null);
 const chipAvatarPath = ref<string | null>(null);
 const nicknameError = ref<string | null>(null);
+
+// Passo Opções: preferências deste aparelho, lidas só no navegador. O
+// toque no interruptor é o gesto que o iPhone exige pra pedir o sensor.
+const isSoundOn = ref(true);
+const isMotionOn = ref(false);
+const hasSensor = ref(false);
+const needsPermission = ref(false);
+
+function toggleSound() {
+    isSoundOn.value = !isSoundOn.value;
+    setSoundMuted(!isSoundOn.value);
+}
+
+async function toggleMotionSwitch() {
+    isMotionOn.value = await toggleMotion(!isMotionOn.value);
+}
 
 // Padrão inicial das rodas: 13 de setembro, 20 anos atrás do ano mais recente.
 const day = ref(13);
@@ -108,6 +132,10 @@ function onNicknameInput() {
 
 onMounted(async () => {
     pillsRoot.value = pills.value?.root ?? null;
+    isSoundOn.value = !isSoundMuted();
+    hasSensor.value = hasMotionSensor();
+    needsPermission.value = motionNeedsPermission();
+    isMotionOn.value = isMotionEnabled();
     await waitForIntro();
 
     if (field.mode() !== 'ambient') {
@@ -215,7 +243,7 @@ async function finish() {
     }
 
     if (Object.keys(profile.errors).length > 0) {
-        await goToStep(profile.errors.birthdate ? 1 : 2);
+        await goToStep(profile.errors.birthdate ? 2 : 3);
 
         return;
     }
@@ -226,9 +254,9 @@ async function finish() {
 /** Fecha o card na última pill e o chip voa pro canto onde fica o avatar da home. */
 async function leaveToHome() {
     isMoving.value = true;
-    await morph.collapseToPill(2);
-    morph.gulp(2);
-    step.value = 3;
+    await morph.collapseToPill(3);
+    morph.gulp(3);
+    step.value = 4;
     await wait(260);
 
     const avatar = chip.value?.avatar?.getBoundingClientRect();
@@ -278,6 +306,8 @@ function onKeydown(event: KeyboardEvent) {
     } else if (step.value === 1) {
         void goToStep(2);
     } else if (step.value === 2) {
+        void goToStep(3);
+    } else if (step.value === 3) {
         void finish();
     }
 }
@@ -296,12 +326,12 @@ function onKeydown(event: KeyboardEvent) {
             :avatar-sprite-path="chipAvatarPath"
         />
 
-        <StepPills ref="pills" :count="3" :current="step" />
+        <StepPills ref="pills" :count="4" :current="step" />
 
         <div
             ref="card"
             class="w-full max-w-[440px] rounded-[28px] bg-white px-[30px] pt-[30px] pb-7 shadow-[0_2px_4px_rgba(43,47,54,0.05),0_22px_56px_rgba(43,47,54,0.18)]"
-            :class="{ invisible: step === 3 }"
+            :class="{ invisible: step === 4 }"
         >
             <div ref="content" class="flex flex-col gap-[22px]">
                 <template v-if="step === 0">
@@ -338,6 +368,52 @@ function onKeydown(event: KeyboardEvent) {
                         <h1
                             class="text-ink text-[27px] leading-[1.15] font-black tracking-[-0.025em] text-balance"
                         >
+                            Do seu jeito
+                        </h1>
+                        <p
+                            class="text-soft text-[14px] leading-[1.45] font-semibold text-pretty"
+                        >
+                            Vale só neste aparelho. Dá pra mudar depois em
+                            Ajustes.
+                        </p>
+                    </div>
+                    <div
+                        data-enter
+                        class="flex flex-col gap-4 rounded-[20px] bg-[#f4f5f7] p-4"
+                    >
+                        <PreferenceSwitch
+                            title="Sons"
+                            hint="Abertura do pack e avisos"
+                            :checked="isSoundOn"
+                            @toggle="toggleSound"
+                        />
+                        <PreferenceSwitch
+                            v-if="hasSensor"
+                            title="Mexer as cartas com o celular"
+                            :hint="
+                                needsPermission && !isMotionOn
+                                    ? 'O celular vai pedir permissão'
+                                    : 'O brilho das cartas segue o celular'
+                            "
+                            :checked="isMotionOn"
+                            @toggle="toggleMotionSwitch"
+                        />
+                    </div>
+                    <div data-enter class="grid grid-cols-2 gap-3">
+                        <SecondaryButton @click="goToStep(0)"
+                            >Voltar</SecondaryButton
+                        >
+                        <PrimaryButton @click="goToStep(2)"
+                            >Continuar</PrimaryButton
+                        >
+                    </div>
+                </template>
+
+                <template v-else-if="step === 2">
+                    <div data-enter class="flex flex-col gap-1.5 text-center">
+                        <h1
+                            class="text-ink text-[27px] leading-[1.15] font-black tracking-[-0.025em] text-balance"
+                        >
                             Qual é a sua data de nascimento, treinador?
                         </h1>
                         <p
@@ -363,16 +439,16 @@ function onKeydown(event: KeyboardEvent) {
                         </span>
                     </div>
                     <div data-enter class="grid grid-cols-2 gap-3">
-                        <SecondaryButton @click="goToStep(0)"
+                        <SecondaryButton @click="goToStep(1)"
                             >Voltar</SecondaryButton
                         >
-                        <PrimaryButton @click="goToStep(2)"
+                        <PrimaryButton @click="goToStep(3)"
                             >Continuar</PrimaryButton
                         >
                     </div>
                 </template>
 
-                <template v-else-if="step === 2">
+                <template v-else-if="step === 3">
                     <div data-enter class="flex flex-col gap-1.5 text-center">
                         <h1
                             class="text-ink text-[27px] leading-[1.15] font-black tracking-[-0.025em]"
@@ -395,7 +471,7 @@ function onKeydown(event: KeyboardEvent) {
                         />
                     </div>
                     <div data-enter class="grid grid-cols-2 gap-3">
-                        <SecondaryButton @click="goToStep(1)"
+                        <SecondaryButton @click="goToStep(2)"
                             >Voltar</SecondaryButton
                         >
                         <PrimaryButton

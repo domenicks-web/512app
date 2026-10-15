@@ -5,6 +5,13 @@ import GroupScreen from '@/components/group/GroupScreen.vue';
 import TrainerAvatar from '@/components/group/TrainerAvatar.vue';
 import EntryLayout from '@/layouts/EntryLayout.vue';
 import GroupLayout from '@/layouts/GroupLayout.vue';
+import PreferenceSwitch from '@/components/PreferenceSwitch.vue';
+import {
+    hasMotionSensor,
+    isMotionEnabled,
+    motionNeedsPermission,
+    toggleMotion,
+} from '@/lib/motionPreference';
 import { isSoundMuted, setSoundMuted } from '@/lib/soundPreference';
 import { logout } from '@/routes';
 import { edit as profileEdit } from '@/routes/profile';
@@ -13,7 +20,8 @@ import { show as verifyShow } from '@/routes/verify';
 defineOptions({ layout: [EntryLayout, GroupLayout] });
 
 /**
- * Ajustes: atalho pro perfil, sons (guardado neste aparelho), verificar um
+ * Ajustes: atalho pro perfil, sons e movimento das cartas (guardados neste
+ * aparelho), verificar um
  * pack e sair. O
  * painel de admin não aparece aqui: quem é admin entra por `/admin`.
  */
@@ -26,7 +34,19 @@ const page = usePage<{
 
 // Lido só no navegador: no servidor não existe localStorage.
 const isSoundOn = ref(true);
-onMounted(() => (isSoundOn.value = !isSoundMuted()));
+const isMotionOn = ref(false);
+const hasSensor = ref(false);
+const needsPermission = ref(false);
+onMounted(() => {
+    isSoundOn.value = !isSoundMuted();
+    hasSensor.value = hasMotionSensor();
+    needsPermission.value = motionNeedsPermission();
+    isMotionOn.value = isMotionEnabled();
+});
+
+async function toggleMotionSwitch() {
+    isMotionOn.value = await toggleMotion(!isMotionOn.value);
+}
 
 function toggleSound() {
     isSoundOn.value = !isSoundOn.value;
@@ -78,36 +98,29 @@ const card =
                 </svg>
             </Link>
 
-            <label data-enter :class="card" class="cursor-pointer p-4 pl-5">
-                <div class="flex min-w-0 flex-1 flex-col gap-px">
-                    <span class="text-ink text-[15.5px] font-black">Sons</span>
-                    <span class="text-soft text-xs font-semibold"
-                        >Vale neste aparelho</span
-                    >
-                </div>
-                <span
-                    class="relative inline-flex h-[28px] w-[48px] shrink-0 items-center rounded-full transition-colors has-[:focus-visible]:shadow-[0_0_0_3px_rgba(242,77,77,0.35)]"
-                    :class="isSoundOn ? 'bg-brand' : 'bg-[#dfe2e6]'"
-                >
-                    <input
-                        type="checkbox"
-                        role="switch"
-                        class="absolute inset-0 size-full cursor-pointer opacity-0"
-                        :checked="isSoundOn"
-                        :aria-checked="isSoundOn"
-                        aria-label="Sons"
-                        @change="toggleSound"
-                    />
-                    <span
-                        class="pointer-events-none block size-[22px] rounded-full bg-white shadow-[0_1px_3px_rgba(28,32,38,0.25)] transition-transform"
-                        :class="
-                            isSoundOn
-                                ? 'translate-x-[23px]'
-                                : 'translate-x-[3px]'
-                        "
-                    />
-                </span>
-            </label>
+            <div
+                data-enter
+                :class="card"
+                class="flex-col !items-stretch gap-4 p-4 pl-5"
+            >
+                <PreferenceSwitch
+                    title="Sons"
+                    hint="Vale neste aparelho"
+                    :checked="isSoundOn"
+                    @toggle="toggleSound"
+                />
+                <PreferenceSwitch
+                    v-if="hasSensor"
+                    title="Mexer as cartas com o celular"
+                    :hint="
+                        needsPermission && !isMotionOn
+                            ? 'O celular vai pedir permissão'
+                            : 'O brilho das cartas segue o celular'
+                    "
+                    :checked="isMotionOn"
+                    @toggle="toggleMotionSwitch"
+                />
+            </div>
 
             <Link
                 data-enter
