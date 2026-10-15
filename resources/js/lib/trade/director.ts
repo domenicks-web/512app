@@ -4,7 +4,7 @@ import type { Tier } from '@/lib/pack/types';
 
 /**
  * Roteiro da cerimônia (WAAPI puro, como o pack): as cartas dadas sobem
- * e as recebidas descem, cruzando em arco com giro, flash no meio, as
+ * e as recebidas descem, cruzando em arco com um giro de lado, flash no meio, as
  * recebidas brilham e o círculo branco cresce revelando o resumo. Com
  * movimento reduzido o `animate()` já encurta tudo.
  */
@@ -59,13 +59,13 @@ export async function playTradeCeremony(
             animate(
                 card,
                 [
-                    { transform: 'translate(0, 0) rotateY(0deg) scale(1)' },
+                    { transform: 'translate(0, 0) rotate(0deg) scale(1)' },
                     {
-                        transform: `translate(${travel * 0.25}px, ${-travel / 2}px) rotateY(90deg) scale(1.08)`,
+                        transform: `translate(${travel * 0.12}px, ${-travel / 2}px) rotate(-14deg) scale(1.08)`,
                         offset: 0.5,
                     },
                     {
-                        transform: `translate(0, ${-travel}px) rotateY(360deg) scale(1)`,
+                        transform: `translate(0, ${-travel}px) rotate(0deg) scale(1)`,
                     },
                 ],
                 760,
@@ -76,13 +76,13 @@ export async function playTradeCeremony(
             animate(
                 card,
                 [
-                    { transform: 'translate(0, 0) rotateY(0deg) scale(1)' },
+                    { transform: 'translate(0, 0) rotate(0deg) scale(1)' },
                     {
-                        transform: `translate(${-travel * 0.25}px, ${travel / 2}px) rotateY(90deg) scale(1.08)`,
+                        transform: `translate(${-travel * 0.12}px, ${travel / 2}px) rotate(14deg) scale(1.08)`,
                         offset: 0.5,
                     },
                     {
-                        transform: `translate(0, ${travel}px) rotateY(360deg) scale(1)`,
+                        transform: `translate(0, ${travel}px) rotate(0deg) scale(1)`,
                     },
                 ],
                 760,
@@ -119,25 +119,11 @@ export async function playTradeCeremony(
 
     sfx?.summary();
     const summary = $('summary');
+    const reveal = 1050;
 
-    if (summary) {
-        summary.style.visibility = 'visible';
-        await finished(
-            animate(
-                summary,
-                [
-                    { clipPath: 'circle(0% at 50% 55%)' },
-                    { clipPath: 'circle(150% at 50% 55%)' },
-                ],
-                1050,
-                {
-                    easing: 'cubic-bezier(.7,0,.2,1)',
-                    fill: 'forwards',
-                },
-            ),
-        );
-    }
-
+    // As cartas do resumo entram enquanto o círculo abre (escondidas até a
+    // vez delas): se esperassem o círculo, apareceriam prontas e depois
+    // sumiriam pra entrar de novo.
     all('summary-card').forEach((card, i) =>
         animate(
             card,
@@ -150,9 +136,27 @@ export async function playTradeCeremony(
             ],
             760,
             {
-                delay: i * 90,
+                delay: reveal * 0.35 + i * 90,
                 easing: 'cubic-bezier(.2,1.3,.4,1)',
             },
         ),
     );
+
+    if (summary) {
+        summary.style.visibility = 'visible';
+        await finished(
+            animate(
+                summary,
+                [
+                    { clipPath: 'circle(0% at 50% 55%)' },
+                    { clipPath: 'circle(150% at 50% 55%)' },
+                ],
+                reveal,
+                {
+                    easing: 'cubic-bezier(.7,0,.2,1)',
+                    fill: 'forwards',
+                },
+            ),
+        );
+    }
 }
