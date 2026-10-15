@@ -14,7 +14,7 @@ use App\Models\User;
  */
 class BefriendInviter
 {
-    public function __construct(private readonly AcceptFriendRequest $accept = new AcceptFriendRequest) {}
+    public function __construct(private readonly AcceptFriendRequest $accept) {}
 
     public function handle(User $user): void
     {
@@ -27,7 +27,7 @@ class BefriendInviter
         $existing = Friendship::query()->between($user, $inviter)->first();
 
         if ($existing?->status === FriendshipStatus::Pending) {
-            $this->accept->handle($existing);
+            $this->accept->handle($existing, notify: false);
         }
 
         if ($existing !== null) {

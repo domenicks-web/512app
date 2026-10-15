@@ -17,7 +17,7 @@ it('preenche nickname, tag, data de nascimento e avatar', function () {
     $user = User::factory()->withoutProfile()->create();
     $species = Species::factory()->create();
 
-    $result = (new CompleteOnboarding)->handle($user, new CompleteOnboardingData(
+    $result = app(CompleteOnboarding::class)->handle($user, new CompleteOnboardingData(
         nickname: 'Ramon',
         birthdate: now()->subYears(25),
         avatarSpeciesId: $species->id,
@@ -34,7 +34,7 @@ it('gera tags diferentes pra nicknames repetidos', function () {
     $user = User::factory()->withoutProfile()->create();
     $species = Species::factory()->create();
 
-    $result = (new CompleteOnboarding)->handle($user, new CompleteOnboardingData(
+    $result = app(CompleteOnboarding::class)->handle($user, new CompleteOnboardingData(
         nickname: 'Ramon',
         birthdate: now()->subYears(25),
         avatarSpeciesId: $species->id,
@@ -48,7 +48,7 @@ it('sorteia outra tag quando a da prévia foi ocupada no meio-tempo', function (
     $user = User::factory()->withoutProfile()->create();
     $species = Species::factory()->create();
 
-    $result = (new CompleteOnboarding)->handle($user, new CompleteOnboardingData(
+    $result = app(CompleteOnboarding::class)->handle($user, new CompleteOnboardingData(
         nickname: 'Ramon',
         birthdate: now()->subYears(25),
         avatarSpeciesId: $species->id,
@@ -63,7 +63,7 @@ it('vira amigo de quem criou o convite ao completar o perfil', function () {
     $invite = Invite::factory()->create(['created_by' => $inviter->id]);
     $user = User::factory()->withoutProfile()->create(['invited_by' => $invite->id]);
 
-    (new CompleteOnboarding)->handle($user, new CompleteOnboardingData(
+    app(CompleteOnboarding::class)->handle($user, new CompleteOnboardingData(
         nickname: 'Bia',
         birthdate: now()->subYears(25),
         avatarSpeciesId: Species::factory()->create()->id,
@@ -78,7 +78,7 @@ it('aceita o pedido pendente com quem convidou em vez de duplicar', function () 
     $user = User::factory()->withoutProfile()->create(['invited_by' => $invite->id]);
     Friendship::factory()->create(['requester_id' => $inviter->id, 'addressee_id' => $user->id]);
 
-    (new CompleteOnboarding)->handle($user, new CompleteOnboardingData(
+    app(CompleteOnboarding::class)->handle($user, new CompleteOnboardingData(
         nickname: 'Bia',
         birthdate: now()->subYears(25),
         avatarSpeciesId: Species::factory()->create()->id,
@@ -91,7 +91,7 @@ it('aceita o pedido pendente com quem convidou em vez de duplicar', function () 
 it('não cria amizade sem convite', function () {
     $user = User::factory()->withoutProfile()->create(['invited_by' => null]);
 
-    (new CompleteOnboarding)->handle($user, new CompleteOnboardingData(
+    app(CompleteOnboarding::class)->handle($user, new CompleteOnboardingData(
         nickname: 'Bia',
         birthdate: now()->subYears(25),
         avatarSpeciesId: Species::factory()->create()->id,

@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Actions\Friends;
 
+use App\Actions\Notify\BuildNotice;
+use App\Actions\Notify\Notifier;
 use App\Enums\FriendshipStatus;
 use App\Models\Friendship;
 use App\Models\User;
@@ -19,7 +21,11 @@ use Illuminate\Validation\ValidationException;
  */
 class SendFriendRequest
 {
-    public function __construct(private readonly AcceptFriendRequest $accept) {}
+    public function __construct(
+        private readonly AcceptFriendRequest $accept,
+        private readonly Notifier $notifier,
+        private readonly BuildNotice $notices,
+    ) {}
 
     public function handle(User $sender, string $handle): Friendship
     {
@@ -46,11 +52,15 @@ class SendFriendRequest
                 return $this->accept->handle($existing);
             }
 
-            return Friendship::create([
+            $friendship = Friendship::create([
                 'requester_id' => $sender->id,
                 'addressee_id' => $target->id,
                 'status' => FriendshipStatus::Pending,
             ]);
+
+            $this->notifier->toPlayer($target->id, $this->notices->friendRequest($friendship));
+
+            return $friendship;
         });
     }
 

@@ -22,7 +22,7 @@ it('revela uma bola de cada vez e só a server seed no fim', function () {
     $user = User::factory()->create();
     $opening = (new OpenPack)->handle($user);
 
-    $specimen = (new RevealSlot)->handle($opening, 3);
+    $specimen = app(RevealSlot::class)->handle($opening, 3);
 
     expect($specimen->slot)->toBe(3)
         ->and($specimen->revealed_at)->not->toBeNull()
@@ -31,7 +31,7 @@ it('revela uma bola de cada vez e só a server seed no fim', function () {
         ->and($opening->fresh()->revealed_at)->toBeNull();
 
     foreach ([1, 2, 4, 5] as $slot) {
-        (new RevealSlot)->handle($opening, $slot);
+        app(RevealSlot::class)->handle($opening, $slot);
     }
 
     expect($opening->fresh()->isComplete())->toBeTrue()
@@ -42,8 +42,8 @@ it('revela uma bola de cada vez e só a server seed no fim', function () {
 it('abrir a mesma bola de novo devolve o mesmo espécime', function () {
     $opening = (new OpenPack)->handle(User::factory()->create());
 
-    $first = (new RevealSlot)->handle($opening, 2);
-    $again = (new RevealSlot)->handle($opening, 2);
+    $first = app(RevealSlot::class)->handle($opening, 2);
+    $again = app(RevealSlot::class)->handle($opening, 2);
 
     expect($again->id)->toBe($first->id)
         ->and($again->revealed_at->toDateTimeString())->toBe($first->revealed_at->toDateTimeString());

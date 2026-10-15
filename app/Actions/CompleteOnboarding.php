@@ -12,8 +12,8 @@ use Illuminate\Support\Facades\DB;
 class CompleteOnboarding
 {
     public function __construct(
-        private readonly GenerateUserTag $generateUserTag = new GenerateUserTag,
-        private readonly BefriendInviter $befriendInviter = new BefriendInviter,
+        private readonly GenerateUserTag $generateUserTag,
+        private readonly BefriendInviter $befriendInviter,
     ) {}
 
     public function handle(User $user, CompleteOnboardingData $data): User
