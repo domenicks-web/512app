@@ -540,3 +540,10 @@ pushado pro `main`.
     - Próximo: **4B** (Reverb + notificação animada com som; dividir com
       o Kimi: eventos no servidor com ele, notificação com o Claude), depois
       **4C** (banimento).
+    - **Pedidos do usuário pra 4A (14/10, 21h; fazer antes do merge)**:
+        - Na tela de trocas (caixa e montador), tocar no espécime abre a
+          ficha dele (o `TradeCard` já emite `open`; falta ligar na ficha).
+        - Mostrar a raridade nas cartas da troca (hoje só a moldura indica).
+        - Cerimônia escalando com o melhor recebido: comum simples; raro,
+          lendário e shiny cada vez mais caprichados (luz, partículas, som),
+          no espírito da revelação do pack.
