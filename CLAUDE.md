@@ -96,13 +96,16 @@ Sempre tem outro jeito.
 O histórico completo (o que foi feito, decidido e testado, sessão a sessão)
 está em `docs/checkpoint.md`. Ler lá quando precisar do porquê de algo.
 
-- **Feito e no `main`**: fases 1 a 4B. Cadastro por convite e onboarding,
+- **Feito e no `main`**: fases 1 a 4C. Cadastro por convite e onboarding,
   pack com provably fair e `/verificar`, coleção, ranking, feed, amigos,
-  Cartão de Treinador, comparar, trocas (4A) e notificações em tempo real
-  pelo Reverb (4B), admin (`/admin`, sem atalho na UI).
-- **Próximo**: 4C (banimento: temporário ou permanente, email com o
-  motivo). Depois a fase 5 (giroscópio, apelido no espécime) e o PWA por
-  último (pedido do usuário).
+  Cartão de Treinador, comparar, trocas (4A), notificações em tempo real
+  pelo Reverb (4B), suspensão e banimento (4C: `sanctions`, banido tem os
+  espécimes libertados pro "Professor Carvalho", `users.is_system`; quem
+  tem sanção ativa some de tudo pelo `User::active()`), admin (`/admin`,
+  sem atalho na UI).
+- **Próximo**: fase 5 (giroscópio, apelido no espécime) e o PWA por
+  último (pedido do usuário). Conta fake repassando espécimes (desfazer
+  trocas do banido) ficou de fora da 4C.
 - **Fora de escopo até atualizar o SPEC**: moeda/dust, loja, dinheiro
   real (ideias do usuário, anotadas no histórico).
 
@@ -113,7 +116,10 @@ está em `docs/checkpoint.md`. Ler lá quando precisar do porquê de algo.
   `DEV_LAN_HOST` e `APP_URL` com o IP do PC (hoje 192.168.1.26). O usuário
   testa no S26+ por `http://192.168.1.26:8000`. Mudou o `.env`? Reiniciar
   o dev.
-- Conta de teste: `claudetest@512app.com` / `claude` (`Claude#9805`). A do
+- Conta de teste: `claudetest@512app.com` / `claude` (`Claude#9805`).
+  `Kimi#2398` (`claudetest2@512app.com`) está **banida** (teste da 4C).
+  O `.env` manda email de verdade (Gmail SMTP): conta de teste nova deve
+  usar domínio inexistente (`@512app.local`). A do
   usuário é a Lin (`Lin#0741`, admin). Liberar pack: `/admin/jogadores` →
   ⋯ ou `GrantNextPack`.
 - Navegador: o MCP do Playwright não acha o Chrome; usar script Node com o
