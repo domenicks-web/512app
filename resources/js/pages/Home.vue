@@ -18,6 +18,7 @@ import { groupNavigationKey } from '@/layouts/groupNavigation';
 import { formatCountdown, formatMint } from '@/lib/format';
 import { animate, spring } from '@/lib/motion';
 import { usePackProgress } from '@/composables/usePackProgress';
+import { CYAN, GOLD } from '@/lib/pack/meta';
 import { rarityLook } from '@/lib/pack/rarity';
 import type { Tier } from '@/lib/pack/types';
 import FriendsOnline from '@/components/group/FriendsOnline.vue';
@@ -72,10 +73,15 @@ const props = defineProps<{
     feedHighlight: {
         isShiny: boolean;
         trainerNickname: string;
+        trainerAvatarSpritePath: string | null;
         speciesName: string;
+        rarityTier: Tier;
+        spritePath: string;
         mintNumber: number;
         caughtAgo: string;
+        recent: { spritePath: string; isShiny: boolean; rarityTier: Tier }[];
     } | null;
+    feedEmptySpritePath: string | null;
     friendsOnline: number;
     presencePollSeconds: number;
 }>();
@@ -137,6 +143,11 @@ const packStatus = computed(() =>
     isPackAvailable.value || props.nextPackAt === null
         ? 'Disponível'
         : `Próximo em ${formatCountdown(props.nextPackAt, now.value)}`,
+);
+
+/** Brilho do card do feed: ciano no shiny, dourado no lendário, ciano apagado vazio. */
+const feedGlow = computed(() =>
+    props.feedHighlight === null || props.feedHighlight.isShiny ? CYAN : GOLD,
 );
 
 const bestLook = computed(() =>
@@ -800,30 +811,83 @@ const compactLabel =
                     <span :class="compactLabel" class="z-[1] text-[#7d8794]"
                         >Feed</span
                     >
+                    <!-- Sprite do destaque de fundo, cortado pela borda como o
+                         da Coleção, com o brilho da raridade (ciano no shiny,
+                         dourado no lendário). Sem destaque, a silhueta do Mew. -->
                     <span
-                        class="absolute inset-0 bg-[radial-gradient(70%_45%_at_50%_46%,rgba(77,217,232,0.16),rgba(77,217,232,0))]"
-                    />
+                        class="pointer-events-none absolute inset-0"
+                        aria-hidden="true"
+                        :style="{
+                            background: `radial-gradient(75% 60% at 80% 38%, ${feedGlow}40, transparent 70%)`,
+                        }"
+                    >
+                        <img
+                            v-if="feedHighlight || feedEmptySpritePath"
+                            :src="`/storage/${feedHighlight?.spritePath ?? feedEmptySpritePath}`"
+                            alt=""
+                            class="absolute -top-[14%] -right-[38%] h-[120%] max-w-none rotate-[10deg] [image-rendering:pixelated]"
+                            :class="
+                                feedHighlight
+                                    ? 'drop-shadow-[0_0_18px_var(--feed-glow)]'
+                                    : 'opacity-[0.12] brightness-0 invert'
+                            "
+                            :style="{ '--feed-glow': `${feedGlow}99` }"
+                        />
+                        <span
+                            class="absolute inset-x-0 bottom-0 h-[62%] bg-gradient-to-t from-[#1c2026] via-[#1c2026]/85 to-transparent"
+                        />
+                    </span>
+                    <span
+                        v-if="feedHighlight && feedHighlight.recent.length > 0"
+                        class="relative flex items-center gap-1"
+                        aria-hidden="true"
+                    >
+                        <span
+                            v-for="(older, index) in feedHighlight.recent"
+                            :key="index"
+                            class="flex size-7 items-center justify-center rounded-full bg-white/8 shadow-[0_0_0_1px_var(--ring)] sm:size-9"
+                            :style="{
+                                '--ring': older.isShiny
+                                    ? `${CYAN}80`
+                                    : 'rgba(255,255,255,0.08)',
+                            }"
+                        >
+                            <FittedSprite
+                                :src="`/storage/${older.spritePath}`"
+                                :size="28"
+                                :padding="3"
+                            />
+                        </span>
+                    </span>
                     <span
                         v-if="feedHighlight?.isShiny"
                         class="text-shiny relative flex h-[22px] items-center self-start rounded-full bg-[rgba(77,217,232,0.14)] px-2.5 text-xs font-extrabold tracking-[0.06em] uppercase sm:h-[26px]"
                     >
                         Shiny
                     </span>
-                    <span
-                        class="relative line-clamp-3 text-[15px] leading-[1.1] font-black tracking-[-0.02em] text-balance text-white sm:line-clamp-none sm:text-[30px] sm:leading-[1.05] sm:tracking-[-0.025em]"
-                    >
-                        {{
-                            feedHighlight
-                                ? `${feedHighlight.trainerNickname} abriu um ${feedHighlight.speciesName}`
-                                : 'Nada de raro por aqui ainda'
-                        }}
+                    <span class="relative flex items-end gap-2">
+                        <TrainerAvatar
+                            v-if="feedHighlight"
+                            :sprite-path="feedHighlight.trainerAvatarSpritePath"
+                            size="sm"
+                            class="!size-8 shrink-0"
+                        />
+                        <span
+                            class="line-clamp-3 min-w-0 text-[15px] leading-[1.1] font-black tracking-[-0.02em] text-balance text-white sm:line-clamp-none sm:text-[30px] sm:leading-[1.05] sm:tracking-[-0.025em]"
+                        >
+                            {{
+                                feedHighlight
+                                    ? `${feedHighlight.trainerNickname} abriu um ${feedHighlight.speciesName}`
+                                    : 'Nenhum shiny ou lendário ainda'
+                            }}
+                        </span>
                     </span>
                     <span
                         class="relative text-[11px] leading-tight font-semibold text-[#7d8794] sm:text-sm"
                         >{{
                             feedHighlight
                                 ? `${feedHighlight.caughtAgo} · ${formatMint(feedHighlight.mintNumber)}`
-                                : 'shinies e raros do grupo aparecem aqui'
+                                : 'quem abrir um aparece aqui'
                         }}</span
                     >
                 </button>

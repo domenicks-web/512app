@@ -175,7 +175,8 @@ return [
     | `feed_highlight_tiers`: tiers que entram no feed do grupo além de
     | todo shiny, que entra sempre. Só o que é importante: raro sai em ~40%
     | dos packs e afogava o feed. `feed_limit`: quantas aberturas a tela
-    | do feed mostra.
+    | do feed mostra. `feed_empty_species_id`: a silhueta do card do feed na
+    | Home enquanto ninguém abriu nada (151, Mew).
     |
     */
 
@@ -186,6 +187,7 @@ return [
             RarityTier::Legendary->value,
         ],
         'feed_limit' => 40,
+        'feed_empty_species_id' => 151,
     ],
 
     /*

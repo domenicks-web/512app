@@ -37,7 +37,8 @@ class BuildHomeSummary
      *     nextPackAt: string|null,
      *     rankingPosition: int|null,
      *     pendingTrades: int,
-     *     feedHighlight: array{isShiny: bool, trainerNickname: string, speciesName: string, mintNumber: int, caughtAgo: string}|null,
+     *     feedHighlight: array{isShiny: bool, trainerNickname: string, trainerAvatarSpritePath: string|null, speciesName: string, rarityTier: string, spritePath: string, mintNumber: int, caughtAgo: string, recent: list<array{spritePath: string, isShiny: bool, rarityTier: string}>}|null,
+     *     feedEmptySpritePath: string|null,
      *     friendsOnline: int,
      *     presencePollSeconds: int,
      * }
@@ -84,6 +85,9 @@ class BuildHomeSummary
                 ->where('from_user_id', $user->id)
                 ->count(),
             'feedHighlight' => $this->feed->handle(),
+            'feedEmptySpritePath' => Species::query()
+                ->whereKey(config('game.group.feed_empty_species_id'))
+                ->value('sprite_path'),
             'friendsOnline' => count(array_intersect($this->presence->onlineUserIds($today), $user->friendIds())),
             'presencePollSeconds' => (int) config('game.group.presence_poll_seconds'),
         ];

@@ -94,7 +94,8 @@ it('destaca no feed a abertura boa mais recente, com quem abriu', function () {
             ->where('feedHighlight.trainerNickname', 'Ramon')
             ->where('feedHighlight.speciesName', 'Rattata')
             ->where('feedHighlight.mintNumber', 4)
-            ->where('feedHighlight.caughtAgo', 'há 12 minutos'));
+            ->where('feedHighlight.caughtAgo', 'há 12 minutos')
+            ->where('feedHighlight.recent.0.spritePath', $mewtwo->sprite_path));
 });
 
 it('deixa o feed vazio quando ninguém abriu nada bom', function () {
