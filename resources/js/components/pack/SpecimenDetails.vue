@@ -10,6 +10,8 @@ import type { PackSpecimen } from '@/lib/pack/types';
  */
 defineProps<{
     part: 'history' | 'hash';
+    /** No modal do celular: o título é do modal e o hash vai inteiro. */
+    titled?: boolean;
     specimen: PackSpecimen;
     tone: {
         muted: string;
@@ -27,7 +29,11 @@ defineProps<{
         v-if="part === 'history' && specimen.history?.length"
         class="flex flex-col gap-2"
     >
-        <div class="text-[11px] font-extrabold" :class="tone.muted">
+        <div
+            v-if="!titled"
+            class="text-[11px] font-extrabold"
+            :class="tone.muted"
+        >
             Histórico
         </div>
         <ol class="flex flex-col gap-1.5 border-l-2 border-[#e4e7eb] pl-3">
@@ -62,11 +68,18 @@ defineProps<{
         :class="tone.box"
     >
         <div class="flex min-w-0 flex-col gap-[3px]">
-            <div class="text-[11px] font-extrabold" :class="tone.muted">
+            <div
+                v-if="!titled"
+                class="text-[11px] font-extrabold"
+                :class="tone.muted"
+            >
                 Hash do espécime
             </div>
-            <div class="font-mono text-sm font-extrabold" :class="tone.soft">
-                {{ shortHash(specimen.hash) }}
+            <div
+                class="font-mono text-sm font-extrabold"
+                :class="[tone.soft, titled ? 'break-all' : '']"
+            >
+                {{ titled ? specimen.hash : shortHash(specimen.hash) }}
             </div>
         </div>
         <span

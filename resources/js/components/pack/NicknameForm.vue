@@ -63,16 +63,20 @@ function save() {
 </script>
 
 <template>
-    <div class="flex flex-col gap-2">
+    <!-- Fica na linha dos selos; o campo aberto ocupa a linha inteira. -->
+    <div
+        class="flex flex-col gap-2"
+        :class="stage !== 'idle' || error ? 'basis-full' : ''"
+    >
         <button
             v-if="stage === 'idle'"
             type="button"
-            class="flex h-9 cursor-pointer items-center gap-1.5 self-start rounded-full bg-[#f4f5f6] px-3.5 text-[13px] font-black text-[#2b2f36] transition-transform active:scale-95"
+            class="flex h-[26px] cursor-pointer items-center gap-1 self-start rounded-full bg-[#f4f5f6] px-2.5 text-xs font-black text-[#2b2f36] transition-transform active:scale-95"
             @click="start"
         >
             <svg
-                width="13"
-                height="13"
+                width="11"
+                height="11"
                 viewBox="0 0 24 24"
                 fill="none"
                 stroke="currentColor"

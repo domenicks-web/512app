@@ -283,7 +283,7 @@ const tone = computed(() =>
                             {{ specimen.name }} · #{{ specimen.dex }}
                         </div>
                     </div>
-                    <div v-else class="flex items-baseline gap-2.5">
+                    <div v-else class="flex items-center gap-2.5">
                         <div
                             class="text-[28px] leading-none font-black tracking-[-0.03em] sm:text-[34px]"
                         >
@@ -327,17 +327,19 @@ const tone = computed(() =>
                             }"
                             >Nº {{ pad(specimen.mint, 4) }}</span
                         >
+                        <NicknameForm
+                            v-if="
+                                light &&
+                                specimen.canName &&
+                                !namedNow[specimen.id]
+                            "
+                            :key="specimen.id"
+                            :specimen-id="specimen.id"
+                            :species-name="specimen.name"
+                            :max-length="specimen.nicknameMaxLength ?? 16"
+                            @named="(name) => (namedNow[specimen!.id] = name)"
+                        />
                     </div>
-                    <NicknameForm
-                        v-if="
-                            light && specimen.canName && !namedNow[specimen.id]
-                        "
-                        :key="specimen.id"
-                        :specimen-id="specimen.id"
-                        :species-name="specimen.name"
-                        :max-length="specimen.nicknameMaxLength ?? 16"
-                        @named="(name) => (namedNow[specimen!.id] = name)"
-                    />
                 </div>
 
                 <div class="flex flex-col gap-2.5">
@@ -526,9 +528,16 @@ const tone = computed(() =>
     >
         <div
             v-if="specimen && detail"
-            class="flex flex-col gap-3 px-5 pt-16 pb-5"
+            class="flex flex-col gap-3 px-5 pt-5 pb-5"
         >
+            <h2
+                class="min-h-[38px] pr-12 text-[20px] leading-[38px] font-black text-[#2b2f36]"
+                :class="light ? '' : '!text-white'"
+            >
+                {{ detail === 'history' ? 'Histórico' : 'Hash do espécime' }}
+            </h2>
             <SpecimenDetails
+                titled
                 :part="detail"
                 :specimen="specimen"
                 :tone="tone"
