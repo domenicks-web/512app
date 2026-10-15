@@ -10,14 +10,15 @@ use App\Models\User;
 /**
  * A Pokédex do jogador: as 151 espécies em ordem de dex, cada uma com
  * quantos espécimes ele tem, quantos são shiny, o menor mint e o maior IV
- * (o que a carta destaca) e se algum espécime atual veio de troca.
+ * (o que a carta destaca), se algum espécime atual veio de troca e o
+ * apelido, só quando há um espécime só (com dois, "Raio ×2" enganaria).
  * Espécie sem espécime aparece como silhueta no front.
  */
 class BuildCollection
 {
     /**
      * @return array{
-     *     species: array<int, array{id: int, name: string, rarityTier: string, spritePath: string, spriteShinyPath: string, specimenCount: int, shinyCount: int, bestMint: int|null, bestIv: int|null, fromTrade: bool}>,
+     *     species: array<int, array{id: int, name: string, rarityTier: string, spritePath: string, spriteShinyPath: string, specimenCount: int, shinyCount: int, bestMint: int|null, bestIv: int|null, fromTrade: bool, nickname: string|null}>,
      *     ownedSpecies: int,
      *     totalSpecimens: int,
      * }
@@ -25,7 +26,7 @@ class BuildCollection
     public function handle(User $user): array
     {
         $owned = $user->specimens()
-            ->selectRaw('species_id, count(*) as specimen_count, sum(case when is_shiny then 1 else 0 end) as shiny_count, min(mint_number) as best_mint, max(iv_total) as best_iv')
+            ->selectRaw('species_id, count(*) as specimen_count, sum(case when is_shiny then 1 else 0 end) as shiny_count, min(mint_number) as best_mint, max(iv_total) as best_iv, max(nickname) as nickname')
             ->groupBy('species_id')
             ->get()
             ->keyBy('species_id');
@@ -50,6 +51,9 @@ class BuildCollection
                 'bestMint' => $owned->has($species->id) ? (int) $owned->get($species->id)->getAttribute('best_mint') : null,
                 'bestIv' => $owned->has($species->id) ? (int) $owned->get($species->id)->getAttribute('best_iv') : null,
                 'fromTrade' => $fromTrade->has($species->id),
+                'nickname' => (int) $owned->get($species->id)?->getAttribute('specimen_count') === 1
+                    ? $owned->get($species->id)->getAttribute('nickname')
+                    : null,
             ])
             ->values()
             ->all();

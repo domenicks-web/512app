@@ -26,6 +26,7 @@ const props = defineProps<{
         bestMint: number | null;
         bestIv: number | null;
         fromTrade?: boolean;
+        nickname?: string | null;
     };
     loading?: boolean;
 }>();
@@ -163,6 +164,12 @@ const mintHighlight = computed(() =>
                 <span
                     class="w-full truncate text-center text-[13px] leading-tight font-black"
                     :style="{ color: skin.nameInk }"
+                    >{{ entry.nickname ?? entry.name }}</span
+                >
+                <span
+                    v-if="entry.nickname"
+                    class="-mt-1.5 w-full truncate text-center text-[9.5px] leading-tight font-extrabold"
+                    :style="{ color: skin.mutedInk }"
                     >{{ entry.name }}</span
                 >
                 <span

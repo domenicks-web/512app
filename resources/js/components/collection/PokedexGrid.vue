@@ -20,6 +20,8 @@ export type SpeciesEntry = {
     bestIv: number | null;
     /** Algum espécime atual desta espécie chegou por troca. */
     fromTrade?: boolean;
+    /** Apelido, só quando há um espécime só da espécie. */
+    nickname?: string | null;
 };
 
 const props = withDefaults(

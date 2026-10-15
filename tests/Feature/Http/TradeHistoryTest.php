@@ -54,3 +54,18 @@ it('põe no feed só a troca com shiny ou tier de destaque', function () {
             fn ($entries) => collect($entries)->where('kind', 'trade')->pluck('tradeId')->all() === [$good->id],
         ));
 });
+
+it('mostra o apelido na carta da coleção só quando há um espécime da espécie', function () {
+    [$a] = friends();
+    $alone = owned($a, ['nickname' => 'Raio']);
+    $pair = owned($a, ['nickname' => 'Brasa']);
+    owned($a, ['species_id' => $pair->species_id]);
+
+    $this->actingAs($a)->get('/colecao')
+        ->assertInertia(fn (Assert $page) => $page->where('species', function ($species) use ($alone, $pair) {
+            $byId = collect($species)->keyBy('id');
+
+            return $byId[$alone->species_id]['nickname'] === 'Raio'
+                && $byId[$pair->species_id]['nickname'] === null;
+        }));
+});
