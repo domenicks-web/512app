@@ -90,6 +90,20 @@ it('bane: liberta tudo pro sistema com o mesmo mint, apaga amizades e encerra a 
     expect(fn () => app(BanPlayer::class)->handle($admin, $b, 'De novo'))->toThrow(SanctionNotAllowedException::class);
 });
 
+it('na libertação do banido o apelido vai pro histórico e o espécime fica sem', function () {
+    $admin = User::factory()->admin()->create();
+    $player = User::factory()->create();
+    $specimen = owned($player, ['nickname' => 'João']);
+
+    app(BanPlayer::class)->handle($admin, $player, 'Trapaça');
+
+    $system = User::system();
+
+    expect($specimen->fresh()->user_id)->toBe($system->id)
+        ->and($specimen->fresh()->nickname)->toBeNull()
+        ->and(SpecimenTransfer::query()->where('specimen_id', $specimen->id)->value('nickname'))->toBe('João');
+});
+
 it('encerra a suspensão antes do prazo, mas não o banimento', function () {
     $admin = User::factory()->admin()->create();
     $player = User::factory()->create();

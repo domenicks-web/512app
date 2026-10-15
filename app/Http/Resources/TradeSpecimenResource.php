@@ -17,7 +17,7 @@ use Illuminate\Http\Resources\Json\JsonResource;
 class TradeSpecimenResource extends JsonResource
 {
     /**
-     * @return array{specimenId: int, speciesId: int, name: string, rarityTier: string, isShiny: bool, spritePath: string, mintNumber: int, ivTotal: int}
+     * @return array{specimenId: int, speciesId: int, name: string, nickname: string|null, rarityTier: string, isShiny: bool, spritePath: string, mintNumber: int, ivTotal: int}
      */
     public function toArray(Request $request): array
     {
@@ -25,6 +25,7 @@ class TradeSpecimenResource extends JsonResource
             'specimenId' => $this->id,
             'speciesId' => $this->species_id,
             'name' => $this->species->name,
+            'nickname' => $this->nickname,
             'rarityTier' => $this->species->rarity_tier->value,
             'isShiny' => $this->is_shiny,
             'spritePath' => (string) ($this->is_shiny ? $this->species->sprite_shiny_path : $this->species->sprite_path),
