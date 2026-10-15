@@ -50,8 +50,8 @@ function centerOf(el: Element | null): { x: number; y: number } {
  * Roteiro da cerimônia (WAAPI puro, como o pack): as cartas dadas sobem
  * e as recebidas descem, cruzando em arco, flash no meio, as recebidas
  * brilham e o círculo branco cresce revelando o resumo. Do raro pra cima
- * a melhor carta carrega antes de cruzar (lendário e shiny com ronco e
- * faíscas puxadas), a chegada ganha halo, partículas, raios, tremida e
+ * a melhor carta carrega antes de cruzar (lendário e shiny com faíscas
+ * puxadas e tilintar), a chegada ganha halo, partículas, raios, tremida e
  * vibração, e o brilho continua em volta dela no resumo. `skipped()`
  * interrompe o roteiro quando o jogador toca pra pular. Com movimento
  * reduzido o `animate()` e o `wait()` já encurtam tudo.
@@ -106,7 +106,7 @@ export async function playTradeCeremony(
     }
 
     // Carga: a melhor carta pulsa na cor dela antes de cruzar. Lendário e
-    // shiny seguram mais, com ronco subindo e faíscas puxadas pra carta.
+    // shiny seguram mais, com faíscas puxadas pra carta e um tilintar.
     if (level >= 2 && bestCard) {
         const charge = level >= 3 ? 1300 : 600;
         const glow = level >= 3 ? 26 : 14;
@@ -124,29 +124,30 @@ export async function playTradeCeremony(
             { iterations: level >= 3 ? 2 : 1, easing: 'ease-in-out' },
         );
 
-        if (level >= 3) {
-            const start = performance.now();
-            const tick = () => {
-                const t = Math.min(1, (performance.now() - start) / charge);
-                sfx?.rumble(skipped() ? 0 : t * 0.8);
-
-                if (fx && !skipped()) {
-                    const c = centerOf(bestCard);
-
-                    if (Math.random() < 0.6) {
-                        fx.attract(c.x, c.y, [col, '#ffffff']);
-                    }
+        if (level >= 3 && fx) {
+            // Faíscas puxadas pra carta durante a carga (só visual).
+            const until = performance.now() + charge;
+            let pulls = 0;
+            const pull = () => {
+                if (skipped() || performance.now() >= until) {
+                    return;
                 }
 
-                if (t < 1 && !skipped()) {
-                    requestAnimationFrame(tick);
+                const c = centerOf(bestCard);
+                for (let k = 0; k < 3; k++) {
+                    fx.attract(c.x, c.y, [col, '#ffffff']);
                 }
+
+                if (pulls++ % 3 === 0) {
+                    sfx?.glint();
+                }
+
+                window.setTimeout(pull, 140);
             };
-            requestAnimationFrame(tick);
+            pull();
         }
 
         await wait(charge);
-        sfx?.rumble(0);
         fx?.dropAttracted();
 
         if (skipped()) {

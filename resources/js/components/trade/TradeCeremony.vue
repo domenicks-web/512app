@@ -2,7 +2,9 @@
 import { Link, router } from '@inertiajs/vue3';
 import { computed, nextTick, onBeforeUnmount, onMounted, ref } from 'vue';
 import TrainerAvatar from '@/components/group/TrainerAvatar.vue';
+import SpecimenSheet from '@/components/pack/SpecimenSheet.vue';
 import TradeCard from '@/components/trade/TradeCard.vue';
+import { useSpecimenSheet } from '@/composables/useSpecimenSheet';
 import { prefersReducedMotion } from '@/lib/motion';
 import { FxCanvas } from '@/lib/pack/fx';
 import { rgba } from '@/lib/pack/meta';
@@ -17,6 +19,7 @@ import {
 } from '@/lib/trade/director';
 import type { TradeCeremonyData } from '@/lib/trade/types';
 import { show as collectionShow } from '@/routes/collection';
+import { show as specimenShow } from '@/routes/specimens';
 import { seen } from '@/routes/trades';
 
 /**
@@ -35,6 +38,9 @@ const isMounted = ref(false);
 const root = ref<HTMLElement | null>(null);
 const canvas = ref<HTMLCanvasElement | null>(null);
 let fx: FxCanvas | null = null;
+// Tocar numa carta do resumo abre a ficha, aqui dentro: a cerimônia fica
+// por cima da tela de Trocas.
+const sheet = useSpecimenSheet((id) => specimenShow.url(id));
 const done = ref(false);
 const sfx = new Sfx();
 const TIER_ORDER: Tier[] = ['comum', 'incomum', 'raro', 'lendario'];
@@ -67,7 +73,6 @@ function skip() {
     }
 
     done.value = true;
-    sfx.rumble(0);
     settleSummary(root.value, fx, best.value);
 }
 
@@ -232,7 +237,13 @@ onBeforeUnmount(() => {
                                         : undefined
                                 "
                             >
-                                <TradeCard :specimen="s" size="lg" />
+                                <TradeCard
+                                    :specimen="s"
+                                    size="lg"
+                                    @open="
+                                        sheet.open(s.specimenId, s.specimenId)
+                                    "
+                                />
                             </div>
                             <span
                                 v-if="data.newSpeciesIds.includes(s.speciesId)"
@@ -254,6 +265,7 @@ onBeforeUnmount(() => {
                             :key="s.specimenId"
                             :specimen="s"
                             size="sm"
+                            @open="sheet.open(s.specimenId, s.specimenId)"
                         />
                     </div>
                 </div>
@@ -277,6 +289,12 @@ onBeforeUnmount(() => {
                 ref="canvas"
                 aria-hidden="true"
                 class="pointer-events-none fixed inset-0 z-[1] size-full"
+            />
+            <SpecimenSheet
+                :specimen="sheet.current.value"
+                light
+                @click.stop
+                @close="sheet.close"
             />
         </div>
     </Teleport>
