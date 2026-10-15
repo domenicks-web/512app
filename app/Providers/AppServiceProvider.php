@@ -8,6 +8,7 @@ use App\Models\User;
 use Carbon\CarbonImmutable;
 use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Auth\Notifications\VerifyEmail;
+use Illuminate\Foundation\DevCommands;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
@@ -32,6 +33,11 @@ class AppServiceProvider extends ServiceProvider
         $this->configureDefaults();
 
         Gate::define('admin', fn (User $user): bool => $user->is_admin === true);
+
+        if ($this->app->environment('local')) {
+            // Ouve na rede toda pro celular conectar pelo IP (ver DEV_LAN_HOST).
+            DevCommands::artisan('reverb:start --host=0.0.0.0 --port=8080', 'reverb');
+        }
 
         VerifyEmail::toMailUsing(fn (User $user, string $url): VerifyEmailMail => (new VerifyEmailMail(
             $user,
