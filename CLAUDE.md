@@ -103,14 +103,13 @@ está em `docs/checkpoint.md`. Ler lá quando precisar do porquê de algo.
   espécimes libertados pro "Professor Carvalho", `users.is_system`; quem
   tem sanção ativa some de tudo pelo `User::active()`), admin (`/admin`,
   sem atalho na UI).
-- **Pendências (15/10, 18h)**:
+- **Pendências (15/10, 18h25)**:
     1. **Loja e economia**: brainstorm em andamento (decisões e onde
-       paramos no fim de `docs/checkpoint.md`). Próximo: nomes dos irmãos
-       da Poké Mart, depois números, spec e SPEC atualizado. Nada de
+       paramos no fim de `docs/checkpoint.md`). Irmãos da Poké Mart
+       definidos (Ioli e Bento); próximo: números, spec e SPEC atualizado. Nada de
        código antes da spec aprovada.
     2. Deploy (VPS/Oracle free tier; Reverb como processo próprio).
     3. PWA por último (instalar no celular exige `https`: só com deploy).
-    4. Apagar o branch local `fase5` (já está no `main`).
 - **Decidido em 15/10 à tarde**: feed só com shiny e lendário (raro
   saiu); selo "Nº 1" virou a plaquinha dourada `FirstMintSeal`; dock de
   7 botões aprovado no celular; `SPEC.md` com fases 1–4 marcadas.

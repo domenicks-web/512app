@@ -565,9 +565,37 @@ pushado pro `main`.
   média, ~160px). Tudo entra pelo `pokedex:sync` (regra 6). Meowth já tem
   GIF animado no storage. Animações dos personagens em CSS (respirar,
   piscar, tremer ao falar).
-- **Onde paramos**: os atendentes são **irmãos que cuidam da Poké Mart
-  da família** (dos avós), personalidades opostas. Falta: **nomes dos
-  irmãos** (próxima sessão), depois preços e ganhos de cada moeda,
-  calendário do Mercado Rocket, marcos de pontos, e então a spec e o
-  SPEC atualizado (tirar "Economia com moeda" da seção 10, reescrever
-  a regra 7.4: proibido é dinheiro real, não loja com moeda do jogo).
+- **Personagens da Poké Mart (15/10, 18h20)**: os irmãos que cuidam da
+  loja da família. **Iolanda, "Ioli"** (animada, vendedora, quer
+  modernizar: a rotação semanal de packs é ideia dela) e **Bento** (seco,
+  organizado, cuida do estoque, quer manter tudo como o avô deixou).
+  Piada recorrente: a loja se chama **"Poké Mart da Vó Iolanda"** e a
+  Ioli herdou o nome da vó, que ela ama, mas odeia o nome. Primeira
+  visita: "Pode me chamar de Ioli. *Só* Ioli." Bento chama de "Iolanda"
+  pra provocar ("Iolanda, o cliente tá esperando." / "IOLI."), sorteado
+  no servidor de vez em quando; chama pelo nome inteiro quando ela
+  exagera vendendo; num marco grande (151 completas) ele diz "Parabéns…
+  Ioli." e ela fica sem reação.
+- **Assets em `assets_ai/` (revisados em 15/10)**: grids de 9 poses dos
+  irmãos e do Oak, mesma ordem (parado, acena, apresenta, comemora,
+  surpreso, pensa, aponta, caixa, reverência; o Oak ri com a mão na
+  cintura no lugar de comemorar). **O Oak de IA substitui o `oak.png` do
+  Showdown** (estilo igual aos irmãos); a Equipe Rocket também deve vir
+  da IA num grid igual (o usuário gera). `assets_store.png`: balcão vazio
+  com prateleira (separar em camada de trás e tampo da frente, irmão no
+  meio) + interior da loja como fundo; transparência real, mas opaco em
+  253 e ruído 1–2 no alfa (normalizar). Grids e balcões com personagem
+  vêm com fundo branco: tirar por flood fill da borda (não por cor, senão
+  o jaleco do Oak some); recortar poses pelo contorno, não por grade
+  fixa (células desiguais, a pose apontando sai da célula); pixel ~3 px
+  nos grids e ~6–7 px nos balcões: reduzir à resolução nativa e casar a
+  escala com o balcão. Testar se a prateleira do balcão + a estante do
+  fundo poluem; se sim, só o tampo. Falta: cenário vazio do Laboratório.
+- **Onde paramos**: nomes e piada aprovados. Próximo: **números** (preços
+  e ganhos de cada moeda), calendário do Mercado Rocket, marcos de
+  pontos, e então a spec e o SPEC atualizado (tirar "Economia com moeda"
+  da seção 10, reescrever a regra 7.4: proibido é dinheiro real, não loja
+  com moeda do jogo).
+- Worktree `video-poc` (prova do vídeo em Remotion) apagada a pedido:
+  quando for fazer o vídeo, começar do zero. Branch `fase5` apagado.
+  O usuário fica só neste PC (Linux) pro jogo.
