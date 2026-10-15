@@ -115,7 +115,8 @@ está em `docs/checkpoint.md`. Ler lá quando precisar do porquê de algo.
   saiu); selo "Nº 1" virou a plaquinha dourada `FirstMintSeal`; dock de
   7 botões aprovado no celular; `SPEC.md` com fases 1–4 marcadas.
 - **Fora de escopo até atualizar o SPEC**: moeda/dust, loja, dinheiro
-  real (ideias do usuário, anotadas no histórico).
+  real (ideias do usuário, anotadas no histórico). Junto da loja, no
+  futuro: vender "renomear de novo" o apelido do espécime.
 
 ### Ambiente e contas
 

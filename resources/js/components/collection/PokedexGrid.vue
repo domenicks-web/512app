@@ -3,7 +3,7 @@ import { computed, ref } from 'vue';
 import CollectionCard from '@/components/collection/CollectionCard.vue';
 
 /**
- * As 151 em ordem de dex com o filtro Todas/Tenho/Faltam (Coleção e
+ * As 151 em ordem de dex com o filtro Todas/Tenho/Faltam, abrindo em Tenho (Coleção e
  * Cartão de Treinador). Só a que tem espécime abre a ficha. O filtro só
  * muda o que é exibido. No cartão de outro, `commonIds` (as espécies de
  * quem vê) liga o "Em comum": as que os dois têm, pra comparar.
@@ -56,7 +56,7 @@ const FILTERS = computed<{ key: Filter; label: string }[]>(() => [
         : [{ key: 'common' as const, label: 'Em comum' }]),
 ]);
 
-const filter = ref<Filter>('all');
+const filter = ref<Filter>('owned');
 
 const visibleSpecies = computed(() =>
     props.species.filter((entry) => {
