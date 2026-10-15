@@ -338,7 +338,8 @@
         inset: 0;
         pointer-events: none;
         background: radial-gradient(
-            circle at var(--mx, 50%) var(--my, 50%),
+            circle at var(--glare-x, var(--mx, 50%))
+                var(--glare-y, var(--my, 50%)),
             rgb(255 255 255 / 0.6),
             rgb(255 255 255 / 0) 55%
         );
@@ -447,7 +448,8 @@
        no shiny. Vale pro brilho redondo (`.card-glare`) e pra faixa. */
     .card-glare.card-glare-gold {
         background: radial-gradient(
-            circle at var(--mx, 50%) var(--my, 50%),
+            circle at var(--glare-x, var(--mx, 50%))
+                var(--glare-y, var(--my, 50%)),
             rgb(255 236 170 / 0.85),
             rgb(255 201 77 / 0.45) 22%,
             rgb(255 201 77 / 0) 55%
@@ -457,12 +459,14 @@
     .card-glare.card-glare-rainbow {
         background:
             radial-gradient(
-                circle at var(--mx, 50%) var(--my, 50%),
+                circle at var(--glare-x, var(--mx, 50%))
+                    var(--glare-y, var(--my, 50%)),
                 rgb(255 255 255 / 0.7),
                 rgb(255 255 255 / 0) 30%
             ),
             conic-gradient(
-                from 200deg at var(--mx, 50%) var(--my, 50%),
+                from 200deg at var(--glare-x, var(--mx, 50%))
+                    var(--glare-y, var(--my, 50%)),
                 rgb(255 95 158 / 0.45),
                 rgb(255 211 77 / 0.45),
                 rgb(93 255 176 / 0.45),
@@ -471,7 +475,8 @@
                 rgb(255 95 158 / 0.45)
             );
         mask-image: radial-gradient(
-            circle at var(--mx, 50%) var(--my, 50%),
+            circle at var(--glare-x, var(--mx, 50%))
+                var(--glare-y, var(--my, 50%)),
             #000 0,
             transparent 65%
         );

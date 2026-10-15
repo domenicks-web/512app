@@ -44,6 +44,8 @@ function reset(el: TiltElement): void {
     el.style.setProperty('--my', '50%');
     el.style.removeProperty('--shine');
     el.style.removeProperty('--shine-on');
+    el.style.removeProperty('--glare-x');
+    el.style.removeProperty('--glare-y');
 }
 
 function followGyro(el: TiltElement, full: boolean): () => void {
@@ -63,10 +65,15 @@ function followGyro(el: TiltElement, full: boolean): () => void {
         }
 
         // O brilho parte de fora (acima do topo) e entra com a inclinação.
+        // Ele tem as próprias variáveis: o foil usa `--mx`/`--my` como
+        // posição de um fundo em ladrilho, e fora de 0–100% aparece a
+        // emenda entre um ladrilho e o próximo (um risco na carta).
         const glare = glareFor(gx, gy);
         el.style.setProperty('--tilt', '1');
-        el.style.setProperty('--mx', `${glare.x.toFixed(1)}%`);
-        el.style.setProperty('--my', `${glare.y.toFixed(1)}%`);
+        el.style.setProperty('--mx', `${(50 + gx * 50).toFixed(1)}%`);
+        el.style.setProperty('--my', `${(50 + gy * 50).toFixed(1)}%`);
+        el.style.setProperty('--glare-x', `${glare.x.toFixed(1)}%`);
+        el.style.setProperty('--glare-y', `${glare.y.toFixed(1)}%`);
     });
 }
 

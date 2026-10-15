@@ -440,7 +440,11 @@ const tone = computed(() =>
                                 }"
                             />{{ specimen.nature }}
                         </div>
-                        <div class="text-[11px] font-bold" :class="tone.muted">
+                        <!-- No celular sai, pra ficha caber na tela. -->
+                        <div
+                            class="hidden text-[11px] font-bold sm:block"
+                            :class="tone.muted"
+                        >
                             {{ specimen.natureEffect }}
                         </div>
                     </div>
