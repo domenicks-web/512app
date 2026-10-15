@@ -76,7 +76,7 @@ const dims = computed(
                 backgroundSize: specimen.isShiny ? '300% 100%' : undefined,
                 boxShadow: look.shadow,
             }"
-            :aria-label="`${specimen.name}, ${look.label}, ${formatMint(specimen.mintNumber)}`"
+            :aria-label="`${specimen.nickname ? `${specimen.nickname}, ` : ''}${specimen.name}, ${look.label}, ${formatMint(specimen.mintNumber)}`"
             @click="$emit('open')"
         >
             <span
@@ -100,7 +100,8 @@ const dims = computed(
                         class="w-full truncate text-center leading-tight font-black"
                         :class="dims.text"
                         :style="{ color: look.card.nameInk }"
-                        >{{ specimen.name }}</span
+                        :title="specimen.nickname ? specimen.name : undefined"
+                        >{{ specimen.nickname ?? specimen.name }}</span
                     >
                     <span
                         class="my-0.5 flex items-center rounded-full leading-none font-black tracking-[0.06em] uppercase"

@@ -33,6 +33,8 @@ type FeedEntry =
           kind: 'opening';
           id: number;
           speciesName: string;
+          /** Apelido que o dono deu depois. */
+          nickname: string | null;
           mintNumber: number;
       })
     | (FeedBase & {
@@ -104,7 +106,13 @@ const look = (entry: FeedEntry) =>
                                 entry.kind === 'trade'
                                     ? entry.summary
                                     : formatMint(entry.mintNumber)
-                            }}
+                            }}<template
+                                v-if="
+                                    entry.kind === 'opening' && entry.nickname
+                                "
+                            >
+                                · “{{ entry.nickname }}”</template
+                            >
                         </span>
                     </div>
                     <div class="flex shrink-0 flex-col items-end gap-1.5">

@@ -32,6 +32,7 @@ class PresentSpecimenSheet
         return [
             ...(new PackSpecimenResource($specimen))->toArray($request),
             'canName' => $request->user()?->id === $specimen->user_id && $specimen->nickname === null,
+            'nicknameMaxLength' => (int) config('game.specimen.nickname_max_length'),
             'history' => [
                 [
                     'kind' => 'caught',

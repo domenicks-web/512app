@@ -128,6 +128,11 @@ const card =
                         class="text-faint-2 text-[11px] font-extrabold tracking-[0.14em] uppercase"
                         >{{ side.owner }}</span
                     >
+                    <span
+                        v-if="side.specimen.nickname"
+                        class="text-ink -mt-1 max-w-full truncate text-[17px] font-black"
+                        >{{ side.specimen.nickname }}</span
+                    >
                     <span class="text-ink -mt-1 text-[15px] font-black"
                         >{{ formatMint(side.specimen.mint)
                         }}<span

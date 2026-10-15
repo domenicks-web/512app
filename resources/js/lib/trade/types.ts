@@ -5,6 +5,8 @@ export type TradeSpecimen = {
     specimenId: number;
     speciesId: number;
     name: string;
+    /** Apelido do dono atual, se deu. */
+    nickname: string | null;
     rarityTier: Tier;
     isShiny: boolean;
     spritePath: string;

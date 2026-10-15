@@ -104,8 +104,12 @@ está em `docs/checkpoint.md`. Ler lá quando precisar do porquê de algo.
   tem sanção ativa some de tudo pelo `User::active()`), admin (`/admin`,
   sem atalho na UI).
 - **Pendências (15/10, 2h50; combinado continuar no dia seguinte)**:
-    1. Fase 5: **apelido no espécime** e **tilt com giroscópio** no
-       celular (hoje só `v-card-tilt` com mouse). Plano em
+    1. Fase 5 (branch `fase5`, CI verde, não testado no celular):
+       apelido no espécime, giroscópio (brilho das cartas; sensor só em
+       `https`, no S26+ pela flag
+       `chrome://flags/#unsafely-treat-insecure-origin-as-secure`), passo
+       "Opções" no cadastro, card do feed na Home, coleção do Cartão de
+       Treinador num botão. Spec em
        `docs/superpowers/specs/2026-10-15-fase5-design.md`.
     2. PWA por último (instalar no celular exige `https`: só com deploy).
     3. Deploy (VPS/Oracle free tier; Reverb como processo próprio).

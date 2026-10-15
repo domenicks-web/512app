@@ -28,8 +28,16 @@ export type PackSpecimen = {
         trainerId: number;
         nickname: string;
         fromNickname: string | null;
+        /** O apelido que este dono deu ao espécime. */
+        specimenNickname?: string | null;
         at: string;
     }[];
+    /** Apelido do dono atual (some na troca). */
+    nickname?: string | null;
+    /** Quem vê é o dono e ainda não deu apelido. */
+    canName?: boolean;
+    /** `game.specimen.nickname_max_length`. */
+    nicknameMaxLength?: number;
     seed: string;
     hash: string;
     caughtAt: string;

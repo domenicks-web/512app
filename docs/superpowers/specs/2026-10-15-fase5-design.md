@@ -82,14 +82,16 @@ já existem. O PWA fica pro fim, porque depende do deploy (`https`).
     no `:root`.
 - **Grade da coleção**: só o brilho do holo segue `--gx`/`--gy`, por CSS.
   As cartas não inclinam e não roda JS por carta.
-- **Carta grande** (a ficha e a carta da cerimônia do pack): o
-  `v-card-tilt` aceita o sensor como fonte, além do mouse. Inclinação
-  completa até `MAX_DEG`, com o mesmo `--mx`/`--my`/`--tilt` de hoje.
+- **Carta grande**: na implementação virou só a **luz** da arte da ficha
+  (foil e brilho seguem o celular, por `v-card-tilt.gyro`), sem girar o
+  bloco: ele é parte do modal, e sprite não se mexe (pedido antigo do
+  usuário). A cerimônia do pack ficou de fora: o sprite dela é animado
+  pelo `director.ts`, e um giro por cima brigaria com a animação.
 - `resources/js/lib/motionPreference.ts`, no mesmo molde do
   `soundPreference.ts` (localStorage com try/catch):
-  - O padrão é ligado quando o aparelho não exige permissão (Android) e
-    desligado quando exige (iOS, com
-    `DeviceOrientationEvent.requestPermission`).
+  - O padrão é ligado quando o navegador não exige permissão e desligado
+    quando exige (`DeviceOrientationEvent.requestPermission`: iOS e, como
+    se viu no teste, o Chrome 153 também).
   - Ligar no iOS chama `requestPermission()` dentro do toque. Se for
     negado, o interruptor volta pra desligado.
 - Com `prefers-reduced-motion: reduce`, nada se mexe, qualquer que seja a

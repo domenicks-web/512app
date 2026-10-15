@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
 import FirstMintSeal from '@/components/FirstMintSeal.vue';
 import { useMediaQuery } from '@/composables/useMediaQuery';
 import { formatDayMonth } from '@/lib/format';
@@ -22,6 +22,7 @@ import { vCardTilt } from '@/lib/cardTilt';
 import { vPixelFit } from '@/lib/pack/pixelFit';
 import { rarityLook } from '@/lib/pack/rarity';
 import type { PackSpecimen } from '@/lib/pack/types';
+import NicknameForm from './NicknameForm.vue';
 import PackModal from './PackModal.vue';
 
 /**
@@ -37,6 +38,24 @@ const props = defineProps<{
 }>();
 const isMobile = useMediaQuery('(max-width: 639.98px)');
 const emit = defineEmits<{ close: []; prev: []; next: [] }>();
+
+/** Apelidos dados agora, por espécime: a ficha é JSON e não recarrega. */
+const namedNow = ref<Record<number, string>>({});
+
+function nicknameOf(specimen: PackSpecimen): string | null {
+    return namedNow.value[specimen.id] ?? specimen.nickname ?? null;
+}
+
+/** No último dono (o atual), vale o apelido dado agora. */
+function historyNickname(specimen: PackSpecimen, k: number): string | null {
+    const isCurrent = k === (specimen.history?.length ?? 0) - 1;
+
+    return (
+        (isCurrent ? namedNow.value[specimen.id] : null) ??
+        specimen.history?.[k]?.specimenNickname ??
+        null
+    );
+}
 
 const caught = computed(() =>
     props.specimen
@@ -232,7 +251,20 @@ const tone = computed(() =>
                 class="flex min-w-0 flex-[1_1_360px] flex-col gap-4 px-5 pt-5 pb-5 sm:gap-[22px] sm:px-7 sm:pt-[30px] sm:pb-7"
             >
                 <div class="flex flex-col gap-2.5">
-                    <div class="flex items-baseline gap-2.5">
+                    <div
+                        v-if="nicknameOf(specimen)"
+                        class="flex flex-col gap-1"
+                    >
+                        <div
+                            class="text-[28px] leading-none font-black tracking-[-0.03em] break-words sm:text-[34px]"
+                        >
+                            {{ nicknameOf(specimen) }}
+                        </div>
+                        <div class="text-sm font-bold" :class="tone.muted">
+                            {{ specimen.name }} · #{{ specimen.dex }}
+                        </div>
+                    </div>
+                    <div v-else class="flex items-baseline gap-2.5">
                         <div
                             class="text-[28px] leading-none font-black tracking-[-0.03em] sm:text-[34px]"
                         >
@@ -277,6 +309,16 @@ const tone = computed(() =>
                             >Nº {{ pad(specimen.mint, 4) }}</span
                         >
                     </div>
+                    <NicknameForm
+                        v-if="
+                            light && specimen.canName && !namedNow[specimen.id]
+                        "
+                        :key="specimen.id"
+                        :specimen-id="specimen.id"
+                        :species-name="specimen.name"
+                        :max-length="specimen.nicknameMaxLength ?? 16"
+                        @named="(name) => (namedNow[specimen!.id] = name)"
+                    />
                 </div>
 
                 <div class="flex flex-col gap-2.5">
@@ -416,6 +458,15 @@ const tone = computed(() =>
                                       ? `Libertado: era de ${step.fromNickname}`
                                       : `Trocado: ${step.fromNickname} → ${step.nickname}`
                             }}</span>
+                            <span
+                                v-if="historyNickname(specimen, k)"
+                                :class="tone.soft"
+                            >
+                                · chamado
+                                <span class="font-black">{{
+                                    historyNickname(specimen, k)
+                                }}</span></span
+                            >
                             <span :class="tone.muted">
                                 · {{ formatDayMonth(step.at) }}</span
                             >
