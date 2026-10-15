@@ -2,6 +2,7 @@
 import { Link, router } from '@inertiajs/vue3';
 import { computed, ref } from 'vue';
 import FittedSprite from '@/components/FittedSprite.vue';
+import CollectionOverlay from '@/components/collection/CollectionOverlay.vue';
 import PokedexGrid from '@/components/collection/PokedexGrid.vue';
 import type { SpeciesEntry } from '@/components/collection/PokedexGrid.vue';
 import GroupScreen from '@/components/group/GroupScreen.vue';
@@ -73,6 +74,25 @@ const percent = computed(() =>
                   100,
           )
         : 0,
+);
+
+const isCollectionOpen = ref(false);
+
+/** Ordem dos tiers pra escolher o que aparece no botão da coleção. */
+const TIER_ORDER: Tier[] = ['comum', 'incomum', 'raro', 'lendario'];
+
+/** Até 5 espécies pra prévia do botão: shiny primeiro, depois a mais rara. */
+const previewSpecies = computed(() =>
+    props.collection.species
+        .filter((entry) => entry.specimenCount > 0)
+        .sort(
+            (a, b) =>
+                Number(b.shinyCount > 0) - Number(a.shinyCount > 0) ||
+                TIER_ORDER.indexOf(b.rarityTier as Tier) -
+                    TIER_ORDER.indexOf(a.rarityTier as Tier) ||
+                a.id - b.id,
+        )
+        .slice(0, 5),
 );
 
 const numbers = computed(() => [
@@ -327,30 +347,96 @@ const pill =
                 </ul>
             </section>
 
-            <section class="flex flex-col gap-3">
-                <h2 data-enter class="text-ink px-1 text-[17px] font-black">
-                    Coleção
-                </h2>
-                <PokedexGrid
-                    :species="collection.species"
-                    :loading-id="sheet.loadingId.value"
-                    :of-other="!trainer.isViewer"
-                    :common-ids="trainer.isViewer ? null : viewerSpeciesIds"
-                    :empty-common="`Você e ${trainer.nickname} ainda não têm nenhuma espécie em comum.`"
-                    :empty-owned="
+            <button
+                data-enter
+                type="button"
+                class="flex w-full cursor-pointer items-center gap-3.5 rounded-[22px] bg-white p-4 text-left shadow-[0_2px_4px_rgba(28,32,38,0.05),0_8px_18px_rgba(28,32,38,0.07)] transition-transform active:scale-[0.98]"
+                @click="isCollectionOpen = true"
+            >
+                <span class="flex min-w-0 flex-1 flex-col gap-2">
+                    <span class="flex items-baseline gap-2">
+                        <span class="text-ink text-[17px] font-black"
+                            >Coleção</span
+                        >
+                        <span class="text-soft text-sm font-extrabold"
+                            >{{ collection.ownedSpecies }}/{{
+                                collection.species.length
+                            }}
+                            espécies</span
+                        >
+                    </span>
+                    <span
+                        v-if="previewSpecies.length > 0"
+                        class="flex items-center gap-1"
+                        aria-hidden="true"
+                    >
+                        <span
+                            v-for="entry in previewSpecies"
+                            :key="entry.id"
+                            class="flex size-10 items-center justify-center rounded-full bg-[#eff0f2]"
+                        >
+                            <FittedSprite
+                                :src="`/storage/${entry.shinyCount > 0 ? entry.spriteShinyPath : entry.spritePath}`"
+                                :size="40"
+                                :padding="4"
+                            />
+                        </span>
+                    </span>
+                    <span v-else class="text-soft text-sm font-semibold">{{
                         trainer.isViewer
-                            ? 'Nenhuma espécie ainda. O pack de hoje te espera.'
+                            ? 'Nenhuma espécie ainda.'
                             : `${trainer.nickname} ainda não tem nenhuma espécie.`
-                    "
-                    :empty-missing="
-                        trainer.isViewer
-                            ? 'Você já tem todas. Que coleção!'
-                            : `${trainer.nickname} já tem todas!`
-                    "
-                    @open="sheet.open"
-                />
-            </section>
+                    }}</span>
+                </span>
+                <span
+                    class="text-ink flex h-10 shrink-0 items-center gap-1 rounded-full bg-[#eef0f2] px-4 text-sm font-black"
+                    >Ver
+                    <svg
+                        width="14"
+                        height="14"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2.8"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        aria-hidden="true"
+                    >
+                        <path d="M9 6l6 6-6 6" />
+                    </svg>
+                </span>
+            </button>
         </div>
+
+        <CollectionOverlay
+            :open="isCollectionOpen"
+            :title="
+                trainer.isViewer
+                    ? 'Sua coleção'
+                    : `Coleção de ${trainer.nickname}`
+            "
+            :subtitle="`${collection.ownedSpecies} de ${collection.species.length} espécies · ${collection.totalSpecimens} espécimes`"
+            @close="isCollectionOpen = false"
+        >
+            <PokedexGrid
+                :species="collection.species"
+                :loading-id="sheet.loadingId.value"
+                :of-other="!trainer.isViewer"
+                :common-ids="trainer.isViewer ? null : viewerSpeciesIds"
+                :empty-common="`Você e ${trainer.nickname} ainda não têm nenhuma espécie em comum.`"
+                :empty-owned="
+                    trainer.isViewer
+                        ? 'Nenhuma espécie ainda. O pack de hoje te espera.'
+                        : `${trainer.nickname} ainda não tem nenhuma espécie.`
+                "
+                :empty-missing="
+                    trainer.isViewer
+                        ? 'Você já tem todas. Que coleção!'
+                        : `${trainer.nickname} já tem todas!`
+                "
+                @open="sheet.open"
+            />
+        </CollectionOverlay>
 
         <SpecimenSheet
             :specimen="sheet.current.value"
