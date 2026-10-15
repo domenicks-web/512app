@@ -414,12 +414,12 @@ const tone = computed(() =>
                             :key="k"
                             class="text-[13px] font-bold"
                         >
-                            <span class="text-ink">{{
+                            <span :style="{ color: tone.value }">{{
                                 step.kind === 'caught'
                                     ? `Capturado por ${step.nickname}`
                                     : `Trocado: ${step.fromNickname} → ${step.nickname}`
                             }}</span>
-                            <span class="text-soft">
+                            <span :class="tone.muted">
                                 · {{ formatDayMonth(step.at) }}</span
                             >
                         </li>
