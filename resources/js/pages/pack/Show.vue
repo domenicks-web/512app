@@ -844,7 +844,16 @@ onBeforeUnmount(() => {
              voltar à esquerda, mudo à direita. No escuro da abertura os dois
              ficam translúcidos, pra não brigar com a cena; no resumo claro,
              brancos como no resto do app, com o título ao lado. -->
-        <div class="pointer-events-none absolute top-0 right-0 left-0 z-20">
+        <div
+            class="pointer-events-none absolute top-0 right-0 left-0 z-20 transition-colors"
+            :class="
+                scene.phase === 'summary'
+                    ? 'bg-[#eff0f2]/92 pb-3 backdrop-blur-md'
+                    : ''
+            "
+        >
+            <!-- No resumo o conteúdo rola por baixo: o fundo do topo
+                 esconde o que passa, em vez de o título ficar por cima. -->
             <div
                 class="mx-auto flex w-full max-w-[calc(880px+2*clamp(16px,5vw,56px))] items-center gap-4 px-[clamp(16px,5vw,56px)] pt-[22px]"
             >
