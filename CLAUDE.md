@@ -515,3 +515,28 @@ pushado pro `main`.
       pack pago aleatório + trocas ≈ caixa de recompensa, ECA Digital).
       Se for monetizar de verdade, versão com criaturas próprias, com
       advogado antes. Trend no Instagram só depois dessa decisão.
+- **Fase 4A, trocas (14/10, noite; branch `trocas`, local, não mergeada
+  nem enviada)**: spec `docs/superpowers/specs/2026-10-14-trocas-design.md`,
+  plano `docs/superpowers/plans/2026-10-14-trocas.md`. Backend pelo Kimi
+  (Tasks 1–6 e backend das 8 e 9: Actions em `app/Actions/Trades/`,
+  `specimen_transfers`, `pendingTrades`, montador, histórico, feed), front
+  pelo Claude (`/trocas`, `components/trade/*`, montador
+  `trades/Create`, cerimônia `lib/trade/director.ts` +
+  `TradeCeremony`). `composer ci:check` verde (323 testes).
+    - Testado com o usuário: Lin#0741 e Claude#9805 viraram amigos;
+      contraproposta da Lin aceita pela Claude (troca 2). Usuário achou a
+      cerimônia "muito boa". Corrigido depois: cerimônia fechava sozinha
+      pro proponente (o POST de "visto" recarregava `ceremony` nulo: o
+      `Index` guarda a cena em `playing`), cartas do resumo apareciam e
+      reentravam, e o giro em Y mostrava o verso espelhado.
+    - **Pendente ao pausar**: troca 4 (Claude dá Jolteon + Nidoking, pede
+      o Seel da Lin) esperando o usuário aceitar pra conferir a cerimônia
+      corrigida. Depois: Task 11 (SPEC + checkpoint), merge no `main` e
+      push.
+    - O usuário levou um susto: a cerimônia de quem propôs aparece ao
+      abrir Trocas sem aviso nenhum (o contador do dock só conta
+      recebidas). Ofereci contar também as aceitas não vistas no dock;
+      sem resposta. A 4B resolve com a notificação.
+    - Próximo: **4B** (Reverb + notificação animada com som; dividir com
+      o Kimi: eventos no servidor com ele, notificação com o Claude), depois
+      **4C** (banimento).
