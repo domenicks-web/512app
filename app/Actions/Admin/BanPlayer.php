@@ -60,15 +60,16 @@ class BanPlayer
     private function release(User $target): void
     {
         $system = User::system();
-        $ids = Specimen::query()->withoutGlobalScopes()->where('user_id', $target->id)->lockForUpdate()->pluck('id');
+        $specimens = Specimen::query()->withoutGlobalScopes()->where('user_id', $target->id)->lockForUpdate()->get(['id', 'nickname']);
 
-        SpecimenTransfer::query()->insert($ids->map(fn (int $id): array => [
-            'specimen_id' => $id,
+        SpecimenTransfer::query()->insert($specimens->map(fn (Specimen $specimen): array => [
+            'specimen_id' => $specimen->id,
             'from_user_id' => $target->id,
             'to_user_id' => $system->id,
             'trade_id' => null,
+            'nickname' => $specimen->nickname,
             'transferred_at' => now(),
         ])->all());
-        Specimen::query()->withoutGlobalScopes()->whereKey($ids)->update(['user_id' => $system->id]);
+        Specimen::query()->withoutGlobalScopes()->whereKey($specimens->modelKeys())->update(['user_id' => $system->id, 'nickname' => null]);
     }
 }

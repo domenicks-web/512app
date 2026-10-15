@@ -62,14 +62,16 @@ class AcceptTrade
             foreach ($items as $item) {
                 $from = $this->giver($locked, $item);
                 $to = $from === $locked->from_user_id ? $locked->to_user_id : $locked->from_user_id;
-                $specimens->get($item->specimen_id)?->forceFill(['user_id' => $to])->save();
+                $specimen = $specimens->get($item->specimen_id);
                 SpecimenTransfer::create([
                     'specimen_id' => $item->specimen_id,
                     'from_user_id' => $from,
                     'to_user_id' => $to,
                     'trade_id' => $locked->id,
+                    'nickname' => $specimen?->nickname,
                     'transferred_at' => now(),
                 ]);
+                $specimen?->forceFill(['user_id' => $to, 'nickname' => null])->save();
             }
 
             $this->cancelUnavailable(Trade::query()
