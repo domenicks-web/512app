@@ -118,6 +118,8 @@ está em `docs/checkpoint.md`. Ler lá quando precisar do porquê de algo.
 - **Decidido em 15/10 à tarde**: feed só com shiny e lendário (raro
   saiu); selo "Nº 1" virou a plaquinha dourada `FirstMintSeal`; dock de
   7 botões aprovado no celular; `SPEC.md` com fases 1–4 marcadas.
+- **Descartado (15/10)**: arrastar pro lado pra trocar de tela no celular
+  (muito trabalho e risco de usabilidade ruim). Não sugerir de novo.
 - **Fora de escopo até atualizar o SPEC**: moeda/dust, loja, dinheiro
   real (ideias do usuário, anotadas no histórico). Junto da loja, no
   futuro: vender "renomear de novo" o apelido do espécime.

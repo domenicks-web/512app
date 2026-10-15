@@ -411,9 +411,9 @@ construir o resto.
 
 ### Fase 5, o polimento
 
-- [ ] Tilt com giroscópio no celular
+- [x] Tilt com giroscópio no celular (brilho na grade, ficha inteira; só em `https`)
 - [x] Som de abertura
-- [ ] Apelido no espécime
+- [x] Apelido no espécime (um por dono; na troca vai pro histórico)
 - [x] Feed do grupo (só shiny e lendário, aberturas e trocas)
 
 ---
