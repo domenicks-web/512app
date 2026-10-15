@@ -60,7 +60,7 @@ const mintHighlight = computed(() =>
 <template>
     <button
         v-if="owned"
-        v-card-tilt="skin.tilt"
+        v-card-tilt.shine="skin.tilt"
         type="button"
         class="group relative w-full cursor-pointer rounded-[20px] text-left transition-transform duration-200 hover:-translate-y-1 active:scale-[0.97]"
         :class="[

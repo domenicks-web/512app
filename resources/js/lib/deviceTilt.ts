@@ -30,6 +30,29 @@ let frame = 0;
 
 const clamp = (value: number) => Math.min(Math.max(value, -1), 1);
 
+/**
+ * Onde o reflexo fica pra uma inclinação. Parado (0, 0), fora da carta,
+ * pra não ficar em cima do sprite de quem não quer girar o celular; entra
+ * conforme inclina. `shine`: posição da faixa da grade (0% é fora).
+ * `x`/`y`: centro do brilho da ficha (y negativo é acima do topo).
+ */
+export function glareFor(
+    gx: number,
+    gy: number,
+): {
+    shine: number;
+    x: number;
+    y: number;
+} {
+    const amount = Math.min(Math.hypot(gx, gy), 1);
+
+    return {
+        shine: Math.min(Math.max(amount * 50 + gx * 8, 0), 100),
+        x: 50 + gx * 50,
+        y: -35 + amount * 85,
+    };
+}
+
 function reducedMotion(): boolean {
     return matchMedia('(prefers-reduced-motion: reduce)').matches;
 }
@@ -58,6 +81,10 @@ function publish(): void {
     const root = document.documentElement;
     root.style.setProperty('--mx', `${(50 + current.gx * 50).toFixed(1)}%`);
     root.style.setProperty('--my', `${(50 + current.gy * 50).toFixed(1)}%`);
+    root.style.setProperty(
+        '--shine',
+        `${glareFor(current.gx, current.gy).shine.toFixed(1)}%`,
+    );
     listeners.forEach((listener) => listener(current));
 }
 
@@ -122,6 +149,7 @@ function stop(): void {
     root.classList.remove('has-gyro');
     root.style.removeProperty('--mx');
     root.style.removeProperty('--my');
+    root.style.removeProperty('--shine');
     current = { gx: 0, gy: 0 };
     listeners.forEach((listener) => listener(current));
 }

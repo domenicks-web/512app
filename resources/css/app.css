@@ -413,8 +413,10 @@
 
     /* Com o giroscópio (`deviceTilt.ts`), quem move é o celular: o foil da
        grade herda o `--mx`/`--my` do <html> e corre junto em todas. */
-    /* Reflexo que segue o celular em toda carta, até a comum, que não tem
-       foil: só aparece com o giroscópio ligado e lendo. */
+    /* Reflexo em toda carta, até a comum, que não tem foil: segue o celular
+       (`--shine` do <html>, com o giroscópio lendo) ou o mouse (`--shine`
+       e `--shine-on` locais, do `v-card-tilt.shine`). Em `--shine: 0%` a
+       faixa fica fora da carta: parado, nada em cima do sprite. */
     .card-gyro-glare {
         position: absolute;
         inset: 0;
@@ -430,15 +432,15 @@
             rgb(255 255 255 / 0) 57%
         );
         background-size: 260% 260%;
-        background-position: var(--mx, 50%) var(--my, 50%);
-        opacity: 0;
+        background-position: var(--shine, 0%) var(--shine, 0%);
+        opacity: var(--shine-on, 0);
         transition:
             opacity 0.3s ease-out,
             background-position 0.15s linear;
     }
 
-    .has-gyro .card-gyro-glare {
-        opacity: 1;
+    .has-gyro {
+        --shine-on: 1;
     }
 
     .has-gyro .card-foil-interactive,

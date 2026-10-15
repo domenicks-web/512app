@@ -1,5 +1,5 @@
 import type { Directive } from 'vue';
-import { onDeviceTilt } from '@/lib/deviceTilt';
+import { glareFor, onDeviceTilt } from '@/lib/deviceTilt';
 
 /**
  * `v-card-tilt="ligado"`: a carta inclina seguindo o mouse e passa pro CSS
@@ -42,6 +42,8 @@ function reset(el: TiltElement): void {
     el.style.setProperty('--tilt', '0');
     el.style.setProperty('--mx', '50%');
     el.style.setProperty('--my', '50%');
+    el.style.removeProperty('--shine');
+    el.style.removeProperty('--shine-on');
 }
 
 function followGyro(el: TiltElement, full: boolean): () => void {
@@ -60,17 +62,20 @@ function followGyro(el: TiltElement, full: boolean): () => void {
             el.style.transform = `perspective(900px) rotateX(${(-gy * MAX_DEG).toFixed(2)}deg) rotateY(${(gx * MAX_DEG).toFixed(2)}deg)`;
         }
 
+        // O brilho parte de fora (acima do topo) e entra com a inclinação.
+        const glare = glareFor(gx, gy);
         el.style.setProperty('--tilt', '1');
-        el.style.setProperty('--mx', `${(50 + gx * 50).toFixed(1)}%`);
-        el.style.setProperty('--my', `${(50 + gy * 50).toFixed(1)}%`);
+        el.style.setProperty('--mx', `${glare.x.toFixed(1)}%`);
+        el.style.setProperty('--my', `${glare.y.toFixed(1)}%`);
     });
 }
 
 export const vCardTilt: Directive<TiltElement, boolean> = {
     mounted(el, binding) {
-        // `.gyro` é só do celular: com mouse a arte da ficha fica como era.
-        if (binding.modifiers.gyro) {
-            if (!canTilt() && binding.value) {
+        // `.gyro` no celular segue o giroscópio; com mouse, a luz segue o
+        // cursor, sem girar (a ficha é larga no computador).
+        if (binding.modifiers.gyro && !canTilt()) {
+            if (binding.value) {
                 el.__gyro = followGyro(el, !!binding.modifiers.full);
             }
 
@@ -81,8 +86,13 @@ export const vCardTilt: Directive<TiltElement, boolean> = {
             return;
         }
 
+        // `.shine` e `.gyro`: mesmo sem inclinar (`false`), o reflexo segue o
+        // mouse, pra carta comum também brilhar.
+        const lightOnly =
+            !!binding.modifiers.shine ||
+            (!!binding.modifiers.gyro && binding.value);
         const state: NonNullable<TiltElement['__tilt']> = {
-            enabled: binding.value,
+            enabled: binding.value && !binding.modifiers.gyro,
             frame: 0,
             onEnter: () => {
                 if (state.enabled) {
@@ -90,7 +100,7 @@ export const vCardTilt: Directive<TiltElement, boolean> = {
                 }
             },
             onMove: (event) => {
-                if (!state.enabled || state.frame) {
+                if ((!state.enabled && !lightOnly) || state.frame) {
                     return;
                 }
 
@@ -106,8 +116,16 @@ export const vCardTilt: Directive<TiltElement, boolean> = {
                         Math.max((clientY - box.top) / box.height, 0),
                         1,
                     );
-                    el.style.transform = `perspective(700px) rotateX(${((0.5 - y) * 2 * MAX_DEG).toFixed(2)}deg) rotateY(${((x - 0.5) * 2 * MAX_DEG).toFixed(2)}deg)`;
+                    if (state.enabled) {
+                        el.style.transform = `perspective(700px) rotateX(${((0.5 - y) * 2 * MAX_DEG).toFixed(2)}deg) rotateY(${((x - 0.5) * 2 * MAX_DEG).toFixed(2)}deg)`;
+                    }
+
                     el.style.setProperty('--tilt', '1');
+                    el.style.setProperty('--shine-on', '1');
+                    el.style.setProperty(
+                        '--shine',
+                        `${(15 + ((x + y) / 2) * 70).toFixed(1)}%`,
+                    );
                     el.style.setProperty('--mx', `${(x * 100).toFixed(1)}%`);
                     el.style.setProperty('--my', `${(y * 100).toFixed(1)}%`);
                 });
