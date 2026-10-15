@@ -3,10 +3,18 @@ import { Link, router } from '@inertiajs/vue3';
 import { computed, nextTick, onBeforeUnmount, onMounted, ref } from 'vue';
 import TrainerAvatar from '@/components/group/TrainerAvatar.vue';
 import TradeCard from '@/components/trade/TradeCard.vue';
+import { prefersReducedMotion } from '@/lib/motion';
+import { FxCanvas } from '@/lib/pack/fx';
+import { rgba } from '@/lib/pack/meta';
 import { Sfx } from '@/lib/pack/sfx';
 import type { Tier } from '@/lib/pack/types';
 import { isSoundMuted } from '@/lib/soundPreference';
-import { playTradeCeremony } from '@/lib/trade/director';
+import {
+    ceremonyColor,
+    ceremonyLevel,
+    playTradeCeremony,
+    settleSummary,
+} from '@/lib/trade/director';
 import type { TradeCeremonyData } from '@/lib/trade/types';
 import { show as collectionShow } from '@/routes/collection';
 import { seen } from '@/routes/trades';
@@ -14,8 +22,10 @@ import { seen } from '@/routes/trades';
 /**
  * Cerimônia da troca: mesa → cartas cruzando → círculo branco → resumo
  * (Você recebeu em destaque, com "Nova na Pokédex!"; Você deu menor). Um
- * toque durante a animação pula pro resumo. Tudo que aparece veio pronto
- * do servidor.
+ * toque durante a animação pula pro resumo. Escala com o melhor recebido
+ * (ver `ceremonyLevel`): do raro pra cima halo, partículas e carga antes
+ * de cruzar; lendário e shiny com raios, chuva, tremida e brilho que fica
+ * no resumo. Tudo que aparece veio pronto do servidor.
  */
 const props = defineProps<{ data: TradeCeremonyData }>();
 const emit = defineEmits<{ close: [] }>();
@@ -23,6 +33,8 @@ const emit = defineEmits<{ close: [] }>();
 // O SSR do Inertia não injeta teleport no <body> (ver ConfirmDialog).
 const isMounted = ref(false);
 const root = ref<HTMLElement | null>(null);
+const canvas = ref<HTMLCanvasElement | null>(null);
+let fx: FxCanvas | null = null;
 const done = ref(false);
 const sfx = new Sfx();
 const TIER_ORDER: Tier[] = ['comum', 'incomum', 'raro', 'lendario'];
@@ -32,8 +44,14 @@ const best = computed(() => {
         Number(s.isShiny) * 10 + TIER_ORDER.indexOf(s.rarityTier);
     const top = [...props.data.received].sort((a, b) => score(b) - score(a))[0];
 
-    return { tier: top?.rarityTier ?? 'comum', shiny: top?.isShiny ?? false };
+    return {
+        id: top?.specimenId ?? null,
+        tier: top?.rarityTier ?? 'comum',
+        shiny: top?.isShiny ?? false,
+    };
 });
+const level = computed(() => ceremonyLevel(best.value));
+const color = computed(() => ceremonyColor(best.value));
 
 function skip() {
     if (done.value || !root.value) {
@@ -49,6 +67,8 @@ function skip() {
     }
 
     done.value = true;
+    sfx.rumble(0);
+    settleSummary(root.value, fx, best.value);
 }
 
 onMounted(async () => {
@@ -66,14 +86,27 @@ onMounted(async () => {
 
     await nextTick();
 
+    if (canvas.value) {
+        fx = new FxCanvas(canvas.value, prefersReducedMotion());
+    }
+
     if (root.value) {
-        await playTradeCeremony(root.value, sfx.on ? sfx : null, best.value);
+        await playTradeCeremony(
+            root.value,
+            sfx.on ? sfx : null,
+            fx,
+            best.value,
+            () => done.value,
+        );
     }
 
     done.value = true;
 });
 
-onBeforeUnmount(() => sfx.close());
+onBeforeUnmount(() => {
+    fx?.destroy();
+    sfx.close();
+});
 </script>
 
 <template>
@@ -85,30 +118,68 @@ onBeforeUnmount(() => sfx.close());
             aria-label="Troca feita"
             @click="skip"
         >
-            <div
-                data-k="row-received"
-                class="absolute inset-x-0 top-[14%] flex justify-center gap-3"
-            >
+            <div data-k="stage" class="absolute inset-0">
                 <div
-                    v-for="s in data.received"
-                    :key="s.specimenId"
-                    data-k="received"
+                    data-k="halo"
+                    class="pointer-events-none absolute size-[420px] rounded-full opacity-0"
+                    :style="{
+                        background: `radial-gradient(circle, ${rgba(color, 0.55)}, ${rgba(color, 0)} 65%)`,
+                    }"
+                />
+                <div
+                    v-if="level >= 3"
+                    data-k="rays"
+                    class="pointer-events-none absolute size-[640px] rounded-full opacity-0"
+                    :style="{
+                        background:
+                            level === 4
+                                ? 'repeating-conic-gradient(from 0deg, rgba(77,217,232,0.5) 0 6deg, rgba(255,255,255,0) 6deg 18deg, rgba(199,164,255,0.45) 18deg 24deg, rgba(255,255,255,0) 24deg 36deg)'
+                                : 'repeating-conic-gradient(from 0deg, rgba(255,201,77,0.55) 0 7deg, rgba(255,201,77,0) 7deg 24deg)',
+                        maskImage:
+                            'radial-gradient(circle, #000 15%, transparent 68%)',
+                    }"
+                />
+                <div
+                    data-k="row-received"
+                    class="absolute inset-x-0 top-[14%] flex justify-center gap-3"
                 >
-                    <TradeCard :specimen="s" size="md" />
+                    <div
+                        v-for="s in data.received"
+                        :key="s.specimenId"
+                        data-k="received"
+                    >
+                        <div
+                            :data-k="
+                                s.specimenId === best.id
+                                    ? 'received-best'
+                                    : undefined
+                            "
+                        >
+                            <TradeCard :specimen="s" size="md" />
+                        </div>
+                    </div>
+                </div>
+                <div
+                    data-k="flash"
+                    class="absolute top-1/2 left-1/2 -mt-16 -ml-16 size-32 rounded-full bg-white opacity-0 blur-md"
+                />
+                <div
+                    data-k="row-given"
+                    class="absolute inset-x-0 bottom-[14%] flex justify-center gap-3"
+                >
+                    <div
+                        v-for="s in data.given"
+                        :key="s.specimenId"
+                        data-k="given"
+                    >
+                        <TradeCard :specimen="s" size="md" />
+                    </div>
                 </div>
             </div>
             <div
-                data-k="flash"
-                class="absolute top-1/2 left-1/2 -mt-16 -ml-16 size-32 rounded-full bg-white opacity-0 blur-md"
+                data-k="screen-flash"
+                class="pointer-events-none absolute inset-0 bg-white opacity-0"
             />
-            <div
-                data-k="row-given"
-                class="absolute inset-x-0 bottom-[14%] flex justify-center gap-3"
-            >
-                <div v-for="s in data.given" :key="s.specimenId" data-k="given">
-                    <TradeCard :specimen="s" size="md" />
-                </div>
-            </div>
 
             <section
                 data-k="summary"
@@ -136,7 +207,33 @@ onBeforeUnmount(() => sfx.close());
                             data-k="summary-card"
                             class="relative"
                         >
-                            <TradeCard :specimen="s" size="lg" />
+                            <span
+                                v-if="s.specimenId === best.id && level >= 2"
+                                aria-hidden="true"
+                                class="pointer-events-none absolute top-1/2 left-1/2 -z-10 -translate-x-1/2 -translate-y-1/2 rounded-full"
+                                :class="
+                                    level >= 3
+                                        ? 'size-[300px] motion-safe:animate-[spin_14s_linear_infinite]'
+                                        : 'size-[220px]'
+                                "
+                                :style="{
+                                    background:
+                                        level >= 3
+                                            ? `repeating-conic-gradient(from 0deg, ${rgba(color, 0.45)} 0 8deg, ${rgba(color, 0)} 8deg 26deg)`
+                                            : `radial-gradient(circle, ${rgba(color, 0.4)}, ${rgba(color, 0)} 65%)`,
+                                    maskImage:
+                                        'radial-gradient(circle, #000 20%, transparent 70%)',
+                                }"
+                            />
+                            <div
+                                :data-k="
+                                    s.specimenId === best.id
+                                        ? 'summary-best'
+                                        : undefined
+                                "
+                            >
+                                <TradeCard :specimen="s" size="lg" />
+                            </div>
                             <span
                                 v-if="data.newSpeciesIds.includes(s.speciesId)"
                                 class="bg-brand absolute -top-2 left-1/2 -translate-x-1/2 rounded-full px-2.5 py-1 text-[10px] font-black tracking-[0.06em] whitespace-nowrap text-white uppercase shadow-[0_6px_14px_rgba(242,77,77,0.4)]"
@@ -176,6 +273,11 @@ onBeforeUnmount(() => sfx.close());
                     </button>
                 </div>
             </section>
+            <canvas
+                ref="canvas"
+                aria-hidden="true"
+                class="pointer-events-none fixed inset-0 z-[1] size-full"
+            />
         </div>
     </Teleport>
 </template>

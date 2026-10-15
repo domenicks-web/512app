@@ -2,11 +2,12 @@ import { computed, ref } from 'vue';
 import type { PackSpecimen } from '@/lib/pack/types';
 
 /**
- * Ficha de espécimes de uma espécie (Coleção e Cartão de Treinador): busca
+ * Ficha de espécimes de uma espécie (Coleção e Cartão de Treinador) ou de
+ * um espécime só (Trocas, com o id dele no lugar da espécie): busca
  * o JSON da espécie tocada e anda entre os espécimes, um de cada vez. O
  * resto do JSON (ex.: `viewerSpecimenId`) fica em `extra`.
  */
-export function useSpecimenSheet(urlFor: (speciesId: number) => string) {
+export function useSpecimenSheet(urlFor: (id: number) => string) {
     const specimens = ref<PackSpecimen[]>([]);
     const index = ref(0);
     const loadingId = ref<number | null>(null);

@@ -12,9 +12,10 @@ import { create as counterCreate } from '@/routes/trades/counter';
 /**
  * Uma proposta na caixa: quem, a mensagem, a mesa em miniatura (você dá ⇄
  * você recebe), a validade e as ações do lado de quem vê. Recusar e
- * cancelar pedem Sim/Não na própria linha.
+ * cancelar pedem Sim/Não na própria linha. Tocar numa carta abre a ficha.
  */
 const props = defineProps<{ offer: TradeOffer; expiresAfterHours: number }>();
+defineEmits<{ open: [specimenId: number] }>();
 
 const confirming = ref(false);
 
@@ -87,6 +88,7 @@ const closedText = () =>
                         :key="s.specimenId"
                         :specimen="s"
                         size="sm"
+                        @open="$emit('open', s.specimenId)"
                     />
                 </div>
             </div>
@@ -103,6 +105,7 @@ const closedText = () =>
                         :key="s.specimenId"
                         :specimen="s"
                         size="sm"
+                        @open="$emit('open', s.specimenId)"
                     />
                 </div>
             </div>

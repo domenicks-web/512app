@@ -15,6 +15,7 @@ use App\Http\Controllers\Pack\PackController;
 use App\Http\Controllers\Profile\ProfileController;
 use App\Http\Controllers\Profile\ShowProfileController;
 use App\Http\Controllers\Ranking\ShowRankingController;
+use App\Http\Controllers\Specimen\ShowSpecimenController;
 use App\Http\Controllers\Trades\ShowTradesController;
 use App\Http\Controllers\Trades\TradeBuilderController;
 use App\Http\Controllers\Trades\TradeController;
@@ -47,6 +48,7 @@ Route::middleware(['auth', 'onboarded'])->group(function () {
     Route::patch('pack/client-seed', [ClientSeedController::class, 'update'])->name('pack.client-seed.update');
     Route::get('treinador/{user}', ShowTrainerController::class)->whereNumber('user')->name('trainer.show');
     Route::get('treinador/{user}/colecao/{species}', ShowTrainerSpeciesController::class)->whereNumber(['user', 'species'])->name('trainer.species');
+    Route::get('especime/{specimen}', ShowSpecimenController::class)->whereNumber('specimen')->name('specimens.show');
     Route::get('comparar/{mine}/{theirs}', CompareSpecimensController::class)->whereNumber(['mine', 'theirs'])->name('compare.show');
     Route::get('verificar', [VerifyPackController::class, 'show'])->name('verify.show');
     Route::post('verificar', [VerifyPackController::class, 'store'])->middleware('throttle:30,1')->name('verify.store');

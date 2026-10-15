@@ -137,7 +137,11 @@ export class FxCanvas {
     }
 
     /** Faísca que nasce longe e é puxada pro centro da bola (carga). */
-    attract(cx: number, cy: number): void {
+    attract(
+        cx: number,
+        cy: number,
+        cols: [string, string] = ['#f24d4d', '#ffd9d9'],
+    ): void {
         const angle = rand(0, Math.PI * 2);
         const radius = rand(170, 340);
         this.particles.push({
@@ -148,7 +152,7 @@ export class FxCanvas {
             life: 1.2,
             max: 1.2,
             r: rand(1, 2.6),
-            col: Math.random() < 0.5 ? '#f24d4d' : '#ffd9d9',
+            col: Math.random() < 0.5 ? cols[0] : cols[1],
             g: 0,
             drag: 1,
             shape: 'spark',

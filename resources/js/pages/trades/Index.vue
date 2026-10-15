@@ -3,8 +3,10 @@ import { Link, router, usePoll } from '@inertiajs/vue3';
 import { computed, ref, watch } from 'vue';
 import GroupScreen from '@/components/group/GroupScreen.vue';
 import TrainerAvatar from '@/components/group/TrainerAvatar.vue';
+import SpecimenSheet from '@/components/pack/SpecimenSheet.vue';
 import TradeCeremony from '@/components/trade/TradeCeremony.vue';
 import TradeOfferCard from '@/components/trade/TradeOfferCard.vue';
+import { useSpecimenSheet } from '@/composables/useSpecimenSheet';
 import EntryLayout from '@/layouts/EntryLayout.vue';
 import GroupLayout from '@/layouts/GroupLayout.vue';
 import type {
@@ -12,6 +14,7 @@ import type {
     TradeOffer,
     TradeTrainer,
 } from '@/lib/trade/types';
+import { show as specimenShow } from '@/routes/specimens';
 import { create as tradeCreate, index as tradesIndex } from '@/routes/trades';
 
 defineOptions({ layout: [EntryLayout, GroupLayout] });
@@ -60,6 +63,9 @@ const empty = computed(
 );
 
 const picking = ref(false);
+
+// Ficha de um espécime só: numa troca concluída o dono já mudou.
+const sheet = useSpecimenSheet((id) => specimenShow.url(id));
 
 // A cerimônia toca quando o servidor manda (troca nova aceita, ou "Ver
 // resumo" de uma concluída) e fica até fechar: o aviso de "vi" recarrega a
@@ -180,9 +186,15 @@ function go(tab: string) {
                     data-enter
                     :offer="offer"
                     :expires-after-hours="expiresAfterHours"
+                    @open="(id) => sheet.open(id, id)"
                 />
             </div>
         </div>
+        <SpecimenSheet
+            :specimen="sheet.current.value"
+            light
+            @close="sheet.close"
+        />
         <TradeCeremony
             v-if="playing"
             :key="playing.tradeId"

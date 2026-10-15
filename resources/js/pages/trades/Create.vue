@@ -2,10 +2,13 @@
 import { router } from '@inertiajs/vue3';
 import { computed, ref } from 'vue';
 import GroupScreen from '@/components/group/GroupScreen.vue';
+import SpecimenSheet from '@/components/pack/SpecimenSheet.vue';
 import TradeCard from '@/components/trade/TradeCard.vue';
+import { useSpecimenSheet } from '@/composables/useSpecimenSheet';
 import EntryLayout from '@/layouts/EntryLayout.vue';
 import GroupLayout from '@/layouts/GroupLayout.vue';
 import type { BuilderSpecimen } from '@/lib/trade/types';
+import { show as specimenShow } from '@/routes/specimens';
 import { store } from '@/routes/trades';
 import { store as counterStore } from '@/routes/trades/counter';
 
@@ -14,7 +17,8 @@ defineOptions({ layout: [EntryLayout, GroupLayout] });
 /**
  * Montador da troca: a mesa (você dá / você recebe, até `limits.perSide`
  * de cada lado) fica no topo; embaixo, a coleção de um dos dois com
- * filtros. Os filtros só escondem o que o servidor mandou. Propor manda os
+ * filtros. Tocar na carta escolhe; o "i" do canto abre a ficha. Os
+ * filtros só escondem o que o servidor mandou. Propor manda os
  * ids; quem valida tudo é o servidor.
  */
 const props = defineProps<{
@@ -79,6 +83,7 @@ const visible = computed(() => {
     });
 });
 
+const sheet = useSpecimenSheet((id) => specimenShow.url(id));
 const side = computed(() => (owner.value === 'mine' ? give : receive));
 
 function toggle(id: number) {
@@ -140,6 +145,8 @@ function submit() {
                                 :key="id"
                                 :specimen="byId.get(id)!"
                                 size="sm"
+                                details
+                                @details="sheet.open(id, id)"
                                 @open="give = give.filter((x) => x !== id)"
                             />
                         </div>
@@ -163,6 +170,8 @@ function submit() {
                                 :key="id"
                                 :specimen="byId.get(id)!"
                                 size="sm"
+                                details
+                                @details="sheet.open(id, id)"
                                 @open="
                                     receive = receive.filter((x) => x !== id)
                                 "
@@ -245,6 +254,8 @@ function submit() {
                     <TradeCard
                         :specimen="s"
                         :selected="side.value.includes(s.specimenId)"
+                        details
+                        @details="sheet.open(s.specimenId, s.specimenId)"
                         @open="toggle(s.specimenId)"
                     />
                 </li>
@@ -256,5 +267,10 @@ function submit() {
                 Nada aqui com esse filtro.
             </p>
         </div>
+        <SpecimenSheet
+            :specimen="sheet.current.value"
+            light
+            @close="sheet.close"
+        />
     </GroupScreen>
 </template>

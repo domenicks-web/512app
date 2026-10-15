@@ -1,22 +1,75 @@
-import { animate, finished, wait } from '@/lib/motion';
+import { animate, finished, prefersReducedMotion, wait } from '@/lib/motion';
+import type { FxCanvas } from '@/lib/pack/fx';
+import { CYAN, GOLD, TIER_META } from '@/lib/pack/meta';
 import type { Sfx } from '@/lib/pack/sfx';
 import type { Tier } from '@/lib/pack/types';
 
 /**
+ * Quanto a cerimônia capricha, pelo melhor espécime recebido: 0 comum,
+ * 1 incomum, 2 raro, 3 lendário, 4 shiny (qualquer tier). Cada nível
+ * soma ao anterior, no espírito da revelação do pack.
+ */
+export type CeremonyLevel = 0 | 1 | 2 | 3 | 4;
+
+const TIER_LEVEL: Record<Tier, CeremonyLevel> = {
+    comum: 0,
+    incomum: 1,
+    raro: 2,
+    lendario: 3,
+};
+
+export function ceremonyLevel(best: {
+    tier: Tier;
+    shiny: boolean;
+}): CeremonyLevel {
+    return best.shiny ? 4 : TIER_LEVEL[best.tier];
+}
+
+/** Cor do brilho da cerimônia: a da raridade, ciano no shiny. */
+export function ceremonyColor(best: { tier: Tier; shiny: boolean }): string {
+    return best.shiny ? CYAN : TIER_META[best.tier].glow;
+}
+
+function vibrate(pattern: number | number[]): void {
+    try {
+        navigator.vibrate?.(pattern);
+    } catch {
+        // sem vibração
+    }
+}
+
+function centerOf(el: Element | null): { x: number; y: number } {
+    const r = el?.getBoundingClientRect();
+
+    return r
+        ? { x: r.left + r.width / 2, y: r.top + r.height / 2 }
+        : { x: innerWidth / 2, y: innerHeight / 2 };
+}
+
+/**
  * Roteiro da cerimônia (WAAPI puro, como o pack): as cartas dadas sobem
- * e as recebidas descem, cruzando em arco com um giro de lado, flash no meio, as
- * recebidas brilham e o círculo branco cresce revelando o resumo. Com
- * movimento reduzido o `animate()` já encurta tudo.
+ * e as recebidas descem, cruzando em arco, flash no meio, as recebidas
+ * brilham e o círculo branco cresce revelando o resumo. Do raro pra cima
+ * a melhor carta carrega antes de cruzar (lendário e shiny com ronco e
+ * faíscas puxadas), a chegada ganha halo, partículas, raios, tremida e
+ * vibração, e o brilho continua em volta dela no resumo. `skipped()`
+ * interrompe o roteiro quando o jogador toca pra pular. Com movimento
+ * reduzido o `animate()` e o `wait()` já encurtam tudo.
  */
 export async function playTradeCeremony(
     root: HTMLElement,
     sfx: Sfx | null,
+    fx: FxCanvas | null,
     best: { tier: Tier; shiny: boolean },
+    skipped: () => boolean,
 ): Promise<void> {
     const $ = (k: string) => root.querySelector<HTMLElement>(`[data-k="${k}"]`);
     const all = (k: string) => [
         ...root.querySelectorAll<HTMLElement>(`[data-k="${k}"]`),
     ];
+    const level = ceremonyLevel(best);
+    const col = ceremonyColor(best);
+    const bestCard = $('received-best');
 
     all('given').forEach((card, i) =>
         animate(
@@ -47,6 +100,59 @@ export async function playTradeCeremony(
         ),
     );
     await wait(700);
+
+    if (skipped()) {
+        return;
+    }
+
+    // Carga: a melhor carta pulsa na cor dela antes de cruzar. Lendário e
+    // shiny seguram mais, com ronco subindo e faíscas puxadas pra carta.
+    if (level >= 2 && bestCard) {
+        const charge = level >= 3 ? 1300 : 600;
+        const glow = level >= 3 ? 26 : 14;
+        sfx?.rise();
+        animate(
+            bestCard,
+            [
+                { filter: 'brightness(1) drop-shadow(0 0 0 transparent)' },
+                {
+                    filter: `brightness(1.25) drop-shadow(0 0 ${glow}px ${col})`,
+                },
+                { filter: 'brightness(1) drop-shadow(0 0 4px transparent)' },
+            ],
+            charge / (level >= 3 ? 2 : 1),
+            { iterations: level >= 3 ? 2 : 1, easing: 'ease-in-out' },
+        );
+
+        if (level >= 3) {
+            const start = performance.now();
+            const tick = () => {
+                const t = Math.min(1, (performance.now() - start) / charge);
+                sfx?.rumble(skipped() ? 0 : t * 0.8);
+
+                if (fx && !skipped()) {
+                    const c = centerOf(bestCard);
+
+                    if (Math.random() < 0.6) {
+                        fx.attract(c.x, c.y, [col, '#ffffff']);
+                    }
+                }
+
+                if (t < 1 && !skipped()) {
+                    requestAnimationFrame(tick);
+                }
+            };
+            requestAnimationFrame(tick);
+        }
+
+        await wait(charge);
+        sfx?.rumble(0);
+        fx?.dropAttracted();
+
+        if (skipped()) {
+            return;
+        }
+    }
 
     sfx?.whoosh(true);
     // Cada fileira vai até a outra: as dadas sobem até onde estavam as
@@ -91,6 +197,11 @@ export async function playTradeCeremony(
         ),
     ];
     await wait(380);
+
+    if (skipped()) {
+        return;
+    }
+
     sfx?.burst();
     animate(
         $('flash'),
@@ -101,8 +212,27 @@ export async function playTradeCeremony(
         ],
         520,
     );
+
+    if (level >= 3) {
+        animate(
+            $('screen-flash'),
+            [
+                { opacity: level === 4 ? 1 : 0.75 },
+                { opacity: level === 4 ? 1 : 0.75, offset: 0.2 },
+                { opacity: 0 },
+            ],
+            level === 4 ? 520 : 380,
+            { easing: 'ease-out' },
+        );
+    }
+
     await Promise.all(moves.map(finished));
 
+    if (skipped()) {
+        return;
+    }
+
+    // Chegada: o acorde e o brilho de sempre; o resto cresce com o nível.
     sfx?.chord(best.tier, best.shiny);
     all('received').forEach((card) =>
         animate(
@@ -115,7 +245,150 @@ export async function playTradeCeremony(
             600,
         ),
     );
-    await wait(450);
+    const c = centerOf(bestCard);
+
+    if (level >= 1) {
+        fx?.emit(c.x, c.y, level >= 2 ? 60 : 24, {
+            cols: [col, '#ffffff', col],
+            sp: level >= 2 ? [3, 12] : [2, 7],
+            r: [1.5, 4],
+            g: 0.06,
+            drag: 0.94,
+            free: true,
+            life: [0.6, 1.4],
+        });
+    }
+
+    if (level >= 2) {
+        sfx?.open();
+        vibrate(level >= 3 ? [20, 30, 60] : 25);
+        const halo = $('halo');
+
+        if (halo) {
+            halo.style.left = `${c.x}px`;
+            halo.style.top = `${c.y}px`;
+            animate(
+                halo,
+                [
+                    {
+                        opacity: 0,
+                        transform: 'translate(-50%, -50%) scale(.3)',
+                    },
+                    {
+                        opacity: 1,
+                        transform: 'translate(-50%, -50%) scale(1)',
+                        offset: 0.35,
+                    },
+                    {
+                        opacity: 0,
+                        transform: 'translate(-50%, -50%) scale(1.3)',
+                    },
+                ],
+                level >= 3 ? 2200 : 1400,
+                { easing: 'cubic-bezier(.2,.9,.2,1)' },
+            );
+        }
+
+        fx?.emit(c.x, c.y, 36, {
+            cols: [col, '#ffffff'],
+            sp: [5, 11],
+            r: [1.5, 3.5],
+            g: 0,
+            drag: 0.9,
+            free: true,
+            shape: 'spark',
+            life: [0.4, 0.8],
+        });
+    }
+
+    if (level >= 3) {
+        const rays = $('rays');
+
+        if (rays) {
+            rays.style.left = `${c.x}px`;
+            rays.style.top = `${c.y}px`;
+            animate(
+                rays,
+                [
+                    {
+                        opacity: 0,
+                        transform:
+                            'translate(-50%, -50%) rotate(0deg) scale(.4)',
+                    },
+                    {
+                        opacity: 0.9,
+                        transform:
+                            'translate(-50%, -50%) rotate(40deg) scale(1)',
+                        offset: 0.3,
+                    },
+                    {
+                        opacity: 0,
+                        transform:
+                            'translate(-50%, -50%) rotate(110deg) scale(1.15)',
+                    },
+                ],
+                2400,
+                { easing: 'ease-out' },
+            );
+        }
+
+        if (!prefersReducedMotion()) {
+            animate(
+                $('stage'),
+                [
+                    { transform: 'none' },
+                    { transform: 'translate(-6px, 3px)' },
+                    { transform: 'translate(5px, -4px)' },
+                    { transform: 'translate(-3px, 2px)' },
+                    { transform: 'none' },
+                ],
+                360,
+            );
+        }
+
+        // Chuva caindo do alto da tela, dourada (ou ciano e branca no shiny).
+        const rain = level === 4 ? [CYAN, '#ffffff', GOLD] : [GOLD, '#fff3c4'];
+
+        for (let k = 0; k < 5; k++) {
+            fx?.emit((innerWidth / 6) * (k + 1), -10, 10, {
+                cols: rain,
+                ang: Math.PI / 2,
+                spread: 0.9,
+                sp: [2, 6],
+                r: [1.5, 3.5],
+                g: 0.1,
+                drag: 0.985,
+                free: true,
+                life: [1.4, 2.4],
+                jit: 40,
+            });
+        }
+    }
+
+    if (level === 4) {
+        fx?.emit(c.x, c.y, 34, {
+            cols: [CYAN, '#ffffff'],
+            shape: 'star',
+            sp: [2, 9],
+            r: [4, 9],
+            g: 0,
+            drag: 0.93,
+            free: true,
+            life: [0.8, 1.6],
+        });
+        setTimeout(() => sfx?.glint(), 300);
+        setTimeout(() => sfx?.glint(), 620);
+    }
+
+    if (fx && level >= 3 && bestCard) {
+        fx.twinkle = { el: bestCard, col: level === 4 ? CYAN : GOLD };
+    }
+
+    await wait([450, 600, 900, 1500, 1700][level]);
+
+    if (skipped()) {
+        return;
+    }
 
     sfx?.summary();
     const summary = $('summary');
@@ -159,4 +432,29 @@ export async function playTradeCeremony(
             ),
         );
     }
+
+    settleSummary(root, fx, best);
+}
+
+/**
+ * Estado final (também usado ao pular): o brilho passa pra melhor carta
+ * do resumo, do lendário pra cima.
+ */
+export function settleSummary(
+    root: HTMLElement,
+    fx: FxCanvas | null,
+    best: { tier: Tier; shiny: boolean },
+): void {
+    const level = ceremonyLevel(best);
+    const card = root.querySelector('[data-k="summary-best"]');
+
+    if (!fx) {
+        return;
+    }
+
+    fx.dropAttracted();
+    fx.twinkle =
+        level >= 3 && card
+            ? { el: card, col: level === 4 ? CYAN : GOLD }
+            : null;
 }
