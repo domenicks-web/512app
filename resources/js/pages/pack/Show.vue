@@ -936,7 +936,11 @@ onBeforeUnmount(() => {
             </button>
         </div>
 
-        <SpecimenSheet :specimen="sheetSpecimen" @close="sheetIndex = null" />
+        <SpecimenSheet
+            :specimen="sheetSpecimen"
+            light
+            @close="sheetIndex = null"
+        />
         <FairnessReceipt
             :open="receiptOpen"
             :receipt="scene.receipt"
