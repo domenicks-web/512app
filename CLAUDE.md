@@ -103,9 +103,19 @@ está em `docs/checkpoint.md`. Ler lá quando precisar do porquê de algo.
   espécimes libertados pro "Professor Carvalho", `users.is_system`; quem
   tem sanção ativa some de tudo pelo `User::active()`), admin (`/admin`,
   sem atalho na UI).
-- **Próximo**: fase 5 (giroscópio, apelido no espécime) e o PWA por
-  último (pedido do usuário). Conta fake repassando espécimes (desfazer
-  trocas do banido) ficou de fora da 4C.
+- **Pendências (15/10, 2h50; combinado continuar no dia seguinte)**:
+    1. Arrumar o `SPEC.md`: marcar as fases 1–3 (prontas), "Som de
+       abertura" e "Feed do grupo" (já existem). Sugestão do Claude pra
+       começar.
+    2. Fase 5: **apelido no espécime** e **tilt com giroscópio** no
+       celular (hoje só `v-card-tilt` com mouse). Brainstorm antes.
+    3. PWA por último (instalar no celular exige `https`: só com deploy).
+    4. Deploy (VPS/Oracle free tier; Reverb como processo próprio).
+    5. Decidir: feed avisar o grupo a cada raro (~40% dos packs) ou só
+       lendário/shiny; selo "Nº 1" (usuário achou feio); conferir o dock
+       de 7 botões no celular.
+    6. Não visto no navegador (só em teste): suspenso com o app aberto
+       cair no próximo clique.
 - **Fora de escopo até atualizar o SPEC**: moeda/dust, loja, dinheiro
   real (ideias do usuário, anotadas no histórico).
 

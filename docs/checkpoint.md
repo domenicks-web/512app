@@ -482,3 +482,26 @@ pushado pro `main`.
     - Próximo: **4B** (Reverb + notificação animada com som; dividir com
       o Kimi se o plano dele tiver folga: eventos no servidor com ele,
       notificação com o Claude), depois **4C** (banimento).
+
+## Sessão de 15/10 (00h30–02h50)
+
+- **4A fechada**: ficha nas trocas (`GET especime/{specimen}`), selo de
+  raridade nas cartas, cerimônia escalando por `ceremonyLevel` (sem o
+  ronco, que ficava preso e soava "motor"), dock contando todas as
+  novidades (`tradeAlerts`, `Trade::outcomeUnseenBy`, selo "Nova").
+- **4B** (Reverb + bolha do dock): backend pelo Kimi, front pelo Claude.
+  Usuário testou no S26+ (troca, pedido de amizade, feed): "Top,
+  funcionando".
+- **4C** (suspensão/banimento): o Kimi chegou a 90% da janela de 5h e
+  foi parado antes de começar; o Claude fez tudo pelo plano dele. Banido
+  tem os espécimes **libertados** pro "Professor Carvalho" (decisão do
+  usuário), mint nunca reaproveitado. Conta fake repassando espécimes
+  ficou de fora (decisão do usuário).
+- `CLAUDE.md` enxugado (histórico veio pra cá); `AGENTS.md` manda o Kimi
+  ler só as regras e rodar o `ci:check` uma vez. O usuário reclamou do
+  gasto de token do Kimi (memória `kimi-lean-delegation`).
+- Contas de teste: `Kimi#2398` (`claudetest2@512app.com`) banida; o
+  teste mandou 2 emails reais pra esse domínio (não é nosso).
+- Menu ⋯ do admin abria longe do botão no celular (altura chutada):
+  agora prende pela borda de baixo quando abre pra cima.
+
