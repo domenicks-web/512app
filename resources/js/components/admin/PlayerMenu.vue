@@ -21,7 +21,10 @@ const open = ref(false);
 const root = ref<HTMLElement | null>(null);
 const trigger = ref<HTMLButtonElement | null>(null);
 const panel = ref<HTMLElement | null>(null);
-const position = ref({ top: 0, right: 0 });
+const position = ref<{ top?: number; bottom?: number; right: number }>({
+    top: 0,
+    right: 0,
+});
 
 // O menu vai pro <body> (a tabela rola na horizontal e cortaria ele), preso
 // embaixo do botão. Rolar ou redimensionar fecha.
@@ -31,10 +34,12 @@ function toggle() {
     if (!open.value && trigger.value) {
         const rect = trigger.value.getBoundingClientRect();
         const right = window.innerWidth - rect.right;
-        // Sem espaço embaixo (último da lista no celular): abre pra cima.
+        const below = window.innerHeight - rect.bottom;
+        // Sem espaço embaixo (último da lista no celular): abre pra cima,
+        // preso pela borda de baixo (a altura muda com os itens).
         position.value =
-            window.innerHeight - rect.bottom < 400
-                ? { top: Math.max(8, rect.top - 8 - 390), right }
+            below < 400 && rect.top > below
+                ? { bottom: window.innerHeight - rect.top + 8, right }
                 : { top: rect.bottom + 8, right };
     }
 
@@ -203,10 +208,17 @@ function changePassword() {
                 ref="panel"
                 role="menu"
                 :style="{
-                    top: `${position.top}px`,
+                    top:
+                        position.top === undefined
+                            ? undefined
+                            : `${position.top}px`,
+                    bottom:
+                        position.bottom === undefined
+                            ? undefined
+                            : `${position.bottom}px`,
                     right: `${position.right}px`,
                 }"
-                class="entry-light text-ink fixed z-40 flex w-max flex-col rounded-2xl bg-white p-1.5 text-left font-sans whitespace-nowrap shadow-[0_2px_4px_rgba(28,32,38,0.06),0_16px_40px_rgba(28,32,38,0.16)]"
+                class="entry-light text-ink fixed z-40 flex max-h-[calc(100dvh-16px)] w-max flex-col overflow-y-auto rounded-2xl bg-white p-1.5 text-left font-sans whitespace-nowrap shadow-[0_2px_4px_rgba(28,32,38,0.06),0_16px_40px_rgba(28,32,38,0.16)]"
             >
                 <button
                     v-for="item in items"
