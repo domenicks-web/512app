@@ -515,6 +515,24 @@ pushado pro `main`.
       pack pago aleatório + trocas ≈ caixa de recompensa, ECA Digital).
       Se for monetizar de verdade, versão com criaturas próprias, com
       advogado antes. Trend no Instagram só depois dessa decisão.
+- **Fase 4B, notificações (pronta 15/10, mergeada e enviada no `main`)**:
+  spec `docs/superpowers/specs/2026-10-15-notificacoes-design.md`, plano
+  `docs/superpowers/plans/2026-10-15-notificacoes.md`. Backend pelo Kimi:
+  Reverb, canais `users.{id}`/`group` (`app/Broadcasting`), `Notice`
+  (`app/Actions/Data`), `PlayerNotified` (`ShouldBroadcastNow`, nome
+  `notice`), `BuildNotice` (todo texto da bolha) e `Notifier` (só depois
+  do commit; erro de broadcast vai pro log). Avisa: troca recebida,
+  aceita, recusada e caída; pedido de amizade e aceite (o automático do
+  convite não); shiny ou tier de `feed_highlight_tiers` revelado (pro
+  grupo, ignorado por quem abriu). Front pelo Claude: `lib/realtime/echo.ts`
+  (autoriza com o cookie XSRF), `useRealtime` no `GroupLayout`,
+  `DockBubble` (sai do ícone `data-dock`, fila "+N", 3+ do mesmo viram
+  uma), `Sfx.notice`. Sem poll de Trocas; Home e Amigos só puxam a
+  presença. Testado ponta a ponta no navegador (aviso real pelo Reverb).
+    - `.env` local precisa de `BROADCAST_CONNECTION=reverb` e do bloco
+      `REVERB_*` (host = IP da LAN); o `php artisan dev` sobe o Reverb na
+      8080. Mudou o `.env`? reiniciar o dev (o Vite lê `VITE_REVERB_*`).
+    - Próximo: **4C** (banimento).
 - **Fase 4A, trocas (pronta 15/10, mergeada e enviada no `main`)**: spec
   `docs/superpowers/specs/2026-10-14-trocas-design.md`, plano
   `docs/superpowers/plans/2026-10-14-trocas.md`. Backend pelo Kimi

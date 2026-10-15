@@ -65,6 +65,10 @@ VPS própria ou Oracle Cloud free tier. Evitar plataformas que hibernam containe
 no plano gratuito, porque o PWA fica com 30 segundos de cold start e a sensação de
 lentidão mata o projeto.
 
+O Reverb (notificações em tempo real, fase 4) roda como processo próprio
+(`php artisan reverb:start`, sob supervisor ou systemd) atrás do mesmo proxy,
+com o cliente em `wss://`. No local ele sobe junto no `php artisan dev`.
+
 ---
 
 ## 3. Conceitos do domínio
@@ -401,7 +405,7 @@ construir o resto.
 ### Fase 4, as trocas
 
 - [x] Propor, aceitar, recusar
-- [ ] Notificação via Reverb
+- [x] Notificação via Reverb
 - [x] Histórico de donos anteriores de cada espécime
 
 ### Fase 5, o polimento
