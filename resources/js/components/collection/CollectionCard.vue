@@ -199,6 +199,7 @@ const mintHighlight = computed(() =>
                 class="card-glare"
                 :class="shiny ? 'mix-blend-screen' : 'mix-blend-overlay'"
             />
+            <div class="card-gyro-glare" />
         </div>
 
         <span

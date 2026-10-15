@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { nextTick, onBeforeUnmount, ref, watch } from 'vue';
+import { vCardTilt } from '@/lib/cardTilt';
 
 /**
  * Moldura dos modais da abertura (ficha e comprovante): escura na tela do
@@ -11,6 +12,8 @@ const props = defineProps<{
     label: string;
     maxWidth: string;
     light?: boolean;
+    /** No celular, o painel inteiro inclina com o giroscópio. */
+    gyro?: boolean;
 }>();
 const emit = defineEmits<{ close: [] }>();
 const panel = ref<HTMLElement | null>(null);
@@ -52,6 +55,7 @@ onBeforeUnmount(() => document.removeEventListener('keydown', onKeydown));
     >
         <div
             ref="panel"
+            v-card-tilt.gyro.full="!!gyro"
             role="dialog"
             aria-modal="true"
             :aria-label="label"

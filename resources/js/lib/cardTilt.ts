@@ -10,8 +10,8 @@ import { onDeviceTilt } from '@/lib/deviceTilt';
  *
  * `v-card-tilt.gyro`: no celular, a luz da arte da ficha (foil e brilho)
  * segue o giroscópio (`deviceTilt.ts`), com o mesmo `--mx`/`--my`/`--tilt`.
- * Sem girar o bloco: ele é parte do modal, e o sprite não se mexe (pedido
- * do usuário). A grade não usa: lá só o foil segue o celular, pelo CSS.
+ * `.gyro.full` também inclina o elemento (a ficha inteira, que no celular
+ * cabe na tela). A grade não usa: lá só o reflexo segue o celular, pelo CSS.
  */
 const MAX_DEG = 8;
 // O sobe/encolhe da carta (`translate`/`scale` das classes) segue com a
@@ -44,12 +44,20 @@ function reset(el: TiltElement): void {
     el.style.setProperty('--my', '50%');
 }
 
-function followGyro(el: TiltElement): () => void {
+function followGyro(el: TiltElement, full: boolean): () => void {
+    if (full) {
+        el.style.transition = 'transform 0.12s linear';
+    }
+
     return onDeviceTilt(({ gx, gy }) => {
         if (gx === 0 && gy === 0) {
             reset(el);
 
             return;
+        }
+
+        if (full) {
+            el.style.transform = `perspective(900px) rotateX(${(-gy * MAX_DEG).toFixed(2)}deg) rotateY(${(gx * MAX_DEG).toFixed(2)}deg)`;
         }
 
         el.style.setProperty('--tilt', '1');
@@ -63,7 +71,7 @@ export const vCardTilt: Directive<TiltElement, boolean> = {
         // `.gyro` é só do celular: com mouse a arte da ficha fica como era.
         if (binding.modifiers.gyro) {
             if (!canTilt() && binding.value) {
-                el.__gyro = followGyro(el);
+                el.__gyro = followGyro(el, !!binding.modifiers.full);
             }
 
             return;

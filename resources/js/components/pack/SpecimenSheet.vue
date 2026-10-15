@@ -1,8 +1,7 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue';
+import { computed, ref, watch } from 'vue';
 import FirstMintSeal from '@/components/FirstMintSeal.vue';
 import { useMediaQuery } from '@/composables/useMediaQuery';
-import { formatDayMonth } from '@/lib/format';
 import {
     holoBackground,
     holoPosition,
@@ -11,7 +10,6 @@ import {
     natureColor,
     pad,
     panelBackground,
-    shortHash,
     sizeLabel,
     sizeText,
     spriteOf,
@@ -24,6 +22,8 @@ import { rarityLook } from '@/lib/pack/rarity';
 import type { PackSpecimen } from '@/lib/pack/types';
 import NicknameForm from './NicknameForm.vue';
 import PackModal from './PackModal.vue';
+import SpecimenDetails from './SpecimenDetails.vue';
+import { show as verifyShow } from '@/routes/verify';
 
 /**
  * Ficha do espécime: sprite até 4×, régua de tamanho, IVs, natureza,
@@ -41,6 +41,14 @@ const emit = defineEmits<{ close: []; prev: []; next: [] }>();
 
 /** Apelidos dados agora, por espécime: a ficha é JSON e não recarrega. */
 const namedNow = ref<Record<number, string>>({});
+
+/** No celular, histórico e hash viram botões que abrem por cima. */
+const compactDetails = computed(() => isMobile.value);
+const detail = ref<'history' | 'hash' | null>(null);
+watch(
+    () => props.specimen?.id,
+    () => (detail.value = null),
+);
 
 function nicknameOf(specimen: PackSpecimen): string | null {
     return namedNow.value[specimen.id] ?? specimen.nickname ?? null;
@@ -111,6 +119,7 @@ const tone = computed(() =>
         :label="specimen ? `Ficha de ${specimen.name}` : 'Ficha'"
         max-width="780px"
         :light="light"
+        :gyro="light && isMobile"
         @close="emit('close')"
     >
         <div v-if="specimen && look" class="flex flex-wrap">
@@ -436,83 +445,88 @@ const tone = computed(() =>
                     </div>
                 </div>
 
-                <div
-                    v-if="light && specimen.history?.length"
-                    class="flex flex-col gap-2"
-                >
-                    <div class="text-[11px] font-extrabold" :class="tone.muted">
-                        Histórico
-                    </div>
-                    <ol
-                        class="flex flex-col gap-1.5 border-l-2 border-[#e4e7eb] pl-3"
-                    >
-                        <li
-                            v-for="(step, k) in specimen.history"
-                            :key="k"
-                            class="text-[13px] font-bold"
+                <template v-if="compactDetails">
+                    <div class="grid grid-cols-2 gap-2">
+                        <button
+                            v-if="light && specimen.history?.length"
+                            type="button"
+                            class="flex h-11 cursor-pointer items-center justify-center gap-1.5 rounded-full text-[13px] font-black"
+                            :class="tone.box"
+                            :style="{ color: tone.value }"
+                            @click="detail = 'history'"
                         >
-                            <span :style="{ color: tone.value }">{{
-                                step.kind === 'caught'
-                                    ? `Capturado por ${step.nickname}`
-                                    : step.kind === 'released'
-                                      ? `Libertado: era de ${step.fromNickname}`
-                                      : `Trocado: ${step.fromNickname} → ${step.nickname}`
+                            Histórico
+                            <span :class="tone.muted">{{
+                                specimen.history.length
                             }}</span>
+                        </button>
+                        <button
+                            type="button"
+                            class="flex h-11 cursor-pointer items-center justify-center gap-1.5 rounded-full text-[13px] font-black"
+                            :class="[
+                                tone.box,
+                                light && specimen.history?.length
+                                    ? ''
+                                    : 'col-span-2',
+                            ]"
+                            :style="{ color: tone.value }"
+                            @click="detail = 'hash'"
+                        >
+                            Hash
                             <span
-                                v-if="historyNickname(specimen, k)"
-                                :class="tone.soft"
+                                class="rounded-full px-2 py-0.5 text-[10.5px] font-extrabold"
+                                :class="tone.verified"
+                                >✓ Verificado</span
                             >
-                                · chamado
-                                <span class="font-black">{{
-                                    historyNickname(specimen, k)
-                                }}</span></span
-                            >
-                            <span :class="tone.muted">
-                                · {{ formatDayMonth(step.at) }}</span
-                            >
-                        </li>
-                    </ol>
-                </div>
-
-                <div
-                    class="flex items-center justify-between gap-2.5 rounded-2xl px-3.5 py-3"
-                    :class="tone.box"
-                >
-                    <div class="flex min-w-0 flex-col gap-[3px]">
-                        <div
-                            class="text-[11px] font-extrabold"
-                            :class="tone.muted"
-                        >
-                            Hash do espécime
-                        </div>
-                        <div
-                            class="font-mono text-sm font-extrabold"
-                            :class="tone.soft"
-                        >
-                            {{ shortHash(specimen.hash) }}
-                        </div>
+                        </button>
                     </div>
-                    <span
-                        class="flex h-[26px] items-center gap-1.5 rounded-full px-2.5 text-xs font-extrabold whitespace-nowrap"
-                        :class="tone.verified"
-                    >
-                        <svg
-                            width="11"
-                            height="11"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            stroke-width="3.4"
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            aria-hidden="true"
-                        >
-                            <path d="M5 12.5l4.5 4.5L19 7.5" /></svg
-                        >Verificado
-                    </span>
-                </div>
+                </template>
+                <template v-else>
+                    <SpecimenDetails
+                        v-if="light"
+                        part="history"
+                        :specimen="specimen"
+                        :tone="tone"
+                        :history-nickname="historyNickname"
+                    />
+                    <SpecimenDetails
+                        part="hash"
+                        :specimen="specimen"
+                        :tone="tone"
+                        :history-nickname="historyNickname"
+                    />
+                </template>
                 <slot name="actions" :specimen="specimen" />
             </div>
+        </div>
+    </PackModal>
+
+    <!-- Fora do painel: ele inclina (transform), e um fixed dentro dele
+         deixaria de cobrir a tela. -->
+    <PackModal
+        :open="specimen !== null && detail !== null"
+        :label="detail === 'history' ? 'Histórico' : 'Hash do espécime'"
+        max-width="420px"
+        :light="light"
+        @close="detail = null"
+    >
+        <div
+            v-if="specimen && detail"
+            class="flex flex-col gap-3 px-5 pt-16 pb-5"
+        >
+            <SpecimenDetails
+                :part="detail"
+                :specimen="specimen"
+                :tone="tone"
+                :history-nickname="historyNickname"
+            />
+            <a
+                v-if="detail === 'hash'"
+                :href="verifyShow().url"
+                class="text-center text-[12.5px] font-extrabold"
+                :class="tone.muted"
+                >Refazer a conta em Verificar</a
+            >
         </div>
     </PackModal>
 </template>
