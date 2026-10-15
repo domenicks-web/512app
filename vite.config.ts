@@ -116,6 +116,7 @@ export default defineConfig({
             'design_handoff_512_onboarding/**',
             'docs/superpowers/**',
             'CLAUDE.md',
+            'docs/checkpoint.md',
             'resources/js/components/ui/*',
             'resources/views/mail/*',
         ],
