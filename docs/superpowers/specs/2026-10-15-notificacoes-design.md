@@ -39,13 +39,14 @@ amizade automática com quem convidou (`BefriendInviter`).
   local; `null` nos testes e no CI.
 - **Canais privados**: `users.{id}` (só o próprio) e `group` (qualquer
   usuário com `hasCompletedProfile()`), em `routes/channels.php`.
-- **Um evento só**: `App\Events\PlayerNotified implements ShouldBroadcastNow,
-  ShouldDispatchAfterCommit`. Ele carrega uma `App\Data\Notice` e um canal
+- **Um evento só**: `App\Events\PlayerNotified implements ShouldBroadcastNow`.
+  Ele carrega uma `App\Actions\Data\Notice` e um canal
   (`users.{id}` ou `group`). O nome no broadcast é `notice`
   (`broadcastAs`), e o payload é a `Notice` serializada.
-  `ShouldBroadcastNow` evita depender do worker da fila; `AfterCommit`
-  garante que só sai depois que a transação gravou.
-- **`App\Data\Notice`** (readonly, `toArray()`), pronta no servidor. O front
+  `ShouldBroadcastNow` evita depender do worker da fila. Quem dispara é o
+  `Notifier`, dentro de `DB::afterCommit`, então só sai depois que a
+  transação gravou.
+- **`App\Actions\Data\Notice`** (readonly, `toArray()`), pronta no servidor. O front
   não decide nada:
   - `kind`: um dos tipos da tabela.
   - `dock`: `'trades' | 'friends' | 'home'` (de qual ícone a bolha sai).
@@ -59,9 +60,11 @@ amizade automática com quem convidou (`BefriendInviter`).
     (`['tradeAlerts', 'received', 'sent', 'done', 'newCounts']`,
     `['pendingFriendRequests', 'friends', 'incoming', 'outgoing']`,
     `['feedHighlight']`). O front só recarrega as que a página tem.
-- **`App\Actions\Notify\NotifyPlayer`** e **`NotifyGroup`**: montam a `Notice`
-  de cada tipo (um método por tipo, ex. `tradeReceived(Trade)`) e despacham
-  o evento. As Actions de negócio só chamam essas duas, sem montar texto.
+- **`App\Actions\Notify\BuildNotice`** monta a `Notice` de cada tipo (um
+  método por tipo, ex. `tradeReceived(Trade)`), e **`Notifier`**
+  (`toPlayer`/`toGroup`) entrega. As Actions de negócio só chamam essas
+  duas, sem montar texto. Hoje `feed_highlight_tiers` é raro e lendário,
+  então raro também avisa o grupo.
 - **Dev**: o `php artisan dev` sobe `reverb:start --host=0.0.0.0 --port=8080`
   (`DevCommands::artisan`, só no ambiente local). O Echo conecta em
   `VITE_REVERB_HOST`, que no `.env` local é o `DEV_LAN_HOST` (o S26+ conecta
@@ -121,7 +124,7 @@ amizade automática com quem convidou (`BefriendInviter`).
 ## Divisão
 
 1. **Kimi**, na worktree `../512app-worktrees/notificacoes-back`: Reverb,
-   canais, `Notice`, `PlayerNotified`, `NotifyPlayer` e `NotifyGroup`, os
+   canais, `Notice`, `PlayerNotified`, `BuildNotice` e `Notifier`, os
    disparos e os testes.
 2. **Claude**, em paralelo, no branch `notificacoes`: Echo, `useRealtime`,
    `DockBubble`, `Sfx.notice` e a troca dos polls, testando com
