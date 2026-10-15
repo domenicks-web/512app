@@ -19,7 +19,7 @@ use Illuminate\Support\Carbon;
  * @property int $specimen_id
  * @property int $from_user_id
  * @property int $to_user_id
- * @property int $trade_id
+ * @property int|null $trade_id
  * @property Carbon $transferred_at
  */
 #[Fillable(['specimen_id', 'from_user_id', 'to_user_id', 'trade_id', 'transferred_at'])]

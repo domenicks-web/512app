@@ -18,6 +18,9 @@ class PlayerResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
+        // `SearchPlayers` carrega só as sanções ativas, a mais recente primeiro.
+        $sanction = $this->relationLoaded('sanctions') ? $this->sanctions->first() : $this->activeSanction();
+
         return [
             'id' => $this->id,
             'nickname' => $this->nickname,
@@ -34,6 +37,11 @@ class PlayerResource extends JsonResource
             'invited_by' => $this->invitedBy?->createdBy?->nickname,
             'specimens_count' => (int) $this->specimens_count,
             'created_at' => $this->created_at?->toIso8601String(),
+            'sanction' => $sanction === null ? null : [
+                'type' => $sanction->type->value,
+                'endsAt' => $sanction->ends_at?->toIso8601String(),
+                'reason' => $sanction->reason,
+            ],
         ];
     }
 }

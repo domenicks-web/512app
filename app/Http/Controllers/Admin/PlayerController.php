@@ -23,6 +23,7 @@ class PlayerController extends Controller
             'search' => $search,
             'counts' => $countTabs->handle(),
             'quota' => config('game.invites.quota'),
+            'sanctionDays' => config('game.sanctions.suspension_days'),
         ]);
     }
 }

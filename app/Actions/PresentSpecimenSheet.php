@@ -11,7 +11,8 @@ use Illuminate\Http\Request;
 
 /**
  * Um espécime como a ficha mostra: os dados da abertura e o histórico de
- * donos (a captura, pelo dono da abertura, e cada troca, em ordem). Espera
+ * donos (a captura, pelo dono da abertura, cada troca e a libertação do
+ * banimento, em ordem). Espera
  * `species`, `opening.user` e `transfers.fromUser|toUser` já carregados.
  */
 class PresentSpecimenSheet
@@ -35,7 +36,7 @@ class PresentSpecimenSheet
                     'at' => $specimen->caught_at->toIso8601String(),
                 ],
                 ...$specimen->transfers->map(fn (SpecimenTransfer $transfer): array => [
-                    'kind' => 'traded',
+                    'kind' => $transfer->trade_id === null ? 'released' : 'traded',
                     'trainerId' => $transfer->toUser->id,
                     'nickname' => (string) $transfer->toUser->nickname,
                     'fromNickname' => (string) $transfer->fromUser->nickname,

@@ -10,6 +10,7 @@ use App\Http\Controllers\Admin\PlayerPackController;
 use App\Http\Controllers\Admin\PlayerPasswordController;
 use App\Http\Controllers\Admin\PlayerQuotaController;
 use App\Http\Controllers\Admin\PlayerRoleController;
+use App\Http\Controllers\Admin\PlayerSanctionController;
 use App\Http\Controllers\Admin\PlayerVerificationController;
 use Illuminate\Support\Facades\Route;
 
@@ -28,4 +29,7 @@ Route::middleware(['auth', 'onboarded', 'can:admin'])->prefix('admin')->name('ad
     Route::post('jogadores/{user}/reenviar-confirmacao', [PlayerVerificationController::class, 'store'])->name('players.verification');
     Route::put('jogadores/{user}/senha', [PlayerPasswordController::class, 'update'])->name('players.password');
     Route::post('jogadores/{user}/liberar-pack', [PlayerPackController::class, 'store'])->name('players.pack');
+    Route::post('jogadores/{user}/suspender', [PlayerSanctionController::class, 'suspend'])->name('players.suspend');
+    Route::post('jogadores/{user}/banir', [PlayerSanctionController::class, 'ban'])->name('players.ban');
+    Route::post('jogadores/{user}/encerrar-suspensao', [PlayerSanctionController::class, 'lift'])->name('players.lift');
 });
