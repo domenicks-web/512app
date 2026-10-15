@@ -865,12 +865,12 @@ const compactLabel =
                     >
                         Shiny
                     </span>
-                    <span class="relative flex items-end gap-2">
+                    <span class="relative flex items-center gap-2 sm:gap-3">
                         <TrainerAvatar
                             v-if="feedHighlight"
                             :sprite-path="feedHighlight.trainerAvatarSpritePath"
                             size="sm"
-                            class="!size-8 shrink-0"
+                            class="!size-8 shrink-0 sm:!size-11"
                         />
                         <span
                             class="line-clamp-3 min-w-0 text-[15px] leading-[1.1] font-black tracking-[-0.02em] text-balance text-white sm:line-clamp-none sm:text-[30px] sm:leading-[1.05] sm:tracking-[-0.025em]"
