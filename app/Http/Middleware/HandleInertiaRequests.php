@@ -63,6 +63,7 @@ class HandleInertiaRequests extends Middleware
                     + Trade::query()->outcomeUnseenBy($request->user())->count(),
             'flash' => [
                 'profile_status' => fn () => $request->session()->get('profile_status'),
+                'sanction' => fn () => $request->session()->get('sanction'),
             ],
         ];
     }

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Requests;
 
+use App\Models\User;
 use Illuminate\Auth\Events\Lockout;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
@@ -45,6 +46,17 @@ class LoginUserRequest extends FormRequest
         }
 
         RateLimiter::clear($this->throttleKey());
+
+        // Senha certa, mas suspenso, banido ou conta do sistema: não entra.
+        /** @var User $user */
+        $user = Auth::user();
+        $message = $user->is_system ? 'Essa conta é do sistema.' : $user->activeSanction()?->message();
+
+        if ($message !== null) {
+            Auth::guard('web')->logout();
+
+            throw ValidationException::withMessages(['email' => $message]);
+        }
     }
 
     private function ensureIsNotRateLimited(): void
