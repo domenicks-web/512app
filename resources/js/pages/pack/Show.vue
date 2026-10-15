@@ -86,13 +86,17 @@ const scene = reactive<PackSceneState>({
     openingId: props.opening?.id ?? null,
     ceremony: null,
     locked: false,
-    showOpenAll: false,
     receipt: props.opening?.receipt ?? null,
     nextPackAt: props.nextPackAt,
     error: null,
 });
 
 const openedAt = ref(props.opening?.createdAt ?? new Date().toISOString());
+const openedAtLabel = computed(() => {
+    const date = new Date(openedAt.value);
+
+    return `${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`;
+});
 const clientSeed = ref(props.clientSeed);
 const savedClientSeed = ref(props.clientSeed);
 const muted = ref(false);
@@ -575,7 +579,7 @@ onBeforeUnmount(() => {
                             class="flex max-w-full flex-col items-center gap-1.5 opacity-0"
                         >
                             <div
-                                class="max-w-full truncate text-sm font-extrabold"
+                                class="h-5 max-w-full truncate text-sm leading-5 font-extrabold"
                             >
                                 {{ slot.specimen?.name ?? '' }}
                             </div>
@@ -591,24 +595,13 @@ onBeforeUnmount(() => {
                     </div>
                 </div>
 
-                <div class="mt-7 flex min-h-9 flex-col items-center gap-3">
-                    <div
-                        v-if="ballsHint && scene.phase === 'balls'"
-                        class="text-[15px] font-extrabold text-[#c3cad4]"
-                        aria-live="polite"
-                    >
-                        {{ ballsHint }}
-                    </div>
-                    <button
-                        v-if="
-                            scene.showOpenAll && !scene.locked && remaining > 0
-                        "
-                        type="button"
-                        class="h-9 cursor-pointer rounded-full bg-white/8 px-4 text-[13px] font-extrabold text-[#c3cad4] hover:bg-white/12"
-                        @click.stop="director?.openAll()"
-                    >
-                        Abrir todas
-                    </button>
+                <!-- Altura fixa: o bloco é ancorado embaixo, e qualquer linha
+                     que nascesse ou sumisse empurraria as bolas pra cima. -->
+                <div
+                    class="mt-7 flex h-9 items-center justify-center text-[15px] font-extrabold text-[#c3cad4]"
+                    aria-live="polite"
+                >
+                    {{ scene.phase === 'balls' ? ballsHint : '' }}
                 </div>
             </div>
 
@@ -841,61 +834,90 @@ onBeforeUnmount(() => {
         >
             <PackSummary
                 :specimens="specimens"
-                :opened-at="openedAt"
                 :next-pack-at="scene.nextPackAt"
                 @sheet="sheetIndex = $event"
                 @receipt="receiptOpen = true"
             />
         </div>
 
-        <!-- Topo: logo (volta pro jogo) e mudo. -->
-        <div
-            class="pointer-events-none absolute top-0 right-0 left-0 z-20 flex items-center justify-between px-5 py-[18px]"
-        >
-            <Link
-                :href="home.url()"
-                class="pointer-events-auto block drop-shadow-[0_6px_14px_rgba(242,77,77,0.28)]"
-                aria-label="Voltar ao jogo"
-                @click.stop
+        <!-- Topo no mesmo lugar e tamanho das outras telas (GroupScreen):
+             voltar à esquerda, mudo à direita. No escuro da abertura os dois
+             ficam translúcidos, pra não brigar com a cena; no resumo claro,
+             brancos como no resto do app, com o título ao lado. -->
+        <div class="pointer-events-none absolute top-0 right-0 left-0 z-20">
+            <div
+                class="mx-auto flex w-full max-w-[calc(880px+2*clamp(16px,5vw,56px))] items-center gap-4 px-[clamp(16px,5vw,56px)] pt-[22px]"
             >
-                <img
-                    src="/logo.svg"
-                    alt=""
-                    width="76"
-                    height="38"
-                    class="h-[38px] w-auto"
-                />
-            </Link>
-            <button
-                type="button"
-                class="pointer-events-auto flex size-10 cursor-pointer items-center justify-center rounded-full"
-                :class="
-                    scene.phase === 'summary'
-                        ? 'bg-white text-[#2b2f36] shadow-[0_2px_6px_rgba(28,32,38,0.08)]'
-                        : 'bg-white/8 text-[#c3cad4]'
-                "
-                :aria-label="muted ? 'Ligar som' : 'Desligar som'"
-                @click="toggleMute"
-            >
-                <svg
-                    width="18"
-                    height="18"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="2.4"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    aria-hidden="true"
+                <Link
+                    :href="home.url()"
+                    aria-label="Voltar pro início"
+                    class="pointer-events-auto flex size-11 shrink-0 items-center justify-center rounded-full transition-transform hover:-translate-x-0.5 active:scale-95"
+                    :class="
+                        scene.phase === 'summary'
+                            ? 'bg-white text-[#2b2f36] shadow-[0_1px_2px_rgba(28,32,38,0.06),0_6px_14px_rgba(28,32,38,0.08)]'
+                            : 'bg-white/8 text-[#c3cad4]'
+                    "
+                    @click.stop
                 >
-                    <path d="M4 9h4l5-4v14l-5-4H4z" />
-                    <template v-if="!muted">
-                        <path d="M16.5 8.5a5 5 0 0 1 0 7" />
-                        <path d="M19 6a8.5 8.5 0 0 1 0 12" />
-                    </template>
-                    <path v-else d="M17 9.5l5 5M22 9.5l-5 5" />
-                </svg>
-            </button>
+                    <svg
+                        width="22"
+                        height="22"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2.6"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        aria-hidden="true"
+                    >
+                        <path d="M15 5l-7 7 7 7" />
+                    </svg>
+                </Link>
+                <div
+                    v-if="scene.phase === 'summary'"
+                    class="flex min-w-0 flex-col gap-0.5"
+                >
+                    <div
+                        class="text-[27px] leading-[1.1] font-black tracking-[-0.025em] text-[#2b2f36]"
+                    >
+                        Pack de hoje
+                    </div>
+                    <p class="text-sm font-semibold text-[#6c737c]">
+                        Aberto às {{ openedAtLabel }}
+                    </p>
+                </div>
+                <div class="ml-auto" />
+                <button
+                    type="button"
+                    class="pointer-events-auto flex size-11 cursor-pointer items-center justify-center rounded-full"
+                    :class="
+                        scene.phase === 'summary'
+                            ? 'bg-white text-[#2b2f36] shadow-[0_2px_6px_rgba(28,32,38,0.08)]'
+                            : 'bg-white/8 text-[#c3cad4]'
+                    "
+                    :aria-label="muted ? 'Ligar som' : 'Desligar som'"
+                    @click="toggleMute"
+                >
+                    <svg
+                        width="18"
+                        height="18"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2.4"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        aria-hidden="true"
+                    >
+                        <path d="M4 9h4l5-4v14l-5-4H4z" />
+                        <template v-if="!muted">
+                            <path d="M16.5 8.5a5 5 0 0 1 0 7" />
+                            <path d="M19 6a8.5 8.5 0 0 1 0 12" />
+                        </template>
+                        <path v-else d="M17 9.5l5 5M22 9.5l-5 5" />
+                    </svg>
+                </button>
+            </div>
         </div>
 
         <div

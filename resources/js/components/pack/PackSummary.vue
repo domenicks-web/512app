@@ -25,7 +25,6 @@ import { show as collectionShow } from '@/routes/collection';
 /** Resumo do pack (tema claro): cartas com tilt e holo, contagem e comprovante. */
 const props = defineProps<{
     specimens: PackSpecimen[];
-    openedAt: string;
     nextPackAt: string | null;
 }>();
 const emit = defineEmits<{ sheet: [index: number]; receipt: [] }>();
@@ -37,12 +36,6 @@ onMounted(
     () => (clock = window.setInterval(() => (now.value = Date.now()), 1000)),
 );
 onBeforeUnmount(() => clearInterval(clock));
-
-const openedAtLabel = computed(() => {
-    const date = new Date(props.openedAt);
-
-    return `${pad(date.getHours(), 2)}:${pad(date.getMinutes(), 2)}`;
-});
 
 const countdown = computed(() =>
     props.nextPackAt
@@ -76,14 +69,9 @@ function untilt(event: MouseEvent, specimen: PackSpecimen) {
 
 <template>
     <div
-        class="mx-auto box-border flex max-w-[1120px] flex-col gap-6 px-4 pt-[84px] pb-10 sm:gap-[30px] sm:px-6 sm:pt-[92px] sm:pb-14"
+        class="mx-auto box-border flex max-w-[calc(880px+2*clamp(16px,5vw,56px))] flex-col gap-6 px-[clamp(16px,5vw,56px)] pt-[96px] pb-10 sm:gap-[30px] sm:pb-14"
     >
         <div data-k="sumHead" class="flex flex-col gap-2">
-            <div
-                class="text-[11px] font-extrabold tracking-[0.2em] text-[#767c85] uppercase"
-            >
-                Pack de hoje · aberto às {{ openedAtLabel }}
-            </div>
             <h1
                 class="text-[clamp(30px,5vw,48px)] leading-[1.04] font-black tracking-[-0.035em] text-balance"
             >
@@ -95,7 +83,7 @@ function untilt(event: MouseEvent, specimen: PackSpecimen) {
         </div>
 
         <div
-            class="grid grid-cols-2 gap-3 sm:grid-cols-[repeat(auto-fit,minmax(176px,1fr))] sm:gap-4"
+            class="grid grid-cols-2 gap-3 sm:grid-cols-[repeat(auto-fit,minmax(150px,1fr))] sm:gap-4"
         >
             <button
                 v-for="(specimen, index) in specimens"
@@ -167,11 +155,13 @@ function untilt(event: MouseEvent, specimen: PackSpecimen) {
                 >
                     <div class="flex items-baseline justify-between gap-2">
                         <div
-                            class="truncate text-[15px] font-black tracking-[-0.02em] sm:text-lg"
+                            class="truncate text-[15px] font-black tracking-[-0.02em] sm:text-base"
                         >
                             {{ specimen.name }}
                         </div>
-                        <div class="text-xs font-semibold text-[#8a9099]">
+                        <div
+                            class="shrink-0 text-[11px] font-semibold text-[#8a9099]"
+                        >
                             #{{ specimen.dex }}
                         </div>
                     </div>

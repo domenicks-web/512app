@@ -14,7 +14,7 @@ import type { PackSpecimen, Receipt } from './types';
  * Diferenças obrigatórias do protótipo (ABERTURA.md):
  * - as bolas não abrem sozinhas: o jogador escolhe qual e quando;
  * - cerimônia trava as outras bolas até o "toque para continuar";
- * - "Abrir todas" abre as fechadas em sequência, no modo rápido.
+ * - uma bola por vez, no toque (o "Abrir todas" saiu: a graça é ver uma a uma).
  */
 export type SlotState = {
     slot: number;
@@ -28,7 +28,6 @@ export type PackSceneState = {
     openingId: number | null;
     ceremony: PackSpecimen | null;
     locked: boolean;
-    showOpenAll: boolean;
     receipt: Receipt | null;
     nextPackAt: string | null;
     error: string | null;
@@ -68,10 +67,8 @@ export class PackDirector {
     private idleTime = 0;
     private tilt = 0;
     private pointer: { x: number; y: number } | null = null;
-    private fast = false;
     private tapResolve: (() => void) | null = null;
     private wobbles = new Map<number, Animation>();
-    private openAllTimer = 0;
 
     constructor(
         private readonly root: HTMLElement,
@@ -104,7 +101,6 @@ export class PackDirector {
         this.token++;
         this.fx.destroy();
         this.sfx.rumble(0);
-        clearTimeout(this.openAllTimer);
         window.removeEventListener('pointermove', this.onPointerMove);
         window.removeEventListener('pointerup', this.onPointerUp);
         window.removeEventListener('pointercancel', this.onPointerUp);
@@ -240,7 +236,6 @@ export class PackDirector {
                 this.startWobble(i);
             }
         });
-        this.scheduleOpenAll(600);
     }
 
     showSummaryNow(): void {
@@ -530,7 +525,6 @@ export class PackDirector {
 
         await this.sleep(160 + 4 * 95 + 560);
         this.state.slots.forEach((_, i) => this.startWobble(i));
-        this.scheduleOpenAll(1500);
     }
 
     // ── bolas no chão ─────────────────────────────────────────────────
@@ -566,15 +560,6 @@ export class PackDirector {
     private stopWobble(i: number): void {
         this.wobbles.get(i)?.cancel();
         this.wobbles.delete(i);
-    }
-
-    private scheduleOpenAll(ms: number): void {
-        clearTimeout(this.openAllTimer);
-        this.openAllTimer = window.setTimeout(() => {
-            if (this.state.slots.some((slot) => !slot.specimen)) {
-                this.state.showOpenAll = true;
-            }
-        }, ms);
     }
 
     /** Clique numa bola fechada: pergunta o conteúdo ao servidor e encena. */
@@ -638,22 +623,8 @@ export class PackDirector {
         }
 
         if (this.state.slots.every((s) => s.specimen)) {
-            this.state.showOpenAll = false;
             await this.sleep(700);
             await this.toSummary();
-        }
-    }
-
-    /** "Abrir todas": as fechadas em sequência, no modo rápido. Cerimônia ainda pede toque. */
-    async openAll(): Promise<void> {
-        this.state.showOpenAll = false;
-        this.fast = true;
-
-        for (let i = 0; i < this.state.slots.length; i++) {
-            if (!this.state.slots[i].specimen) {
-                await this.openSlot(i);
-                await this.sleep(90);
-            }
         }
     }
 
@@ -686,7 +657,7 @@ export class PackDirector {
                 { transform: 'rotate(10deg)' },
                 { transform: 'none' },
             ],
-            this.fast ? 140 : 220,
+            220,
             { e: 'ease-in-out', fill: 'none' },
         );
         this.sfx.pop(i, specimen.tier);
@@ -740,7 +711,7 @@ export class PackDirector {
             320,
             { d: 220 },
         );
-        await this.sleep(this.fast ? 160 : 300);
+        await this.sleep(300);
     }
 
     // ── cerimônia (raro, lendário, shiny) ─────────────────────────────
