@@ -505,3 +505,69 @@ pushado pro `main`.
 - Menu ⋯ do admin abria longe do botão no celular (altura chutada):
   agora prende pela borda de baixo quando abre pra cima.
 
+
+## Sessão de 15/10 (14h20–18h05)
+
+- **Fase 5 fechada e no `main`** (testada pelo usuário no S26+: "tudo
+  ok"): apelido no espécime (backend pelo Kimi), giroscópio (brilho da
+  grade, ficha inteira inclinando no celular, reflexo fora da carta com
+  o celular parado, ouro no lendário e arco-íris no shiny, também com o
+  mouse), passo "Do seu jeito" no cadastro, card do feed na Home com
+  sprite, coleção do Cartão de Treinador num botão com tela cheia,
+  histórico e hash em modais no celular, topo do pack no padrão, sem
+  "Abrir todas". Feed só shiny e lendário; selo Nº 1 virou `FirstMintSeal`.
+- **Bug achado no navegador**: o `EndPlayerAccess` apagava as sessões do
+  suspenso, e ele caía no login sem o motivo. Agora a sessão fica e o
+  `EnsureNotSanctioned` derruba com a mensagem.
+- Branch local `fase5` ficou (já está todo no `main`): o usuário apaga
+  depois com `git branch -d fase5` (a permissão foi negada pro Claude).
+- **Loja e economia: brainstorm em andamento, nada implementado, SPEC
+  ainda não atualizado.** Decidido até aqui:
+    - Duas moedas: **dust** (vem de mandar repetido pro Professor; compra
+      pack especial e renomear apelido) e **pontos** (presença: pack do
+      dia e sequência de dias; marcos: espécie nova, 25/50/100/151, tipo
+      completo, primeiro shiny; nada social, pra não farmar trocando).
+    - Pack do dia continua 1/24h. Dust compra **pack especial com limite
+      semanal** (opção C). Packs especiais são temáticos dentro das 151
+      (Fóssil, Fogo, Lendários de Kanto…), **rotação semanal automática**
+      pelo `config/game.php` (loja estilo Valorant/Fortnite). Cosméticos
+      não rodam por enquanto.
+    - Moer = **mandar pro Professor Carvalho**: destrói o espécime, Nº
+      nunca reaproveitado, histórico "Enviado ao Professor". Só repetido
+      (fica sempre 1 por espécie), aviso extra pra shiny, lendário e Nº 1;
+      espécime em troca aberta não pode.
+    - Cosméticos v1: **moldura do avatar** e **skin da Pokébola** (só
+      visual, aviso explícito). Depois: fundo do cartão, título.
+    - Três lugares: **Poké Mart** (sempre aberta), **Laboratório do
+      Professor** (sempre aberto) e **Mercado da Equipe Rocket** (evento
+      periódico, tipo mercado noturno do Valorant: ofertas próprias por
+      jogador sorteadas no servidor, sempre vistas antes de pagar,
+      moldura Rocket exclusiva; "A Equipe Rocket decolou de novo!").
+    - Roleplay: diálogo completo só na primeira visita e em novidades
+      (servidor guarda quais o jogador viu); fora isso, bolha parada
+      ("Bem-vindo de volta, Ramon!", frase escolhida no servidor). Cards
+      da Poké Mart e do Professor na Home (talvez juntar com o card de
+      Trocas). Rocket "invade" a Home e o mercado com tema escuro e
+      neon, animação de entrada 1x por evento (às vezes de saída), ícone
+      piscando no dock, música chiptune original (IA ou código). App
+      inteiro escuro só se valer o trabalho.
+    - Monetização: **decisão do usuário**, não do Claude. Enquanto o SPEC
+      proibir dinheiro real, não implementar.
+- **Mockups**: canvas privado https://claude.ai/artifact/1Q8n2XiYMpNzkk5pUVAvrF
+  (Poké Mart, Laboratório, Mercado Rocket; preços fictícios). O usuário
+  aprovou a direção e pediu mais personagens e roleplay.
+- **Sprites**: Pokémon Showdown (`play.pokemonshowdown.com/sprites/trainers/`)
+  tem `oak.png` (Professor, estilo B/W 80×80, oficial: usar) e
+  `teamrocket.png` (Jessie, James e Meowth juntos: recortar em três). Não
+  tem atendente de Poké Mart: o usuário gerou por IA dois atendentes
+  (homem e mulher) com grid de 9 poses, em `assets_ai/` (fora do git;
+  1254px, pixel irregular: processar detectando o pixel e reduzindo pela
+  média, ~160px). Tudo entra pelo `pokedex:sync` (regra 6). Meowth já tem
+  GIF animado no storage. Animações dos personagens em CSS (respirar,
+  piscar, tremer ao falar).
+- **Onde paramos**: os atendentes são **irmãos que cuidam da Poké Mart
+  da família** (dos avós), personalidades opostas. Falta: **nomes dos
+  irmãos** (próxima sessão), depois preços e ganhos de cada moeda,
+  calendário do Mercado Rocket, marcos de pontos, e então a spec e o
+  SPEC atualizado (tirar "Economia com moeda" da seção 10, reescrever
+  a regra 7.4: proibido é dinheiro real, não loja com moeda do jogo).

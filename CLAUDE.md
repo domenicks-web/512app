@@ -103,16 +103,14 @@ está em `docs/checkpoint.md`. Ler lá quando precisar do porquê de algo.
   espécimes libertados pro "Professor Carvalho", `users.is_system`; quem
   tem sanção ativa some de tudo pelo `User::active()`), admin (`/admin`,
   sem atalho na UI).
-- **Pendências (15/10, 2h50; combinado continuar no dia seguinte)**:
-    1. Fase 5 (no `main`; falta o usuário testar no S26+):
-       apelido no espécime, giroscópio (brilho das cartas; sensor só em
-       `https`, no S26+ pela flag
-       `chrome://flags/#unsafely-treat-insecure-origin-as-secure`), passo
-       "Opções" no cadastro, card do feed na Home, coleção do Cartão de
-       Treinador num botão. Spec em
-       `docs/superpowers/specs/2026-10-15-fase5-design.md`.
-    2. PWA por último (instalar no celular exige `https`: só com deploy).
-    3. Deploy (VPS/Oracle free tier; Reverb como processo próprio).
+- **Pendências (15/10, 18h)**:
+    1. **Loja e economia**: brainstorm em andamento (decisões e onde
+       paramos no fim de `docs/checkpoint.md`). Próximo: nomes dos irmãos
+       da Poké Mart, depois números, spec e SPEC atualizado. Nada de
+       código antes da spec aprovada.
+    2. Deploy (VPS/Oracle free tier; Reverb como processo próprio).
+    3. PWA por último (instalar no celular exige `https`: só com deploy).
+    4. Apagar o branch local `fase5` (já está no `main`).
 - **Decidido em 15/10 à tarde**: feed só com shiny e lendário (raro
   saiu); selo "Nº 1" virou a plaquinha dourada `FirstMintSeal`; dock de
   7 botões aprovado no celular; `SPEC.md` com fases 1–4 marcadas.

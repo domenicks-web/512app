@@ -26,3 +26,6 @@ yarn-error.log
 /.nova
 /.vscode
 /.zed
+
+# Imagens originais geradas por IA (grandes); só os sprites processados entram no repo
+/assets_ai
