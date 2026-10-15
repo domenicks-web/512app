@@ -110,14 +110,16 @@ const card =
                     @toggle="toggleSound"
                 />
                 <PreferenceSwitch
-                    v-if="hasSensor"
                     title="Mexer as cartas com o celular"
+                    :disabled="!hasSensor"
                     :hint="
-                        needsPermission && !isMotionOn
-                            ? 'O celular vai pedir permissão'
-                            : 'O brilho das cartas segue o celular'
+                        !hasSensor
+                            ? 'Precisa de https: liga depois do deploy'
+                            : needsPermission && !isMotionOn
+                              ? 'O celular vai pedir permissão'
+                              : 'O brilho das cartas segue o celular'
                     "
-                    :checked="isMotionOn"
+                    :checked="hasSensor && isMotionOn"
                     @toggle="toggleMotionSwitch"
                 />
             </div>

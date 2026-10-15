@@ -4,12 +4,20 @@
  * (som, mexer as cartas) em Ajustes e no cadastro. Cores fixas, não
  * token: aparece dentro e fora do tema claro.
  */
-defineProps<{ title: string; hint: string; checked: boolean }>();
+defineProps<{
+    title: string;
+    hint: string;
+    checked: boolean;
+    disabled?: boolean;
+}>();
 const emit = defineEmits<{ toggle: [] }>();
 </script>
 
 <template>
-    <label class="flex cursor-pointer items-center gap-3.5">
+    <label
+        class="flex items-center gap-3.5"
+        :class="disabled ? 'cursor-not-allowed opacity-55' : 'cursor-pointer'"
+    >
         <div class="flex min-w-0 flex-1 flex-col gap-px">
             <span class="text-[15.5px] font-black text-[#2b2f36]">{{
                 title
@@ -27,6 +35,7 @@ const emit = defineEmits<{ toggle: [] }>();
                 :checked="checked"
                 :aria-checked="checked"
                 :aria-label="title"
+                :disabled="disabled"
                 @change="emit('toggle')"
             />
             <span
