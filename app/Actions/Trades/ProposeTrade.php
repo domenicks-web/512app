@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Actions\Trades;
 
+use App\Actions\Notify\BuildNotice;
+use App\Actions\Notify\Notifier;
 use App\Enums\TradeItemSide;
 use App\Enums\TradeStatus;
 use App\Models\Specimen;
@@ -20,6 +22,11 @@ use Illuminate\Validation\ValidationException;
  */
 class ProposeTrade
 {
+    public function __construct(
+        private readonly Notifier $notifier,
+        private readonly BuildNotice $notices,
+    ) {}
+
     /**
      * @param  array<int, int>  $offeredIds
      * @param  array<int, int>  $requestedIds
@@ -71,6 +78,8 @@ class ProposeTrade
                 ...array_map(fn (int $id): array => ['specimen_id' => $id, 'side' => TradeItemSide::Offered], $offered),
                 ...array_map(fn (int $id): array => ['specimen_id' => $id, 'side' => TradeItemSide::Requested], $requested),
             ]);
+
+            $this->notifier->toPlayer($trade->to_user_id, $this->notices->tradeReceived($trade));
 
             return $trade;
         });
