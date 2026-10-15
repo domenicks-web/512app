@@ -400,9 +400,9 @@ construir o resto.
 
 ### Fase 4, as trocas
 
-- [ ] Propor, aceitar, recusar
+- [x] Propor, aceitar, recusar
 - [ ] Notificação via Reverb
-- [ ] Histórico de donos anteriores de cada espécime
+- [x] Histórico de donos anteriores de cada espécime
 
 ### Fase 5, o polimento
 

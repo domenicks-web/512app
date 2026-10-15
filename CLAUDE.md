@@ -515,35 +515,38 @@ pushado pro `main`.
       pack pago aleatório + trocas ≈ caixa de recompensa, ECA Digital).
       Se for monetizar de verdade, versão com criaturas próprias, com
       advogado antes. Trend no Instagram só depois dessa decisão.
-- **Fase 4A, trocas (14/10, noite; branch `trocas`, local, não mergeada
-  nem enviada)**: spec `docs/superpowers/specs/2026-10-14-trocas-design.md`,
-  plano `docs/superpowers/plans/2026-10-14-trocas.md`. Backend pelo Kimi
-  (Tasks 1–6 e backend das 8 e 9: Actions em `app/Actions/Trades/`,
-  `specimen_transfers`, `pendingTrades`, montador, histórico, feed), front
-  pelo Claude (`/trocas`, `components/trade/*`, montador
-  `trades/Create`, cerimônia `lib/trade/director.ts` +
-  `TradeCeremony`). `composer ci:check` verde (323 testes).
-    - Testado com o usuário: Lin#0741 e Claude#9805 viraram amigos;
-      contraproposta da Lin aceita pela Claude (troca 2). Usuário achou a
-      cerimônia "muito boa". Corrigido depois: cerimônia fechava sozinha
-      pro proponente (o POST de "visto" recarregava `ceremony` nulo: o
-      `Index` guarda a cena em `playing`), cartas do resumo apareciam e
-      reentravam, e o giro em Y mostrava o verso espelhado.
-    - **Pendente ao pausar**: troca 4 (Claude dá Jolteon + Nidoking, pede
-      o Seel da Lin) esperando o usuário aceitar pra conferir a cerimônia
-      corrigida. Depois: Task 11 (SPEC + checkpoint), merge no `main` e
-      push.
-    - O usuário levou um susto: a cerimônia de quem propôs aparece ao
-      abrir Trocas sem aviso nenhum (o contador do dock só conta
-      recebidas). Ofereci contar também as aceitas não vistas no dock;
-      sem resposta. A 4B resolve com a notificação.
+- **Fase 4A, trocas (pronta 15/10, mergeada e enviada no `main`)**: spec
+  `docs/superpowers/specs/2026-10-14-trocas-design.md`, plano
+  `docs/superpowers/plans/2026-10-14-trocas.md`. Backend pelo Kimi
+  (Actions em `app/Actions/Trades/`, `specimen_transfers`, montador,
+  histórico, feed), front pelo Claude (`/trocas`, `components/trade/*`,
+  montador `trades/Create`, cerimônia `lib/trade/director.ts` +
+  `TradeCeremony`). `AcceptTrade` já chama o `ResetUnownedAvatar` pros
+  dois lados.
+    - **Ficha nas trocas**: `GET especime/{specimen}` (`ShowSpecimenController`,
+      JSON de um espécime só, porque depois da troca o dono mudou; a
+      montagem saiu pra `PresentSpecimenSheet`). Caixa: tocar na carta
+      abre; montador: toque escolhe, o "i" do canto abre; resumo da
+      cerimônia: abre dentro dela (o `PackModal` z-50 ficaria atrás).
+    - Cartas da troca com o selo da raridade (como a coleção).
+    - **Cerimônia escala** (`ceremonyLevel`: comum 0 → shiny 4): do raro
+      pra cima carga antes de cruzar, halo e partículas (`FxCanvas` do
+      pack); lendário e shiny com faíscas puxadas, flash de tela, raios,
+      chuva, tremida e raios girando atrás da carta no resumo. **Sem o
+      ronco** do pack (o usuário achou "motor estranho"; também ficava
+      ligado pra sempre).
+    - **Dock conta tudo** (`tradeAlerts` compartilhado): recebidas abertas
+      + desfechos que quem propôs não viu (`Trade::outcomeUnseenBy`:
+      aceita até a cerimônia tocar; recusada/caída até abrir a aba delas,
+      `MarkTradeOutcomesSeen`). Abas com contador e selo "Nova".
+      `pendingTrades` continua só recebidas (Home).
+    - Ficha: histórico usa as cores fixas do `tone` (com `text-ink` sumia
+      no tema escuro do celular, fora do `.entry-light`).
+    - Teste no navegador: Playwright com rota interceptada (trocar
+      raridade só na resposta) precisa de
+      `--disable-features=...LocalNetworkAccessChecks` senão o Vite é
+      bloqueado. Conta Claude ganhou 5 packs (saiu um Zapdos, trocado
+      com a Lin na troca 6).
     - Próximo: **4B** (Reverb + notificação animada com som; dividir com
-      o Kimi: eventos no servidor com ele, notificação com o Claude), depois
-      **4C** (banimento).
-    - **Pedidos do usuário pra 4A (14/10, 21h; fazer antes do merge)**:
-        - Na tela de trocas (caixa e montador), tocar no espécime abre a
-          ficha dele (o `TradeCard` já emite `open`; falta ligar na ficha).
-        - Mostrar a raridade nas cartas da troca (hoje só a moldura indica).
-        - Cerimônia escalando com o melhor recebido: comum simples; raro,
-          lendário e shiny cada vez mais caprichados (luz, partículas, som),
-          no espírito da revelação do pack.
+      o Kimi se o plano dele tiver folga: eventos no servidor com ele,
+      notificação com o Claude), depois **4C** (banimento).
